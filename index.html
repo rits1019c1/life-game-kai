@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVO-LIFE: 究極の人工生命サンドボックス</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#050811',
+                        cardbg: '#0f172a',
+                        accent: '#38bdf8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            background-color: #050811;
+            color: #f3f4f6;
+        }
+        canvas {
+            touch-action: none;
+        }
+        input[type=range] {
+            accent-color: #38bdf8;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 2px;
+        }
+        .tab-btn.active {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border-bottom: 2px solid #38bdf8;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col overflow-hidden text-sm select-none bg-slate-950">
+
+    <header class="h-14 bg-slate-900/90 border-b border-slate-800/80 px-4 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-gradient-to-br from-cyan-500/20 to-pink-500/20 text-cyan-400 rounded-lg border border-cyan-500/30">
+                <i class="fa-solid fa-atom text-xl animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base tracking-wide bg-gradient-to-r from-cyan-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">
+                    EVO-LIFE <span class="text-xs text-amber-400 font-mono font-normal">v4.8 Advanced Studio</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 hidden sm:block">微細パラメータ調整 × リアルタイム進化計測</p>
+            </div>
+        </div>
+
+        <!-- リアルタイムHUD情報 & チャートトグル -->
+        <div class="flex items-center space-x-2 text-xs">
+            <button onclick="toggleChartOverlay()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700/80 rounded-lg text-slate-300 text-[11px] flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-chart-line text-cyan-400"></i>
+                <span class="hidden md:inline">推移グラフ</span>
+            </button>
+            <div class="bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 flex items-center space-x-1.5">
+                <span class="text-slate-400">個体:</span>
+                <span id="stat-count" class="font-mono text-cyan-400 font-bold">0</span>
+            </div>
+            <div class="bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 flex items-center space-x-1.5">
+                <span class="text-slate-400">ステップ:</span>
+                <span id="stat-step" class="font-mono text-emerald-400 font-bold">0</span>
+            </div>
+            <div class="bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/50 flex items-center space-x-1.5 hidden md:flex">
+                <span class="text-slate-400">FPS:</span>
+                <span id="stat-fps" class="font-mono text-amber-400 font-bold">60</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- メイン描画エリア -->
+        <main class="flex-1 relative flex items-center justify-center bg-slate-950 p-2 overflow-hidden">
+            <div id="canvas-container" class="relative w-full h-full flex items-center justify-center">
+                <canvas id="sim-canvas" class="rounded-xl shadow-2xl border border-slate-800/80 cursor-crosshair max-w-full max-h-full"></canvas>
+            </div>
+
+            <!-- モードHUDバッジ -->
+            <div id="mode-badge" class="absolute top-4 left-4 glass-panel px-3.5 py-2 rounded-xl text-xs text-cyan-300 border border-cyan-500/30 flex items-center space-x-2.5 shadow-lg pointer-events-none">
+                <i id="mode-badge-icon" class="fa-solid fa-disease text-cyan-400 text-sm"></i>
+                <div>
+                    <div id="mode-title-text" class="font-bold text-slate-100">粒子生命体群 (Particle Life)</div>
+                    <div id="mode-sub-text" class="text-[10px] text-slate-400">自己組織化によるアメーバ・多細胞構造の創発</div>
+                </div>
+            </div>
+
+            <!-- リアルタイム個体数推移オーバーレイチャート -->
+            <div id="chart-overlay" class="absolute top-4 right-4 glass-panel p-3 rounded-xl border border-slate-700/80 shadow-2xl hidden z-20 w-64 text-xs">
+                <div class="flex justify-between items-center mb-1.5 text-slate-300 font-bold">
+                    <span><i class="fa-solid fa-chart-area mr-1 text-cyan-400"></i> 生態系データ推移</span>
+                    <button onclick="toggleChartOverlay()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <canvas id="chart-canvas" width="230" height="90" class="w-full h-20 bg-slate-900/80 rounded border border-slate-800"></canvas>
+            </div>
+
+            <!-- 個体インスペクターパネル -->
+            <div id="inspector-panel" class="absolute bottom-6 right-6 w-64 glass-panel p-3.5 rounded-xl border border-cyan-500/30 hidden shadow-2xl z-20 text-xs">
+                <div class="flex justify-between items-center mb-2 pb-1 border-b border-slate-700/60">
+                    <span class="font-bold text-cyan-400"><i class="fa-solid fa-microscope mr-1"></i> 個体インスペクター</span>
+                    <button onclick="closeInspector()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="inspector-content" class="space-y-1.5 text-[11px] text-slate-300"></div>
+            </div>
+        </main>
+
+        <!-- 右側多機能サイドバー -->
+        <aside class="w-80 lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col justify-between overflow-y-auto shrink-0 z-10">
+            <div class="p-4 space-y-4">
+                
+                <!-- 1. エンジン選択セレクト -->
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-microchip text-cyan-400 mr-1"></i> シミュレーションエンジン
+                    </label>
+                    <select id="engine-select" onchange="switchEngine(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-cyan-300 focus:outline-none focus:border-cyan-500">
+                        <option value="particle">🧪 1. 粒子生命体群 (Particle Life)</option>
+                        <option value="eco">🦁 2. エージェント進化生態系 (Evo-Agents)</option>
+                        <option value="lenia">🌊 3. 連続体 Lenia (アメーバ物理)</option>
+                        <option value="gene">🧬 4. 遺伝子セル・オートマトン</option>
+                    </select>
+                </div>
+
+                <!-- 2. スタート/ストップ統合コントロールパネル -->
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-cyan-500/30 space-y-2">
+                    <div class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                        <span><i class="fa-solid fa-circle-play text-cyan-400 mr-1"></i> シミュレーション制御</span>
+                        <span id="status-indicator" class="text-[10px] text-amber-400 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800/50">停止中</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-play-side" onclick="togglePlay()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg shadow-cyan-600/30 active:scale-95">
+                            <i id="icon-play-side" class="fa-solid fa-play"></i>
+                            <span id="text-play-side">シミュレーション開始</span>
+                        </button>
+                        <button onclick="stepSimulation()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 w-9 h-9 rounded-xl border border-slate-700 transition flex items-center justify-center shrink-0 hover:text-cyan-400" title="1ステップ進む">
+                            <i class="fa-solid fa-forward-step text-xs"></i>
+                        </button>
+                        <button onclick="resetCurrentEngine()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-rose-400 w-9 h-9 rounded-xl border border-slate-700 transition flex items-center justify-center shrink-0" title="リセット">
+                            <i class="fa-solid fa-rotate-left text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. 機能別コントロールタブ -->
+                <div class="flex border-b border-slate-800 text-xs">
+                    <button onclick="switchTab('tune')" id="tab-btn-tune" class="tab-btn active flex-1 py-2 text-center font-bold text-slate-400 transition">
+                        <i class="fa-solid fa-sliders text-cyan-400 mr-1"></i> 微調整
+                    </button>
+                    <button onclick="switchTab('god')" id="tab-btn-god" class="tab-btn flex-1 py-2 text-center font-bold text-slate-400 transition">
+                        <i class="fa-solid fa-hand-holding-hand text-emerald-400 mr-1"></i> 神の介入
+                    </button>
+                    <button onclick="switchTab('visual')" id="tab-btn-visual" class="tab-btn flex-1 py-2 text-center font-bold text-slate-400 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> 描画・物理
+                    </button>
+                </div>
+
+                <!-- TAB 1: エンジン超詳細微調整パネル -->
+                <div id="tab-content-tune" class="space-y-4">
+                    <div id="engine-tuning-container" class="space-y-3 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50">
+                        <!-- Dynamic Tuning Sliders -->
+                    </div>
+
+                    <!-- プリセット切替 -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                            <i class="fa-solid fa-bookmark text-indigo-400 mr-1"></i> プリセット世界
+                        </label>
+                        <div id="preset-buttons-container" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+
+                    <!-- 設定JSONデータのエクスポート/インポート -->
+                    <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
+                        <div class="flex justify-between items-center text-[11px] text-slate-400">
+                            <span>パラメータ設定コード</span>
+                            <div class="space-x-1">
+                                <button onclick="copyConfigJSON()" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-cyan-300 text-[10px]">コピー</button>
+                                <button onclick="pasteConfigJSON()" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-emerald-300 text-[10px]">読み込み</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: 神の介入ツール設定 -->
+                <div id="tab-content-god" class="space-y-3 hidden">
+                    <div class="text-[11px] text-slate-400">キャンバス上をドラッグして直接介入できます：</div>
+                    <div class="grid grid-cols-2 gap-1.5 text-xs">
+                        <button id="tool-spawn" onclick="setGodTool('spawn')" class="god-tool-btn p-2 bg-indigo-900/60 border border-indigo-500/50 rounded-lg text-indigo-300 flex items-center space-x-1.5 font-bold">
+                            <i class="fa-solid fa-plus-circle text-indigo-400"></i> <span>生命注入</span>
+                        </button>
+                        <button id="tool-erase" onclick="setGodTool('erase')" class="god-tool-btn p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 flex items-center space-x-1.5 hover:bg-slate-700">
+                            <i class="fa-solid fa-eraser text-rose-400"></i> <span>消しゴム</span>
+                        </button>
+                        <button id="tool-gravity" onclick="setGodTool('gravity')" class="god-tool-btn p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 flex items-center space-x-1.5 hover:bg-slate-700">
+                            <i class="fa-solid fa-magnet text-purple-400"></i> <span>引力/重力</span>
+                        </button>
+                        <button id="tool-wall" onclick="setGodTool('wall')" class="god-tool-btn p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 flex items-center space-x-1.5 hover:bg-slate-700">
+                            <i class="fa-solid fa-block-brick text-amber-400"></i> <span>壁・障害物</span>
+                        </button>
+                        <button id="tool-food" onclick="setGodTool('food')" class="god-tool-btn p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 flex items-center space-x-1.5 hover:bg-slate-700">
+                            <i class="fa-solid fa-apple-whole text-emerald-400"></i> <span>餌/エネルギー</span>
+                        </button>
+                        <button id="tool-inspect" onclick="setGodTool('inspect')" class="god-tool-btn p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 flex items-center space-x-1.5 hover:bg-slate-700">
+                            <i class="fa-solid fa-microscope text-cyan-400"></i> <span>個体観察</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/50 space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-300">ブラシ半径:</span>
+                                <span id="val-brush-size" class="font-mono text-cyan-400 font-bold">35px</span>
+                            </div>
+                            <input type="range" min="10" max="150" value="35" oninput="godSettings.brushSize = parseInt(this.value); document.getElementById('val-brush-size').innerText = this.value + 'px';" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-300">注入密度/強度:</span>
+                                <span id="val-brush-density" class="font-mono text-cyan-400 font-bold">5</span>
+                            </div>
+                            <input type="range" min="1" max="25" value="5" oninput="godSettings.density = parseInt(this.value); document.getElementById('val-brush-density').innerText = this.value;" class="w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: 描画・物理環境設定パネル -->
+                <div id="tab-content-visual" class="space-y-3 hidden">
+                    <div class="bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50 space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-300">シミュレーション速度:</span>
+                                <span id="val-sim-speed" class="font-mono text-cyan-400 font-bold">1.0x</span>
+                            </div>
+                            <input type="range" min="0.1" max="4.0" step="0.1" value="1.0" oninput="updateVisualSetting('simSpeed', this.value)" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-300">ネオントレイル (残像長さ):</span>
+                                <span id="val-trail-fade" class="font-mono text-cyan-400 font-bold">標準</span>
+                            </div>
+                            <input type="range" min="0.05" max="1.0" step="0.05" value="0.25" oninput="updateVisualSetting('trailFade', this.value)" class="w-full">
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-slate-300">発光エフェクト (Glow):</span>
+                            <input type="checkbox" id="chk-glow" checked onchange="updateVisualSetting('glow', this.checked)" class="accent-cyan-400 w-4 h-4 cursor-pointer">
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-slate-300">画面端の扱い:</span>
+                            <select id="sel-boundary" onchange="updateVisualSetting('boundary', this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200">
+                                <option value="wrap">ループ (トーラス空間)</option>
+                                <option value="bounce">跳ね返り (壁の反射)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="resetCurrentEngine()" class="w-full py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs flex items-center justify-center space-x-1.5 font-bold transition">
+                    <i class="fa-solid fa-trash-can"></i> <span>画面完全初期化</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // --- コア変数の初期化 ---
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+        const chartCanvas = document.getElementById('chart-canvas');
+        const chartCtx = chartCanvas ? chartCanvas.getContext('2d') : null;
+
+        let isRunning = false;
+        let animationFrameId = null;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let stepCount = 0;
+
+        let activeEngine = 'particle';
+        let currentGodTool = 'spawn';
+        let selectedEntity = null;
+
+        let isMouseDown = false;
+        let mouseX = -100, mouseY = -100;
+        let isMouseHover = false;
+
+        // グローバルビジュアル & 物理設定
+        const visualSettings = {
+            simSpeed: 1.0,
+            trailFade: 0.25,
+            glow: true,
+            boundary: 'wrap'
+        };
+
+        const godSettings = {
+            brushSize: 35,
+            density: 5
+        };
+
+        let historyData = [];
+
+        // --- 1. PARTICLE LIFE ENGINE ---
+        const ParticleLife = {
+            numParticles: 800,
+            rMax: 100,
+            friction: 0.04,
+            forceScale: 0.5,
+            particleRadius: 3.5,
+            numTypes: 4,
+            colors: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'],
+            typeNames: ['赤種族', '青種族', '緑種族', '黄種族'],
+            particles: [],
+            matrix: [
+                [ 0.6, -0.4,  0.2, -0.1],
+                [-0.3,  0.8, -0.5,  0.4],
+                [ 0.1, -0.2,  0.7, -0.6],
+                [-0.5,  0.3, -0.1,  0.9]
+            ],
+            walls: [],
+
+            init() {
+                this.particles = [];
+                this.walls = [];
+                for (let i = 0; i < this.numParticles; i++) {
+                    this.particles.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: 0,
+                        vy: 0,
+                        type: Math.floor(Math.random() * this.numTypes),
+                        age: 0
+                    });
+                }
+            },
+
+            step() {
+                const friction = Math.pow(0.5, 0.016 / Math.max(0.001, this.friction));
+                const rMax = this.rMax;
+                const rMaxSq = rMax * rMax;
+                const forceFactor = this.forceScale;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    let p1 = this.particles[i];
+                    let fx = 0, fy = 0;
+
+                    for (let j = 0; j < this.particles.length; j++) {
+                        if (i === j) continue;
+                        let p2 = this.particles[j];
+
+                        let dx = p2.x - p1.x;
+                        let dy = p2.y - p1.y;
+
+                        if (visualSettings.boundary === 'wrap') {
+                            if (dx > canvas.width * 0.5) dx -= canvas.width;
+                            if (dx < -canvas.width * 0.5) dx += canvas.width;
+                            if (dy > canvas.height * 0.5) dy -= canvas.height;
+                            if (dy < -canvas.height * 0.5) dy += canvas.height;
+                        }
+
+                        let r2 = dx * dx + dy * dy;
+                        if (r2 > 0 && r2 < rMaxSq) {
+                            let r = Math.sqrt(r2);
+                            let q = r / rMax;
+                            let attr = this.matrix[p1.type][p2.type];
+
+                            let f = 0;
+                            if (q < 0.2) {
+                                f = (q / 0.2) - 1.0;
+                            } else {
+                                f = attr * (1.0 - Math.abs(2.0 * q - 1.2));
+                            }
+
+                            fx += (dx / r) * f;
+                            fy += (dy / r) * f;
+                        }
+                    }
+
+                    p1.vx = (p1.vx + fx * forceFactor) * friction;
+                    p1.vy = (p1.vy + fy * forceFactor) * friction;
+                    p1.age++;
+                }
+
+                for (let p of this.particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (visualSettings.boundary === 'wrap') {
+                        p.x = (p.x + canvas.width) % canvas.width;
+                        p.y = (p.y + canvas.height) % canvas.height;
+                    } else {
+                        if (p.x < 10) { p.x = 10; p.vx *= -1; }
+                        if (p.x > canvas.width - 10) { p.x = canvas.width - 10; p.vx *= -1; }
+                        if (p.y < 10) { p.y = 10; p.vy *= -1; }
+                        if (p.y > canvas.height - 10) { p.y = canvas.height - 10; p.vy *= -1; }
+                    }
+
+                    for (let w of this.walls) {
+                        let dist = Math.hypot(p.x - w.x, p.y - w.y);
+                        if (dist < w.r + this.particleRadius) {
+                            let angle = Math.atan2(p.y - w.y, p.x - w.x);
+                            p.x = w.x + Math.cos(angle) * (w.r + this.particleRadius);
+                            p.y = w.y + Math.sin(angle) * (w.r + this.particleRadius);
+                            p.vx *= -0.8;
+                            p.vy *= -0.8;
+                        }
+                    }
+                }
+            },
+
+            draw() {
+                ctx.fillStyle = '#f59e0b22';
+                ctx.strokeStyle = '#f59e0b88';
+                ctx.lineWidth = 2;
+                for (let w of this.walls) {
+                    ctx.beginPath();
+                    ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                for (let p of this.particles) {
+                    ctx.fillStyle = this.colors[p.type];
+                    if (visualSettings.glow) {
+                        ctx.shadowBlur = 6;
+                        ctx.shadowColor = this.colors[p.type];
+                    }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, this.particleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (selectedEntity && selectedEntity.id === p.id) {
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                }
+                ctx.shadowBlur = 0;
+            }
+        };
+
+        // --- 2. ECOSYSTEM ENGINE ---
+        const EcoEngine = {
+            herbSpeed: 2.2,
+            carnSpeed: 3.0,
+            mutationRate: 0.3,
+            foodSpawnRate: 0.4,
+            metabolism: 0.3,
+            agents: [],
+            foods: [],
+            walls: [],
+
+            init() {
+                this.agents = [];
+                this.foods = [];
+                this.walls = [];
+                for (let i = 0; i < 40; i++) this.spawnAgent('herbivore', Math.random() * canvas.width, Math.random() * canvas.height);
+                for (let i = 0; i < 8; i++) this.spawnAgent('carnivore', Math.random() * canvas.width, Math.random() * canvas.height);
+                for (let i = 0; i < 100; i++) this.foods.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, energy: 25 });
+            },
+
+            spawnAgent(type, x, y, genes = null) {
+                const defaultGenes = type === 'herbivore'
+                    ? { speed: this.herbSpeed, vision: 70, size: 4, hue: 140 }
+                    : { speed: this.carnSpeed, vision: 110, size: 6, hue: 0 };
+
+                this.agents.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    type: type,
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    energy: 100,
+                    age: 0,
+                    genes: genes ? { ...genes } : defaultGenes
+                });
+            },
+
+            step() {
+                if (this.foods.length < 200 && Math.random() < this.foodSpawnRate) {
+                    this.foods.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, energy: 25 });
+                }
+
+                for (let i = this.agents.length - 1; i >= 0; i--) {
+                    let a = this.agents[i];
+                    a.age++;
+                    a.energy -= (this.metabolism) + (a.genes.speed * 0.08);
+
+                    if (a.energy <= 0) {
+                        this.agents.splice(i, 1);
+                        continue;
+                    }
+
+                    let target = null;
+                    let minDist = a.genes.vision;
+
+                    if (a.type === 'herbivore') {
+                        for (let f of this.foods) {
+                            let d = Math.hypot(f.x - a.x, f.y - a.y);
+                            if (d < minDist) { minDist = d; target = f; }
+                        }
+                    } else {
+                        for (let other of this.agents) {
+                            if (other.type === 'herbivore') {
+                                let d = Math.hypot(other.x - a.x, other.y - a.y);
+                                if (d < minDist) { minDist = d; target = other; }
+                            }
+                        }
+                    }
+
+                    if (target) {
+                        let angle = Math.atan2(target.y - a.y, target.x - a.x);
+                        a.vx = Math.cos(angle) * a.genes.speed;
+                        a.vy = Math.sin(angle) * a.genes.speed;
+                    } else {
+                        a.vx += (Math.random() - 0.5) * 0.4;
+                        a.vy += (Math.random() - 0.5) * 0.4;
+                        let spd = Math.hypot(a.vx, a.vy);
+                        if (spd > a.genes.speed) { a.vx = (a.vx / spd) * a.genes.speed; a.vy = (a.vy / spd) * a.genes.speed; }
+                    }
+
+                    a.x = (a.x + a.vx + canvas.width) % canvas.width;
+                    a.y = (a.y + a.vy + canvas.height) % canvas.height;
+
+                    for (let w of this.walls) {
+                        let dist = Math.hypot(a.x - w.x, a.y - w.y);
+                        if (dist < w.r + a.genes.size) {
+                            let angle = Math.atan2(a.y - w.y, a.x - w.x);
+                            a.x = w.x + Math.cos(angle) * (w.r + a.genes.size);
+                            a.y = w.y + Math.sin(angle) * (w.r + a.genes.size);
+                            a.vx *= -1;
+                            a.vy *= -1;
+                        }
+                    }
+
+                    if (a.type === 'herbivore') {
+                        for (let j = this.foods.length - 1; j >= 0; j--) {
+                            let f = this.foods[j];
+                            if (Math.hypot(f.x - a.x, f.y - a.y) < a.genes.size + 4) {
+                                a.energy += f.energy;
+                                this.foods.splice(j, 1);
+                                break;
+                            }
+                        }
+                    } else {
+                        for (let j = this.agents.length - 1; j >= 0; j--) {
+                            let victim = this.agents[j];
+                            if (victim.type === 'herbivore' && Math.hypot(victim.x - a.x, victim.y - a.y) < a.genes.size + victim.genes.size) {
+                                a.energy += 85;
+                                this.agents.splice(j, 1);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (a.energy > 180) {
+                        a.energy -= 90;
+                        let childGenes = { ...a.genes };
+                        if (Math.random() < this.mutationRate) {
+                            childGenes.speed = Math.max(0.8, childGenes.speed + (Math.random() - 0.5) * 0.8);
+                            childGenes.vision = Math.max(30, childGenes.vision + (Math.random() - 0.5) * 20);
+                            childGenes.hue = (childGenes.hue + (Math.random() - 0.5) * 30 + 360) % 360;
+                        }
+                        this.spawnAgent(a.type, a.x + (Math.random() - 0.5) * 10, a.y + (Math.random() - 0.5) * 10, childGenes);
+                    }
+                }
+            },
+
+            draw() {
+                ctx.fillStyle = '#f59e0b22';
+                ctx.strokeStyle = '#f59e0b88';
+                ctx.lineWidth = 2;
+                for (let w of this.walls) {
+                    ctx.beginPath();
+                    ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#10b98188';
+                for (let f of this.foods) {
+                    ctx.beginPath();
+                    ctx.arc(f.x, f.y, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let a of this.agents) {
+                    ctx.fillStyle = `hsl(${a.genes.hue}, 85%, 55%)`;
+                    if (visualSettings.glow) { ctx.shadowBlur = 4; ctx.shadowColor = `hsl(${a.genes.hue}, 85%, 55%)`; }
+                    ctx.beginPath();
+                    ctx.arc(a.x, a.y, a.genes.size, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (selectedEntity && selectedEntity.id === a.id) {
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+
+                    ctx.strokeStyle = `hsla(${a.genes.hue}, 85%, 55%, 0.12)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(a.x, a.y, a.genes.vision, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+            }
+        };
+
+        // --- 3. LENIA ENGINE ---
+        const LeniaEngine = {
+            cols: 80, rows: 60, scale: 10,
+            mu: 0.15, sigma: 0.04, dt: 0.1, kernelR: 3,
+            palette: 'cyan-magenta',
+            grid: [], nextGrid: [],
+
+            init() {
+                this.cols = Math.max(10, Math.floor(canvas.width / this.scale));
+                this.rows = Math.max(10, Math.floor(canvas.height / this.scale));
+                this.grid = new Float32Array(this.cols * this.rows);
+                this.nextGrid = new Float32Array(this.cols * this.rows);
+
+                const cx = Math.floor(this.cols / 2);
+                const cy = Math.floor(this.rows / 2);
+                for (let x = -8; x <= 8; x++) {
+                    for (let y = -8; y <= 8; y++) {
+                        let r = Math.hypot(x, y);
+                        if (r < 7) {
+                            let idx = (cy + y) * this.cols + (cx + x);
+                            if (idx >= 0 && idx < this.grid.length) this.grid[idx] = Math.exp(-r * 0.3);
+                        }
+                    }
+                }
+            },
+
+            step() {
+                const mu = this.mu, sigma = this.sigma, dt = this.dt, R = this.kernelR;
+
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let sum = 0, count = 0;
+
+                        for (let dy = -R; dy <= R; dy++) {
+                            for (let dx = -R; dx <= R; dx++) {
+                                let dist = Math.hypot(dx, dy);
+                                if (dist >= R * 0.5 && dist <= R) {
+                                    let nx = (x + dx + this.cols) % this.cols;
+                                    let ny = (y + dy + this.rows) % this.rows;
+                                    sum += this.grid[ny * this.cols + nx];
+                                    count++;
+                                }
+                            }
+                        }
+
+                        let avg = sum / Math.max(1, count);
+                        let growth = Math.exp(-Math.pow((avg - mu) / sigma, 2) / 2) * 2.0 - 1.0;
+                        let idx = y * this.cols + x;
+                        let val = this.grid[idx] + dt * growth;
+                        this.nextGrid[idx] = Math.min(1.0, Math.max(0.0, val));
+                    }
+                }
+                this.grid.set(this.nextGrid);
+            },
+
+            draw() {
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let val = this.grid[y * this.cols + x];
+                        if (val > 0.02) {
+                            let hue = 200 + val * 120;
+                            if (this.palette === 'fire') hue = val * 60;
+                            else if (this.palette === 'emerald') hue = 120 + val * 60;
+                            ctx.fillStyle = `hsla(${hue}, 90%, 50%, ${val})`;
+                            ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
+                        }
+                    }
+                }
+            }
+        };
+
+        // --- 4. GENE CELLULAR AUTOMATA ---
+        const GeneCA = {
+            cols: 100, rows: 75, scale: 8,
+            mutationChance: 0.05,
+            rulePreset: 'B3/S23',
+            grid: [],
+
+            init() {
+                this.cols = Math.max(10, Math.floor(canvas.width / this.scale));
+                this.rows = Math.max(10, Math.floor(canvas.height / this.scale));
+                this.grid = new Array(this.cols * this.rows).fill(null);
+
+                for (let i = 0; i < this.cols * this.rows * 0.2; i++) {
+                    let x = Math.floor(Math.random() * this.cols);
+                    let y = Math.floor(Math.random() * this.rows);
+                    this.grid[y * this.cols + x] = { alive: true, hue: Math.floor(Math.random() * 360) };
+                }
+            },
+
+            step() {
+                let nextGrid = new Array(this.cols * this.rows).fill(null);
+
+                let birthRules = [3];
+                let surviveRules = [2, 3];
+                if (this.rulePreset === 'HighLife') { birthRules = [3, 6]; surviveRules = [2, 3]; }
+                else if (this.rulePreset === 'Seeds') { birthRules = [2]; surviveRules = []; }
+
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let neighbors = [];
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dx === 0 && dy === 0) continue;
+                                let nx = (x + dx + this.cols) % this.cols;
+                                let ny = (y + dy + this.rows) % this.rows;
+                                let cell = this.grid[ny * this.cols + nx];
+                                if (cell && cell.alive) neighbors.push(cell);
+                            }
+                        }
+
+                        let idx = y * this.cols + x;
+                        let current = this.grid[idx];
+                        let count = neighbors.length;
+
+                        if (current && current.alive) {
+                            if (surviveRules.includes(count)) nextGrid[idx] = { ...current };
+                        } else {
+                            if (birthRules.includes(count)) {
+                                let avgHue = count > 0 ? neighbors.reduce((a, c) => a + c.hue, 0) / count : Math.random() * 360;
+                                if (Math.random() < this.mutationChance) avgHue = (avgHue + (Math.random() * 60 - 30) + 360) % 360;
+                                nextGrid[idx] = { alive: true, hue: avgHue };
+                            }
+                        }
+                    }
+                }
+                this.grid = nextGrid;
+            },
+
+            draw() {
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let cell = this.grid[y * this.cols + x];
+                        if (cell && cell.alive) {
+                            ctx.fillStyle = `hsl(${cell.hue}, 80%, 55%)`;
+                            ctx.fillRect(x * this.scale, y * this.scale, this.scale - 1, this.scale - 1);
+                        }
+                    }
+                }
+            }
+        };
+
+        // --- UI & スライダーインタラクション ---
+        function switchEngine(type) {
+            activeEngine = type;
+            document.getElementById('engine-select').value = type;
+
+            const info = {
+                particle: { title: '粒子生命体群 (Particle Life)', sub: '相互引力・反発ルールからの構造・運動創発', icon: 'fa-disease' },
+                eco: { title: 'エージェント進化生態系 (Evo-Agents)', sub: '視界・速度遺伝子を持つ個体の自然淘汰競合', icon: 'fa-paw' },
+                lenia: { title: '連続体 Lenia (アメーバ物理)', sub: '滑らかな連続密度場を動く人工単細胞構造', icon: 'fa-water' },
+                gene: { title: '遺伝子セル・オートマトン', sub: '離散グリッド上での突然変異・種族交配進化', icon: 'fa-dna' }
+            }[type];
+
+            document.getElementById('mode-title-text').innerText = info.title;
+            document.getElementById('mode-sub-text').innerText = info.sub;
+            document.getElementById('mode-badge-icon').className = `fa-solid ${info.icon} text-cyan-400 text-sm`;
+
+            renderEngineTuningUI();
+            resetCurrentEngine();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-btn-${tab}`).classList.add('active');
+
+            document.getElementById('tab-content-tune').classList.add('hidden');
+            document.getElementById('tab-content-visual').classList.add('hidden');
+            document.getElementById('tab-content-god').classList.add('hidden');
+            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+        }
+
+        function renderEngineTuningUI() {
+            const container = document.getElementById('engine-tuning-container');
+            const presetContainer = document.getElementById('preset-buttons-container');
+            container.innerHTML = '';
+            presetContainer.innerHTML = '';
+
+            if (activeEngine === 'particle') {
+                container.innerHTML = `
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">粒子総数:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-num-p">${ParticleLife.numParticles}</span>
+                        </div>
+                        <input type="range" min="100" max="2500" step="50" value="${ParticleLife.numParticles}" oninput="ParticleLife.numParticles=parseInt(this.value); document.getElementById('val-num-p').innerText=this.value;" onchange="ParticleLife.init()" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">作用半径 (R_max):</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-rmax">${ParticleLife.rMax}px</span>
+                        </div>
+                        <input type="range" min="30" max="250" value="${ParticleLife.rMax}" oninput="ParticleLife.rMax=parseInt(this.value); document.getElementById('val-rmax').innerText=this.value+'px';" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">摩擦係数 (減衰):</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-fric">${ParticleLife.friction}</span>
+                        </div>
+                        <input type="range" min="0.005" max="0.15" step="0.005" value="${ParticleLife.friction}" oninput="ParticleLife.friction=parseFloat(this.value); document.getElementById('val-fric').innerText=this.value;" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">力の強度倍率:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-fscale">${ParticleLife.forceScale}</span>
+                        </div>
+                        <input type="range" min="0.1" max="2.0" step="0.1" value="${ParticleLife.forceScale}" oninput="ParticleLife.forceScale=parseFloat(this.value); document.getElementById('val-fscale').innerText=this.value;" class="w-full">
+                    </div>
+                    <div class="pt-2 border-t border-slate-700/60">
+                        <div class="flex justify-between items-center text-xs mb-1.5 font-bold text-slate-300">
+                            <span>引力/反発 マトリックス</span>
+                            <button onclick="randomizeParticleMatrix()" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-cyan-300">シャッフル</button>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1 text-[10px] font-mono text-center">
+                            <div></div><div class="text-rose-400">赤</div><div class="text-blue-400">青</div><div class="text-emerald-400">緑</div><div class="text-amber-400">黄</div>
+                            ${ParticleLife.colors.map((c, i) => `
+                                <div style="color:${c}">${['赤','青','緑','黄'][i]}</div>
+                                ${ParticleLife.matrix[i].map((val, j) => `
+                                    <input type="number" step="0.1" min="-1" max="1" value="${val.toFixed(1)}" onchange="ParticleLife.matrix[${i}][${j}]=parseFloat(this.value)" class="bg-slate-900 border border-slate-700 rounded text-center text-[10px] text-cyan-300 w-full py-0.5">
+                                `).join('')}
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                presetContainer.innerHTML = `
+                    <button onclick="loadParticlePreset('soup')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🧪 原生スープ</button>
+                    <button onclick="loadParticlePreset('worms')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🐛 自律ワーム</button>
+                    <button onclick="loadParticlePreset('snakes')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🐉 捕食チェイス</button>
+                    <button onclick="loadParticlePreset('galaxy')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🌌 銀河渦巻き</button>
+                `;
+            } else if (activeEngine === 'eco') {
+                container.innerHTML = `
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">突然変異率:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-mut">${Math.round(EcoEngine.mutationRate*100)}%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="${EcoEngine.mutationRate}" oninput="EcoEngine.mutationRate=parseFloat(this.value); document.getElementById('val-mut').innerText=Math.round(this.value*100)+'%';" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">植物生長速度:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-foodr">${EcoEngine.foodSpawnRate}</span>
+                        </div>
+                        <input type="range" min="0.1" max="2.0" step="0.1" value="${EcoEngine.foodSpawnRate}" oninput="EcoEngine.foodSpawnRate=parseFloat(this.value); document.getElementById('val-foodr').innerText=this.value;" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">代謝・エネルギー消費率:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-meta">${EcoEngine.metabolism}</span>
+                        </div>
+                        <input type="range" min="0.1" max="1.5" step="0.1" value="${EcoEngine.metabolism}" oninput="EcoEngine.metabolism=parseFloat(this.value); document.getElementById('val-meta').innerText=this.value;" class="w-full">
+                    </div>
+                `;
+                presetContainer.innerHTML = `
+                    <button onclick="EcoEngine.init()" class="col-span-2 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🌿 生態系を再セット</button>
+                `;
+            } else if (activeEngine === 'lenia') {
+                container.innerHTML = `
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">成長最適密度 (μ):</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-mu">${LeniaEngine.mu}</span>
+                        </div>
+                        <input type="range" min="0.05" max="0.35" step="0.01" value="${LeniaEngine.mu}" oninput="LeniaEngine.mu=parseFloat(this.value); document.getElementById('val-mu').innerText=this.value;" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">成長許容幅 (σ):</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-sig">${LeniaEngine.sigma}</span>
+                        </div>
+                        <input type="range" min="0.01" max="0.08" step="0.005" value="${LeniaEngine.sigma}" oninput="LeniaEngine.sigma=parseFloat(this.value); document.getElementById('val-sig').innerText=this.value;" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">時間変化ステップ (dt):</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-dt">${LeniaEngine.dt}</span>
+                        </div>
+                        <input type="range" min="0.02" max="0.3" step="0.01" value="${LeniaEngine.dt}" oninput="LeniaEngine.dt=parseFloat(this.value); document.getElementById('val-dt').innerText=this.value;" class="w-full">
+                    </div>
+                `;
+                presetContainer.innerHTML = `
+                    <button onclick="LeniaEngine.init()" class="col-span-2 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🌊 アメーバ核を生成</button>
+                `;
+            } else if (activeEngine === 'gene') {
+                container.innerHTML = `
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">ルールプリセット:</span>
+                        </div>
+                        <select onchange="GeneCA.rulePreset=this.value; GeneCA.init();" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-cyan-300">
+                            <option value="B3/S23">Conway B3/S23 (標準)</option>
+                            <option value="HighLife">HighLife B36/S23</option>
+                            <option value="Seeds">Seeds B2/S</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 text-xs">
+                            <span class="text-slate-300">突然変異確率:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="val-gmut">${Math.round(GeneCA.mutationChance*100)}%</span>
+                        </div>
+                        <input type="range" min="0" max="0.2" step="0.01" value="${GeneCA.mutationChance}" oninput="GeneCA.mutationChance=parseFloat(this.value); document.getElementById('val-gmut').innerText=Math.round(this.value*100)+'%';" class="w-full">
+                    </div>
+                `;
+                presetContainer.innerHTML = `
+                    <button onclick="GeneCA.init()" class="col-span-2 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300">🧬 遺伝子スープ生成</button>
+                `;
+            }
+        }
+
+        function updateVisualSetting(key, val) {
+            if (key === 'simSpeed') { visualSettings.simSpeed = parseFloat(val); document.getElementById('val-sim-speed').innerText = val + 'x'; }
+            else if (key === 'trailFade') { visualSettings.trailFade = parseFloat(val); }
+            else if (key === 'glow') { visualSettings.glow = val; }
+            else if (key === 'boundary') { visualSettings.boundary = val; }
+        }
+
+        function randomizeParticleMatrix() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    ParticleLife.matrix[i][j] = parseFloat((Math.random() * 2 - 1).toFixed(1));
+                }
+            }
+            renderEngineTuningUI();
+        }
+
+        function loadParticlePreset(preset) {
+            if (preset === 'soup') {
+                ParticleLife.matrix = [
+                    [ 0.8, -0.6,  0.2, -0.1],
+                    [-0.4,  0.9, -0.7,  0.3],
+                    [ 0.2, -0.3,  0.8, -0.5],
+                    [-0.1,  0.4, -0.2,  0.7]
+                ];
+            } else if (preset === 'worms') {
+                ParticleLife.matrix = [
+                    [0.4, 0.8, -0.2, 0.0],
+                    [0.0, 0.4, 0.8, -0.2],
+                    [-0.2, 0.0, 0.4, 0.8],
+                    [0.8, -0.2, 0.0, 0.4]
+                ];
+            } else if (preset === 'snakes') {
+                ParticleLife.matrix = [
+                    [0.2, 1.0, -0.8, 0.0],
+                    [0.0, 0.2, 1.0, -0.8],
+                    [-0.8, 0.0, 0.2, 1.0],
+                    [1.0, -0.8, 0.0, 0.2]
+                ];
+            } else if (preset === 'galaxy') {
+                ParticleLife.matrix = [
+                    [0.9, 0.5, 0.5, 0.5],
+                    [0.5, 0.9, 0.5, 0.5],
+                    [0.5, 0.5, 0.9, 0.5],
+                    [0.5, 0.5, 0.5, 0.9]
+                ];
+            }
+            renderEngineTuningUI();
+            ParticleLife.init();
+        }
+
+        function copyConfigJSON() {
+            let data = {};
+            if (activeEngine === 'particle') data = ParticleLife.matrix;
+            else if (activeEngine === 'eco') data = { mut: EcoEngine.mutationRate, spd: EcoEngine.herbSpeed };
+            else if (activeEngine === 'lenia') data = { mu: LeniaEngine.mu, sigma: LeniaEngine.sigma };
+
+            const str = JSON.stringify(data);
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = str;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            alert('設定JSONをクリップボードにコピーしました！');
+        }
+
+        function pasteConfigJSON() {
+            const str = prompt('JSONデータコードを入力してください:');
+            if (!str) return;
+            try {
+                const parsed = JSON.parse(str);
+                if (activeEngine === 'particle' && Array.isArray(parsed)) ParticleLife.matrix = parsed;
+                renderEngineTuningUI();
+            } catch(e) {}
+        }
+
+        function setGodTool(tool) {
+            currentGodTool = tool;
+            document.querySelectorAll('.god-tool-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-900/60', 'border-indigo-500/50', 'text-indigo-300', 'font-bold');
+                btn.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-300');
+            });
+            const active = document.getElementById(`tool-${tool}`);
+            if (active) active.classList.add('bg-indigo-900/60', 'border-indigo-500/50', 'text-indigo-300', 'font-bold');
+        }
+
+        function toggleChartOverlay() {
+            document.getElementById('chart-overlay').classList.toggle('hidden');
+        }
+
+        // --- 全エンジン対応の神の介入（ポインター操作） ---
+        function handleCanvasPointer(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            mouseX = (clientX - rect.left) * (canvas.width / rect.width);
+            mouseY = (clientY - rect.top) * (canvas.height / rect.height);
+
+            const size = godSettings.brushSize;
+            const density = godSettings.density;
+
+            if (currentGodTool === 'spawn') {
+                if (activeEngine === 'particle') {
+                    for (let i = 0; i < density; i++) {
+                        ParticleLife.particles.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            x: mouseX + (Math.random() - 0.5) * size,
+                            y: mouseY + (Math.random() - 0.5) * size,
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: (Math.random() - 0.5) * 4,
+                            type: Math.floor(Math.random() * 4),
+                            age: 0
+                        });
+                    }
+                } else if (activeEngine === 'eco') {
+                    for (let i = 0; i < Math.max(1, Math.floor(density / 2)); i++) {
+                        EcoEngine.spawnAgent(Math.random() < 0.7 ? 'herbivore' : 'carnivore', mouseX + (Math.random() - 0.5) * size, mouseY + (Math.random() - 0.5) * size);
+                    }
+                } else if (activeEngine === 'lenia') {
+                    let rCells = Math.ceil(size / LeniaEngine.scale);
+                    let cx = Math.floor(mouseX / LeniaEngine.scale);
+                    let cy = Math.floor(mouseY / LeniaEngine.scale);
+                    for (let dy = -rCells; dy <= rCells; dy++) {
+                        for (let dx = -rCells; dx <= rCells; dx++) {
+                            if (Math.hypot(dx, dy) <= rCells) {
+                                let nx = (cx + dx + LeniaEngine.cols) % LeniaEngine.cols;
+                                let ny = (cy + dy + LeniaEngine.rows) % LeniaEngine.rows;
+                                LeniaEngine.grid[ny * LeniaEngine.cols + nx] = 1.0;
+                            }
+                        }
+                    }
+                } else if (activeEngine === 'gene') {
+                    let rCells = Math.ceil(size / GeneCA.scale);
+                    let cx = Math.floor(mouseX / GeneCA.scale);
+                    let cy = Math.floor(mouseY / GeneCA.scale);
+                    for (let dy = -rCells; dy <= rCells; dy++) {
+                        for (let dx = -rCells; dx <= rCells; dx++) {
+                            if (Math.hypot(dx, dy) <= rCells && Math.random() < 0.6) {
+                                let nx = (cx + dx + GeneCA.cols) % GeneCA.cols;
+                                let ny = (cy + dy + GeneCA.rows) % GeneCA.rows;
+                                GeneCA.grid[ny * GeneCA.cols + nx] = { alive: true, hue: Math.floor(Math.random() * 360) };
+                            }
+                        }
+                    }
+                }
+            } else if (currentGodTool === 'erase') {
+                if (activeEngine === 'particle') {
+                    ParticleLife.particles = ParticleLife.particles.filter(p => Math.hypot(p.x - mouseX, p.y - mouseY) > size);
+                    ParticleLife.walls = ParticleLife.walls.filter(w => Math.hypot(w.x - mouseX, w.y - mouseY) > size);
+                } else if (activeEngine === 'eco') {
+                    EcoEngine.agents = EcoEngine.agents.filter(a => Math.hypot(a.x - mouseX, a.y - mouseY) > size);
+                    EcoEngine.foods = EcoEngine.foods.filter(f => Math.hypot(f.x - mouseX, f.y - mouseY) > size);
+                    EcoEngine.walls = EcoEngine.walls.filter(w => Math.hypot(w.x - mouseX, w.y - mouseY) > size);
+                } else if (activeEngine === 'lenia') {
+                    let rCells = Math.ceil(size / LeniaEngine.scale);
+                    let cx = Math.floor(mouseX / LeniaEngine.scale);
+                    let cy = Math.floor(mouseY / LeniaEngine.scale);
+                    for (let dy = -rCells; dy <= rCells; dy++) {
+                        for (let dx = -rCells; dx <= rCells; dx++) {
+                            if (Math.hypot(dx, dy) <= rCells) {
+                                let nx = (cx + dx + LeniaEngine.cols) % LeniaEngine.cols;
+                                let ny = (cy + dy + LeniaEngine.rows) % LeniaEngine.rows;
+                                LeniaEngine.grid[ny * LeniaEngine.cols + nx] = 0.0;
+                            }
+                        }
+                    }
+                } else if (activeEngine === 'gene') {
+                    let rCells = Math.ceil(size / GeneCA.scale);
+                    let cx = Math.floor(mouseX / GeneCA.scale);
+                    let cy = Math.floor(mouseY / GeneCA.scale);
+                    for (let dy = -rCells; dy <= rCells; dy++) {
+                        for (let dx = -rCells; dx <= rCells; dx++) {
+                            if (Math.hypot(dx, dy) <= rCells) {
+                                let nx = (cx + dx + GeneCA.cols) % GeneCA.cols;
+                                let ny = (cy + dy + GeneCA.rows) % GeneCA.rows;
+                                GeneCA.grid[ny * GeneCA.cols + nx] = null;
+                            }
+                        }
+                    }
+                }
+            } else if (currentGodTool === 'gravity') {
+                if (activeEngine === 'particle') {
+                    for (let p of ParticleLife.particles) {
+                        let d = Math.hypot(mouseX - p.x, mouseY - p.y);
+                        if (d < size * 3.5 && d > 1) {
+                            p.vx += ((mouseX - p.x) / d) * 0.8;
+                            p.vy += ((mouseY - p.y) / d) * 0.8;
+                        }
+                    }
+                } else if (activeEngine === 'eco') {
+                    for (let a of EcoEngine.agents) {
+                        let d = Math.hypot(mouseX - a.x, mouseY - a.y);
+                        if (d < size * 3.5 && d > 1) {
+                            a.vx += ((mouseX - a.x) / d) * 1.2;
+                            a.vy += ((mouseY - a.y) / d) * 1.2;
+                        }
+                    }
+                } else if (activeEngine === 'lenia' || activeEngine === 'gene') {
+                    handleCanvasPointer({ ...e, toolOverride: 'spawn' });
+                }
+            } else if (currentGodTool === 'wall') {
+                if (activeEngine === 'particle') {
+                    if (!ParticleLife.walls.some(w => Math.hypot(w.x - mouseX, w.y - mouseY) < size * 0.5)) {
+                        ParticleLife.walls.push({ x: mouseX, y: mouseY, r: size * 0.5 });
+                    }
+                } else if (activeEngine === 'eco') {
+                    if (!EcoEngine.walls.some(w => Math.hypot(w.x - mouseX, w.y - mouseY) < size * 0.5)) {
+                        EcoEngine.walls.push({ x: mouseX, y: mouseY, r: size * 0.5 });
+                    }
+                } else if (activeEngine === 'lenia' || activeEngine === 'gene') {
+                    handleCanvasPointer({ ...e, toolOverride: 'erase' });
+                }
+            } else if (currentGodTool === 'food') {
+                if (activeEngine === 'eco') {
+                    for (let i = 0; i < density; i++) {
+                        EcoEngine.foods.push({
+                            x: mouseX + (Math.random() - 0.5) * size,
+                            y: mouseY + (Math.random() - 0.5) * size,
+                            energy: 30
+                        });
+                    }
+                } else if (activeEngine === 'particle') {
+                    for (let p of ParticleLife.particles) {
+                        if (Math.hypot(p.x - mouseX, p.y - mouseY) < size) {
+                            p.vx *= 1.8;
+                            p.vy *= 1.8;
+                        }
+                    }
+                } else if (activeEngine === 'lenia' || activeEngine === 'gene') {
+                    handleCanvasPointer({ ...e, toolOverride: 'spawn' });
+                }
+            } else if (currentGodTool === 'inspect') {
+                inspectEntityAt(mouseX, mouseY);
+            }
+        }
+
+        function inspectEntityAt(x, y) {
+            selectedEntity = null;
+            if (activeEngine === 'particle') {
+                for (let p of ParticleLife.particles) {
+                    if (Math.hypot(p.x - x, p.y - y) < 22) {
+                        selectedEntity = p;
+                        showInspectorUI('粒子生命体', [
+                            { label: '種族', val: ParticleLife.typeNames[p.type] },
+                            { label: '生存ステップ', val: p.age },
+                            { label: '速度', val: Math.hypot(p.vx, p.vy).toFixed(2) }
+                        ]);
+                        return;
+                    }
+                }
+            } else if (activeEngine === 'eco') {
+                for (let a of EcoEngine.agents) {
+                    if (Math.hypot(a.x - x, a.y - y) < 25) {
+                        selectedEntity = a;
+                        showInspectorUI(a.type === 'herbivore' ? '草食個体' : '肉食ハンター', [
+                            { label: '体力(エネルギー)', val: a.energy.toFixed(1) },
+                            { label: '移動速度遺伝子', val: a.genes.speed.toFixed(2) },
+                            { label: '視界半径', val: a.genes.vision.toFixed(0) + 'px' },
+                            { label: '年齢', val: a.age }
+                        ]);
+                        return;
+                    }
+                }
+            } else if (activeEngine === 'lenia') {
+                let cx = Math.floor(x / LeniaEngine.scale);
+                let cy = Math.floor(y / LeniaEngine.scale);
+                if (cx >= 0 && cx < LeniaEngine.cols && cy >= 0 && cy < LeniaEngine.rows) {
+                    let val = LeniaEngine.grid[cy * LeniaEngine.cols + cx];
+                    showInspectorUI('Lenia 連続セル', [
+                        { label: 'グリッド位置', val: `(${cx}, ${cy})` },
+                        { label: '活性密度 (0~1)', val: val.toFixed(3) }
+                    ]);
+                    return;
+                }
+            } else if (activeEngine === 'gene') {
+                let cx = Math.floor(x / GeneCA.scale);
+                let cy = Math.floor(y / GeneCA.scale);
+                if (cx >= 0 && cx < GeneCA.cols && cy >= 0 && cy < GeneCA.rows) {
+                    let cell = GeneCA.grid[cy * GeneCA.cols + cx];
+                    if (cell && cell.alive) {
+                        showInspectorUI('遺伝子CA セル', [
+                            { label: 'グリッド位置', val: `(${cx}, ${cy})` },
+                            { label: '遺伝子Hue(色)', val: Math.round(cell.hue) + '°' }
+                        ]);
+                        return;
+                    }
+                }
+            }
+            closeInspector();
+        }
+
+        function showInspectorUI(title, items) {
+            const panel = document.getElementById('inspector-panel');
+            const content = document.getElementById('inspector-content');
+            content.innerHTML = `<div class="font-bold text-slate-100 mb-1">${title}</div>`;
+            items.forEach(it => {
+                content.innerHTML += `<div class="flex justify-between"><span class="text-slate-400">${it.label}:</span> <span class="font-mono text-cyan-300 font-bold">${it.val}</span></div>`;
+            });
+            panel.classList.remove('hidden');
+        }
+
+        function closeInspector() {
+            selectedEntity = null;
+            document.getElementById('inspector-panel').classList.add('hidden');
+        }
+
+        // イベントリスナーの修正
+        canvas.addEventListener('mouseenter', () => { isMouseHover = true; });
+        canvas.addEventListener('mouseleave', () => { isMouseHover = false; isMouseDown = false; });
+
+        canvas.addEventListener('mousedown', (e) => { isMouseDown = true; handleCanvasPointer(e); });
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            if (isMouseDown) handleCanvasPointer(e);
+        });
+        window.addEventListener('mouseup', () => { isMouseDown = false; });
+
+        canvas.addEventListener('touchstart', (e) => { isMouseDown = true; handleCanvasPointer(e); e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { if (isMouseDown) handleCanvasPointer(e); e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', () => { isMouseDown = false; });
+
+        // --- チャート描画 ---
+        function updateChart() {
+            if (!chartCtx || document.getElementById('chart-overlay').classList.contains('hidden')) return;
+
+            let count = 0;
+            if (activeEngine === 'particle') count = ParticleLife.particles.length;
+            else if (activeEngine === 'eco') count = EcoEngine.agents.length;
+            else if (activeEngine === 'gene') count = GeneCA.grid.filter(c => c && c.alive).length;
+
+            historyData.push(count);
+            if (historyData.length > 50) historyData.shift();
+
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            chartCtx.strokeStyle = '#38bdf8';
+            chartCtx.lineWidth = 1.5;
+            chartCtx.beginPath();
+
+            const max = Math.max(...historyData, 10);
+            const w = chartCanvas.width / 50;
+
+            historyData.forEach((val, i) => {
+                const x = i * w;
+                const y = chartCanvas.height - (val / max) * (chartCanvas.height - 10) - 5;
+                if (i === 0) chartCtx.moveTo(x, y);
+                else chartCtx.lineTo(x, y);
+            });
+            chartCtx.stroke();
+        }
+
+        // --- メインループ ---
+        function updateSimulation() {
+            stepCount++;
+            if (activeEngine === 'particle') ParticleLife.step();
+            else if (activeEngine === 'eco') EcoEngine.step();
+            else if (activeEngine === 'lenia') LeniaEngine.step();
+            else if (activeEngine === 'gene') GeneCA.step();
+
+            if (stepCount % 10 === 0) updateChart();
+            updateHUDStats();
+        }
+
+        function render() {
+            ctx.fillStyle = `rgba(5, 8, 17, ${visualSettings.trailFade})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (activeEngine === 'particle') ParticleLife.draw();
+            else if (activeEngine === 'eco') EcoEngine.draw();
+            else if (activeEngine === 'lenia') LeniaEngine.draw();
+            else if (activeEngine === 'gene') GeneCA.draw();
+
+            // 神の介入ツール カーソルガイド描画
+            if (isMouseHover && mouseX >= 0 && mouseY >= 0) {
+                ctx.strokeStyle = currentGodTool === 'erase' ? 'rgba(244, 63, 94, 0.6)' :
+                                  currentGodTool === 'gravity' ? 'rgba(192, 132, 252, 0.6)' :
+                                  currentGodTool === 'wall' ? 'rgba(251, 191, 36, 0.6)' :
+                                  currentGodTool === 'food' ? 'rgba(52, 211, 153, 0.6)' : 'rgba(56, 189, 248, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, godSettings.brushSize, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function loop(timestamp) {
+            if (!isRunning) return;
+
+            const steps = Math.max(1, Math.round(visualSettings.simSpeed));
+            for (let s = 0; s < steps; s++) {
+                updateSimulation();
+            }
+            render();
+
+            frameCount++;
+            if (timestamp - lastFpsUpdate >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = timestamp;
+                document.getElementById('stat-fps').innerText = fps;
+            }
+
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        function togglePlay() {
+            isRunning = !isRunning;
+            const btnSide = document.getElementById('btn-play-side');
+            const iconSide = document.getElementById('icon-play-side');
+            const textSide = document.getElementById('text-play-side');
+            const statusInd = document.getElementById('status-indicator');
+
+            if (isRunning) {
+                if (btnSide) {
+                    btnSide.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
+                    btnSide.classList.add('bg-amber-600', 'hover:bg-amber-500');
+                    iconSide.className = 'fa-solid fa-pause';
+                    textSide.innerText = '一時停止';
+                }
+                statusInd.className = 'text-[10px] text-emerald-400 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/50';
+                statusInd.innerText = '実行中';
+
+                animationFrameId = requestAnimationFrame(loop);
+            } else {
+                if (btnSide) {
+                    btnSide.classList.remove('bg-amber-600', 'hover:bg-amber-500');
+                    btnSide.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+                    iconSide.className = 'fa-solid fa-play';
+                    textSide.innerText = 'シミュレーション開始';
+                }
+                statusInd.className = 'text-[10px] text-amber-400 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800/50';
+                statusInd.innerText = '停止中';
+
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        function stepSimulation() {
+            if (isRunning) togglePlay();
+            updateSimulation();
+            render();
+        }
+
+        function resetCurrentEngine() {
+            stepCount = 0;
+            historyData = [];
+            if (activeEngine === 'particle') ParticleLife.init();
+            else if (activeEngine === 'eco') EcoEngine.init();
+            else if (activeEngine === 'lenia') LeniaEngine.init();
+            else if (activeEngine === 'gene') GeneCA.init();
+            render();
+            updateHUDStats();
+        }
+
+        function updateHUDStats() {
+            let count = 0;
+            if (activeEngine === 'particle') count = ParticleLife.particles.length;
+            else if (activeEngine === 'eco') count = EcoEngine.agents.length;
+            else if (activeEngine === 'lenia') count = LeniaEngine.cols * LeniaEngine.rows;
+            else if (activeEngine === 'gene') count = GeneCA.grid.filter(c => c && c.alive).length;
+
+            document.getElementById('stat-count').innerText = count;
+            document.getElementById('stat-step').innerText = stepCount;
+        }
+
+        function initCanvas() {
+            const container = document.getElementById('canvas-container');
+            const rect = container ? container.getBoundingClientRect() : { width: 800, height: 600 };
+
+            canvas.width = Math.max(300, Math.floor(rect.width - 20));
+            canvas.height = Math.max(300, Math.floor(rect.height - 20));
+
+            switchEngine('particle');
+        }
+
+        window.addEventListener('resize', () => { initCanvas(); });
+        window.onload = () => { initCanvas(); };
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENESIS v10 - Complete Emergent Biophysical Universe & Life Simulator</title>
+    <title>GENESIS - Ab-Initio Physical Universe & Emergence Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -13,24 +13,23 @@
                 extend: {
                     colors: {
                         voidbg: '#020617',
-                        panelbg: 'rgba(15, 23, 42, 0.88)',
-                        cyanaccent: '#38bdf8',
-                        bioemerald: '#10b981',
-                        atomamber: '#f59e0b',
-                        dnapink: '#ec4899',
-                        atpyellow: '#eab308'
+                        panelbg: 'rgba(15, 23, 42, 0.90)'
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: #020617;
             color: #f1f5f9;
             user-select: none;
-            overflow: hidden;
         }
         canvas { touch-action: none; }
         .glass-panel {
@@ -55,248 +54,226 @@
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col bg-slate-950 font-sans text-xs">
+<body class="h-screen w-screen flex flex-col bg-slate-950 font-sans text-xs overflow-hidden">
 
-    <header class="h-14 border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0 bg-slate-900/90 backdrop-blur">
+    <header class="h-12 border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0 bg-slate-900/90 backdrop-blur w-full">
         <div class="flex items-center space-x-3">
-            <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-                <i class="fa-solid fa-atom text-xl animate-spin" style="animation-duration: 16s;"></i>
+            <div class="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/30">
+                <i class="fa-solid fa-atom text-lg animate-spin" style="animation-duration: 16s;"></i>
             </div>
             <div>
-                <h1 class="font-black text-sm tracking-widest bg-gradient-to-r from-cyan-400 via-emerald-300 to-pink-500 bg-clip-text text-transparent">
-                    GENESIS <span class="text-[10px] text-slate-400 font-mono font-normal">v10 Complete Biophysical Emergence Engine</span>
+                <h1 class="font-black text-xs sm:text-sm tracking-widest bg-gradient-to-r from-cyan-400 via-emerald-300 to-pink-500 bg-clip-text text-transparent">
+                    GENESIS <span class="text-[10px] text-slate-400 font-mono font-normal">Ab-Initio Physics & Reaction Engine</span>
                 </h1>
-                <p class="text-[10px] text-slate-400">ATP通貨 &bull; 拡散場(pH/O₂/CO₂) &bull; 膜透過・浸透圧 &bull; DNA損傷修復 &bull; 細胞分化・多細胞化</p>
+                <p class="text-[9px] text-slate-400 hidden sm:block">非平衡ポテンシャル &bull; 拡散反応場 &bull; 光電励起 &bull; 電磁場 &bull; 構造自発創発</p>
             </div>
         </div>
 
-        <!-- リアルタイム宇宙データ & コントロール -->
-        <div class="flex items-center space-x-2 md:space-x-3 text-xs font-mono">
-            <div class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1.5">
-                <span class="text-slate-400">粒子/細胞:</span>
+        <!-- リアルタイムデータ & コントロール -->
+        <div class="flex items-center space-x-2 text-xs font-mono">
+            <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1">
+                <span class="text-slate-400">基本粒子:</span>
                 <span id="hud-particles" class="text-cyan-400 font-bold">0</span>
             </div>
-            <div class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1.5 hidden md:flex">
-                <span class="text-slate-400">多細胞体:</span>
-                <span id="hud-colonies" class="text-emerald-400 font-bold">0</span>
+            <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1 hidden sm:flex">
+                <span class="text-slate-400">バネ結合:</span>
+                <span id="hud-bonds" class="text-emerald-400 font-bold">0</span>
             </div>
-            <div class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1.5 hidden md:flex">
-                <span class="text-slate-400">総ATP量:</span>
-                <span id="hud-atp" class="text-yellow-400 font-bold">0 ATP</span>
+            <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1 hidden md:flex">
+                <span class="text-slate-400">総内部エネルギー:</span>
+                <span id="hud-energy" class="text-yellow-400 font-bold">0.0</span>
             </div>
-            <div class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1.5 hidden lg:flex">
-                <span class="text-slate-400">平均pH / O₂:</span>
-                <span id="hud-env-chem" class="text-pink-400 font-bold">7.0 / 21%</span>
-            </div>
-            <div class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1.5">
+            <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1">
                 <i id="hud-day-icon" class="fa-solid fa-sun text-amber-400"></i>
-                <span id="hud-time" class="text-slate-200 font-bold">昼 (00:00)</span>
+                <span id="hud-time" class="text-slate-200 font-bold">00:00</span>
             </div>
-            <button onclick="togglePlay()" id="btn-global-play" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold flex items-center space-x-1.5 transition shadow-lg shadow-emerald-600/20 active:scale-95">
+            <button onclick="togglePlay()" id="btn-global-play" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold flex items-center space-x-1 transition active:scale-95">
                 <i id="icon-global-play" class="fa-solid fa-pause"></i>
                 <span id="text-global-play" class="hidden sm:inline">実行中</span>
+            </button>
+            <button onclick="stepFrame()" id="btn-step-frame" title="1コマ進める (ショートカット: → または Nキー)" class="px-2 py-1 bg-cyan-700 hover:bg-cyan-600 text-white rounded font-bold flex items-center space-x-1 transition active:scale-95">
+                <i class="fa-solid fa-forward-step"></i>
+                <span class="hidden sm:inline">1コマコマ送り</span>
             </button>
         </div>
     </header>
 
-    <div class="flex-1 flex overflow-hidden relative">
+    <div class="flex-1 flex overflow-hidden relative w-full h-[calc(100vh-3rem)]">
 
-        <!-- シミュレーション・キャンバス領域 -->
-        <main class="flex-1 relative flex items-center justify-center bg-slate-950 p-2 overflow-hidden">
-            <div id="canvas-container" class="relative w-full h-full flex items-center justify-center">
-                <canvas id="sim-canvas" class="rounded-2xl border border-slate-800 shadow-2xl cursor-crosshair max-w-full max-h-full"></canvas>
+        <!-- キャンバス描画エリア -->
+        <main class="flex-1 relative flex items-center justify-center bg-slate-950 p-2 overflow-hidden h-full min-w-0">
+            <div id="canvas-container" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                <canvas id="sim-canvas" class="rounded-xl border border-slate-800/80 shadow-2xl cursor-crosshair block"></canvas>
             </div>
 
-            <!-- フィールド視覚化オーバーレイ選択 -->
+            <!-- 拡散場オーバーレイ選択 -->
             <div class="absolute top-4 left-4 glass-panel p-2 rounded-xl text-xs border border-cyan-500/30 shadow-2xl flex items-center space-x-2 z-10">
-                <span class="text-slate-400 font-bold ml-1"><i class="fa-solid fa-layer-group text-cyan-400 mr-1"></i> 拡散場表示:</span>
+                <span class="text-slate-400 font-bold ml-1"><i class="fa-solid fa-layer-group text-cyan-400 mr-1"></i> 連続反応場表示:</span>
                 <select id="select-overlay" onchange="currentOverlay = this.value;" class="bg-slate-900 border border-slate-700 rounded text-slate-200 px-2 py-1 focus:outline-none focus:border-cyan-400">
                     <option value="none">なし (粒子のみ)</option>
-                    <option value="ph">pH (酸性 - アルカリ性)</option>
-                    <option value="o2">酸素 (O₂) 濃度マップ</option>
-                    <option value="co2">二酸化炭素 (CO₂) 濃度マップ</option>
-                    <option value="temp">温度勾配 (Heat Map)</option>
-                    <option value="uv">紫外線 (UV) 照射度マップ</option>
+                    <option value="substrate">基質濃度 (F₀ Substrate)</option>
+                    <option value="product">分解物濃度 (F₁ Waste)</option>
+                    <option value="ph">水素イオン濃度 [H⁺] (pH場)</option>
+                    <option value="light">光子放射束 (Light Intensity)</option>
                 </select>
             </div>
 
-            <!-- 物性 ＆ 生化学・遺伝情報インスペクター -->
+            <!-- 粒子ミクロ物性インスペクター -->
             <div id="entity-inspector" class="absolute bottom-6 left-6 glass-panel p-4 rounded-xl border border-emerald-500/40 w-80 shadow-2xl z-10 hidden">
                 <div class="flex justify-between items-center border-b border-slate-700/60 pb-1.5 mb-2">
-                    <span class="font-bold text-emerald-400"><i class="fa-solid fa-microscope mr-1"></i> 詳細生化学 & 遺伝アナライザー</span>
+                    <span class="font-bold text-emerald-400"><i class="fa-solid fa-microscope mr-1"></i> ミクロ物性・ポテンシャル解析器</span>
                     <button onclick="closeInspector()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div id="inspector-body" class="space-y-1.5 text-[11px] text-slate-300"></div>
             </div>
 
             <!-- 創発イベントログ -->
-            <div id="event-log-container" class="absolute top-4 right-4 glass-panel p-3 rounded-xl border border-slate-700/50 w-72 max-h-44 overflow-y-auto z-10 text-[10px] hidden md:block pointer-events-none">
+            <div id="event-log-container" class="absolute top-4 right-4 glass-panel p-3 rounded-xl border border-slate-700/50 w-72 max-h-40 overflow-y-auto z-10 text-[10px] hidden md:block pointer-events-none">
                 <div class="font-bold text-slate-300 mb-1 border-b border-slate-700/50 pb-1 flex justify-between">
-                    <span><i class="fa-solid fa-list-ul text-cyan-400 mr-1"></i> 進化・創発イベントログ</span>
+                    <span><i class="fa-solid fa-list-ul text-cyan-400 mr-1"></i> 物理・化学現象ログ</span>
                     <span id="log-count" class="text-slate-500 font-mono">0 events</span>
                 </div>
                 <div id="log-list" class="space-y-1 text-slate-400 font-mono"></div>
             </div>
         </main>
 
-        <aside class="w-80 lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-10 text-xs">
+        <!-- サイドバー操作パネル -->
+        <aside class="w-80 lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-10 text-xs h-full overflow-hidden">
             
-            <!-- タブ切替ヘッダー -->
-            <div class="flex border-b border-slate-800 bg-slate-950/50">
+            <!-- タブ切替 -->
+            <div class="flex border-b border-slate-800 bg-slate-950/50 shrink-0">
                 <button onclick="switchTab('params')" id="tab-btn-params" class="tab-btn active flex-1 py-2.5 text-center font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-sliders mr-1"></i> 物理・代謝
+                    <i class="fa-solid fa-sliders mr-1"></i> 物理・相互作用
                 </button>
                 <button onclick="switchTab('env')" id="tab-btn-env" class="tab-btn flex-1 py-2.5 text-center font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-flask mr-1"></i> 化学・環境場
+                    <i class="fa-solid fa-flask mr-1"></i> 拡散・光放射
                 </button>
                 <button onclick="switchTab('stats')" id="tab-btn-stats" class="tab-btn flex-1 py-2.5 text-center font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-chart-line mr-1"></i> 統計・系統
+                    <i class="fa-solid fa-chart-line mr-1"></i> 統計・自発構造
                 </button>
             </div>
 
+            <!-- タブコンテンツエリア -->
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 
-                <!-- パラメータタブ -->
+                <!-- 物理・相互作用タブ -->
                 <div id="tab-content-params" class="space-y-4">
                     
-                    <!-- 1. ATP代謝 & 浸透圧・膜透過性 -->
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-3">
                         <div class="font-bold text-amber-400 border-b border-slate-700/60 pb-1 flex justify-between">
-                            <span><i class="fa-solid fa-bolt mr-1"></i> 1. ATP生化学 & 膜物理</span>
-                            <button onclick="resetUniverse()" class="text-[10px] text-cyan-300 bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700">宇宙リセット</button>
+                            <span><i class="fa-solid fa-bolt mr-1"></i> 1. ポテンシャル & 結合パラメータ</span>
+                            <button onclick="resetUniverse()" class="text-[10px] text-cyan-300 bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700">世界再生成</button>
                         </div>
                         <div>
                             <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">基礎代謝ATP消費率:</span>
-                                <span id="val-metabolism" class="font-mono text-amber-400 font-bold">0.05</span>
+                                <span class="text-slate-300">バネ弾性率 (Bond Stiffness):</span>
+                                <span id="val-stiffness" class="font-mono text-amber-400 font-bold">0.40</span>
                             </div>
-                            <input type="range" min="0.01" max="0.20" step="0.01" value="0.05" oninput="bioConfig.metabolismRate=parseFloat(this.value); document.getElementById('val-metabolism').innerText=this.value;" class="w-full">
+                            <input type="range" min="0.05" max="1.00" step="0.05" value="0.40" oninput="simParams.bondStiffness=parseFloat(this.value); document.getElementById('val-stiffness').innerText=this.value;" class="w-full">
                         </div>
                         <div>
                             <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">浸透圧感度 (Water Flux):</span>
-                                <span id="val-osmotic" class="font-mono text-amber-400 font-bold">1.0</span>
+                                <span class="text-slate-300">熱ゆらぎ (Thermal Motion):</span>
+                                <span id="val-thermo" class="font-mono text-amber-400 font-bold">0.20</span>
                             </div>
-                            <input type="range" min="0.0" max="3.0" step="0.1" value="1.0" oninput="bioConfig.osmoticSensitivity=parseFloat(this.value); document.getElementById('val-osmotic').innerText=this.value;" class="w-full">
+                            <input type="range" min="0.00" max="1.00" step="0.05" value="0.20" oninput="simParams.thermalNoise=parseFloat(this.value); document.getElementById('val-thermo').innerText=this.value;" class="w-full">
                         </div>
                         <div>
                             <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">膜構造・自己修復ATPコスト:</span>
-                                <span id="val-repair-cost" class="font-mono text-amber-400 font-bold">0.8</span>
+                                <span class="text-slate-300">結合解離閾値 (Dissociation Energy):</span>
+                                <span id="val-break" class="font-mono text-amber-400 font-bold">85</span>
                             </div>
-                            <input type="range" min="0.1" max="3.0" step="0.1" value="0.8" oninput="bioConfig.repairCost=parseFloat(this.value); document.getElementById('val-repair-cost').innerText=this.value;" class="w-full">
+                            <input type="range" min="20" max="200" step="5" value="85" oninput="simParams.breakThreshold=parseFloat(this.value); document.getElementById('val-break').innerText=this.value;" class="w-full">
                         </div>
                     </div>
 
-                    <!-- 2. UV・DNA損傷 & 突然変異 -->
-                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-3">
-                        <div class="font-bold text-pink-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-dna mr-1"></i> 2. UV紫外線・DNA損傷 & 修復</div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">紫外線 (UV) 放射強度:</span>
-                                <span id="val-uv" class="font-mono text-pink-400 font-bold">0.3</span>
-                            </div>
-                            <input type="range" min="0.0" max="1.5" step="0.05" value="0.3" oninput="envConfig.uvIntensity=parseFloat(this.value); document.getElementById('val-uv').innerText=this.value;" class="w-full">
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">突然変異率 (Mutation Rate):</span>
-                                <span id="val-mutation" class="font-mono text-pink-400 font-bold">6.0%</span>
-                            </div>
-                            <input type="range" min="0.5" max="25.0" step="0.5" value="6.0" oninput="bioConfig.mutationRate=parseFloat(this.value)/100; document.getElementById('val-mutation').innerText=this.value + '%';" class="w-full">
-                        </div>
-                    </div>
-
-                    <!-- 3. 自然創発現象プリセット -->
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="font-bold text-cyan-400 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 生化学創発実験室プリセット</div>
+                        <div class="font-bold text-cyan-400 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 素粒子のランダム初期配置</div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="spawnEmergentPreset('primordial_soup')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-emerald-300">🍲 原初化学スープ</div>
-                                <div class="text-[9px] text-slate-400">気体・基質・ATP前駆体のカオス</div>
+                            <button onclick="spawnInitialState('random_soup')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
+                                <div class="font-bold text-emerald-300">🧪 ランダム粒子スープ</div>
+                                <div class="text-[9px] text-slate-400">多様な物理物性パラメータの混相</div>
                             </button>
-                            <button onclick="spawnEmergentPreset('differentiated_colony')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-pink-300">🧫 多細胞分化コロニー</div>
-                                <div class="text-[9px] text-slate-400">膜・呼吸器・光合成器官の自己組織化</div>
-                            </button>
-                            <button onclick="spawnEmergentPreset('symbiosis_ecosystem')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-amber-300">🌿 共生・ガス循環系</div>
-                                <div class="text-[9px] text-slate-400">O₂/CO₂ 相互補完モデル</div>
-                            </button>
-                            <button onclick="spawnEmergentPreset('predator_enzyme')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-purple-300">🧪 酵素分解・創発捕食</div>
-                                <div class="text-[9px] text-slate-400">触媒溶菌によるエネルギー奪取</div>
+                            <button onclick="spawnInitialState('hydrophobic_monolayer')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
+                                <div class="font-bold text-pink-300">🫧 高疎水性分子群</div>
+                                <div class="text-[9px] text-slate-400">自発的な小胞・膜形成実験</div>
                             </button>
                         </div>
                     </div>
 
-                    <!-- 4. 物理・化学介入ツール -->
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="font-bold text-slate-200"><i class="fa-solid fa-hand-pointer text-cyan-400 mr-1"></i> 神の化学・物理介入ツール</div>
+                        <div class="font-bold text-slate-200"><i class="fa-solid fa-hand-pointer text-cyan-400 mr-1"></i> 外部物理介入ツール</div>
                         <div class="grid grid-cols-3 gap-1.5">
-                            <button id="tool-heat" onclick="setGodTool('heat')" class="god-tool active p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded font-bold text-center">🔥 熱ゆらぎ</button>
-                            <button id="tool-acid" onclick="setGodTool('acid')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🧪 酸注入 (H⁺)</button>
-                            <button id="tool-base" onclick="setGodTool('base')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">💧 アルカリ</button>
-                            <button id="tool-atp" onclick="setGodTool('atp')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">⚡ ATP投与</button>
-                            <button id="tool-uv" onclick="setGodTool('uv')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">☀️ UVビーム</button>
+                            <button id="tool-heat" onclick="setGodTool('heat')" class="god-tool active p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded font-bold text-center">🔥 熱エネルギー</button>
+                            <button id="tool-photon" onclick="setGodTool('photon')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">☀️ 光束照射</button>
+                            <button id="tool-substrate" onclick="setGodTool('substrate')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🧪 基質注入</button>
+                            <button id="tool-proton" onclick="setGodTool('proton')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">⚡ 電荷刺激</button>
+                            <button id="tool-cleave" onclick="setGodTool('cleave')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">✂️ 結合切断</button>
                             <button id="tool-inspect" onclick="setGodTool('inspect')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🔬 物性解析</button>
+                            <button id="tool-tag" onclick="setGodTool('tag')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center col-span-2">🏷️ タグ付与</button>
+                            <button id="tool-untag" onclick="setGodTool('untag')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🏷️❌ タグ消去</button>
+                        </div>
+                        <div id="tag-palette-container" class="mt-2 pt-2 border-t border-slate-700/60 hidden space-y-1.5">
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold">
+                                <span>付与するタグ設定:</span>
+                                <button onclick="openTagModal()" class="text-cyan-400 hover:underline"><i class="fa-solid fa-window-restore mr-0.5"></i> モダールで設定</button>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <input type="text" id="tag-label-input" value="Lineage-A" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-slate-200 w-24 focus:outline-none focus:border-cyan-400">
+                                <input type="color" id="tag-color-input" value="#ff3366" class="w-6 h-5 bg-transparent border-0 cursor-pointer rounded">
+                                <button onclick="quickSetTag('Alpha', '#ff3366')" class="px-1.5 py-0.5 bg-red-900/50 hover:bg-red-800 text-red-300 border border-red-500/40 rounded text-[9px]">🔴 α</button>
+                                <button onclick="quickSetTag('Beta', '#38bdf8')" class="px-1.5 py-0.5 bg-sky-900/50 hover:bg-sky-800 text-sky-300 border border-sky-500/40 rounded text-[9px]">🔵 β</button>
+                                <button onclick="quickSetTag('Gamma', '#34d399')" class="px-1.5 py-0.5 bg-emerald-900/50 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 rounded text-[9px]">🟢 γ</button>
+                            </div>
+                            <div class="pt-1 flex space-x-1">
+                                <button onclick="clearAllTagsInUniverse()" class="w-full py-1 bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-700/50 rounded text-[9px] font-bold">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> 全粒子のタグを一括全消去
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 環境タブ -->
+                <!-- 拡散・環境タブ -->
                 <div id="tab-content-env" class="space-y-4 hidden">
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-3">
-                        <div class="font-bold text-amber-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-sun mr-1"></i> 太陽光 & 昼夜サイクル</div>
+                        <div class="font-bold text-amber-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-sun mr-1"></i> 光子放射 & 周期環境</div>
                         <div class="flex items-center justify-between">
-                            <span class="text-slate-300">自動昼夜移動:</span>
-                            <input type="checkbox" id="chk-daynight" checked onchange="envConfig.enableDayNight = this.checked;" class="accent-cyan-400 w-4 h-4">
+                            <span class="text-slate-300">光子照射の周期変動:</span>
+                            <input type="checkbox" id="chk-daynight" checked onchange="envConfig.enableCycle = this.checked;" class="accent-cyan-400 w-4 h-4">
                         </div>
                         <div>
                             <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">太陽光エネルギー強度:</span>
-                                <span id="val-solar" class="font-mono text-amber-400 font-bold">1.2</span>
+                                <span class="text-slate-300">最大光子束 (Light Intensity):</span>
+                                <span id="val-solar" class="font-mono text-amber-400 font-bold">1.5</span>
                             </div>
-                            <input type="range" min="0" max="3.0" step="0.1" value="1.2" oninput="envConfig.solarIntensity=parseFloat(this.value); document.getElementById('val-solar').innerText=this.value;" class="w-full">
+                            <input type="range" min="0" max="3.0" step="0.1" value="1.5" oninput="envConfig.maxLight=parseFloat(this.value); document.getElementById('val-solar').innerText=this.value;" class="w-full">
                         </div>
                     </div>
 
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-3">
-                        <div class="font-bold text-cyan-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-wind mr-1"></i> 拡散場 & 流体モデル</div>
+                        <div class="font-bold text-cyan-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-wind mr-1"></i> 連続体の拡散 & 反応</div>
                         <div>
                             <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">化学物質拡散速度 (Diffusivity):</span>
-                                <span id="val-diffuse" class="font-mono text-cyan-400 font-bold">0.18</span>
+                                <span class="text-slate-300">基質拡散速度 (Diffusion Rate):</span>
+                                <span id="val-diffuse" class="font-mono text-cyan-400 font-bold">0.20</span>
                             </div>
-                            <input type="range" min="0.02" max="0.50" step="0.02" value="0.18" oninput="envConfig.diffusivity=parseFloat(this.value); document.getElementById('val-diffuse').innerText=this.value;" class="w-full">
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-slate-300">流体水流速度:</span>
-                                <span id="val-flow" class="font-mono text-cyan-400 font-bold">0.3</span>
-                            </div>
-                            <input type="range" min="0" max="2.0" step="0.1" value="0.3" oninput="envConfig.flowStrength=parseFloat(this.value); document.getElementById('val-flow').innerText=this.value;" class="w-full">
+                            <input type="range" min="0.02" max="0.50" step="0.02" value="0.20" oninput="envConfig.diffusivity=parseFloat(this.value); document.getElementById('val-diffuse').innerText=this.value;" class="w-full">
                         </div>
                     </div>
                 </div>
 
-                <!-- 統計・系統タブ -->
+                <!-- 統計・自発構造タブ -->
                 <div id="tab-content-stats" class="space-y-4 hidden">
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="font-bold text-emerald-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-chart-pie mr-1"></i> 創発生態系 生化学データ</div>
+                        <div class="font-bold text-emerald-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-chart-pie mr-1"></i> 統計 & 創発クラスタデータ</div>
                         <div class="space-y-1.5 text-slate-300 font-mono text-[11px]">
-                            <div class="flex justify-between"><span>通算誕生数 (Total Births):</span><span id="stat-births" class="text-cyan-400">0</span></div>
-                            <div class="flex justify-between"><span>自然死・溶菌数 (Deaths):</span><span id="stat-deaths" class="text-rose-400">0</span></div>
-                            <div class="flex justify-between"><span>DNA修復回数:</span><span id="stat-repairs" class="text-emerald-400">0</span></div>
-                            <div class="flex justify-between"><span>変異イベント総数:</span><span id="stat-mutations" class="text-pink-400">0</span></div>
-                            <div class="flex justify-between"><span>現存系統種数 (Species):</span><span id="stat-species" class="text-amber-400">0</span></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="font-bold text-pink-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-sitemap mr-1"></i> 進化系統樹 (Lineage Tree)</div>
-                        <div id="lineage-tree-container" class="h-40 overflow-y-auto space-y-1 font-mono text-[10px] text-slate-400 bg-slate-950/60 p-2 rounded-lg border border-slate-800">
-                            <!-- 系統樹ノードが動的生成されます -->
+                            <div class="flex justify-between"><span>自発的結合クラスタ数:</span><span id="stat-clusters" class="text-cyan-400">0</span></div>
+                            <div class="flex justify-between"><span>最大分子複合体サイズ:</span><span id="stat-max-cluster" class="text-emerald-400">0</span></div>
+                            <div class="flex justify-between"><span>結合生成回数:</span><span id="stat-bonds-created" class="text-pink-400">0</span></div>
+                            <div class="flex justify-between"><span>結合破断・解離回数:</span><span id="stat-bonds-broken" class="text-amber-400">0</span></div>
+                            <div class="flex justify-between border-t border-slate-700/40 pt-1"><span>追跡タグ粒子総数:</span><span id="stat-tagged-count" class="text-pink-400 font-bold">0</span></div>
+                            <div id="stat-tagged-details" class="space-y-0.5 pl-2 text-[10px]"></div>
                         </div>
                     </div>
                 </div>
@@ -317,188 +294,114 @@
 
         let mouseX = -100, mouseY = -100;
         let isMouseDown = false;
-        let grabbedParticle = null;
 
-        // 時間・世界統計
         let globalTicks = 0;
-        let totalBirths = 0;
-        let totalDeaths = 0;
-        let totalMutations = 0;
-        let totalDnaRepairs = 0;
-        let maxGeneration = 0;
+        let totalBondsCreated = 0;
+        let totalBondsBroken = 0;
 
-        // 生化学・生物物理設定
-        const bioConfig = {
-            metabolismRate: 0.05,        // 基礎代謝ATP消費
-            osmoticSensitivity: 1.0,     // 浸透圧応答度
-            repairCost: 0.8,             // DNA修復ATP消費
-            mutationRate: 0.06,          // 遺伝子変異率
-            reproductionAtpCost: 80,     // 分裂に必要なATP量
-            optimumTemp: 298,            // 適正温度 298K (25℃)
-            bondStrength: 0.35
+        // 全般的な物理パラメータ
+        const simParams = {
+            bondStiffness: 0.40,
+            thermalNoise: 0.20,
+            breakThreshold: 85,
+            bondDistance: 14.0
         };
 
-        // 環境・拡散場設定
         const envConfig = {
-            enableDayNight: true,
-            solarIntensity: 1.2,
-            uvIntensity: 0.3,
-            diffusivity: 0.18,
-            flowStrength: 0.3,
-            dayCycleTicks: 1200
+            enableCycle: true,
+            maxLight: 1.5,
+            diffusivity: 0.20,
+            cyclePeriod: 1200
         };
 
-        // 拡散格子 (Diffusion Grid for pH, O2, CO2, Temp, Signal)
-        const GRID_COLS = 50;
+        // 連続拡散格子 (Substrate F0, Product F1, Proton H+, Radiative Light)
+        const GRID_COLS = 48;
         const GRID_ROWS = 32;
-        class FieldGrid {
+        class ReactionGrid {
             constructor(cols, rows) {
                 this.cols = cols;
                 this.rows = rows;
                 this.size = cols * rows;
-                this.ph = new Float32Array(this.size).fill(7.0);       // 中性 pH 7.0
-                this.o2 = new Float32Array(this.size).fill(0.21);      // 酸素 21%
-                this.co2 = new Float32Array(this.size).fill(0.04);     // CO2 0.04%
-                this.signal = new Float32Array(this.size).fill(0.0);   // フェロモン/シグナル
-                this.temp = new Float32Array(this.size).fill(298.0);   // 温度 K
+                this.f0 = new Float32Array(this.size).fill(0.5); // 基質 F0
+                this.f1 = new Float32Array(this.size).fill(0.0); // 生成物 F1
+                this.hPlus = new Float32Array(this.size).fill(7.0); // pH
             }
 
             index(x, y) {
-                let cx = Math.max(0, Math.min(this.cols - 1, Math.floor((x / canvas.width) * this.cols)));
-                let cy = Math.max(0, Math.min(this.rows - 1, Math.floor((y / canvas.height) * this.rows)));
+                let cx = Math.max(0, Math.min(this.cols - 1, Math.floor((x / Math.max(1, canvas.width)) * this.cols)));
+                let cy = Math.max(0, Math.min(this.rows - 1, Math.floor((y / Math.max(1, canvas.height)) * this.rows)));
                 return cy * this.cols + cx;
             }
 
             diffuse() {
                 const diff = envConfig.diffusivity;
-                const nextPh = new Float32Array(this.ph);
-                const nextO2 = new Float32Array(this.o2);
-                const nextCo2 = new Float32Array(this.co2);
+                const nextF0 = new Float32Array(this.f0);
+                const nextF1 = new Float32Array(this.f1);
 
                 for (let r = 1; r < this.rows - 1; r++) {
                     for (let c = 1; c < this.cols - 1; c++) {
                         let i = r * this.cols + c;
-                        let neighbors = (
-                            this.ph[i - 1] + this.ph[i + 1] +
-                            this.ph[i - this.cols] + this.ph[i + this.cols]
-                        ) * 0.25;
-                        nextPh[i] += (neighbors - this.ph[i]) * diff;
+                        let nF0 = (this.f0[i - 1] + this.f0[i + 1] + this.f0[i - this.cols] + this.f0[i + this.cols]) * 0.25;
+                        nextF0[i] += (nF0 - this.f0[i]) * diff;
 
-                        let nO2 = (this.o2[i - 1] + this.o2[i + 1] + this.o2[i - this.cols] + this.o2[i + this.cols]) * 0.25;
-                        nextO2[i] += (nO2 - this.o2[i]) * diff;
-
-                        let nCo2 = (this.co2[i - 1] + this.co2[i + 1] + this.co2[i - this.cols] + this.co2[i + this.cols]) * 0.25;
-                        nextCo2[i] += (nCo2 - this.co2[i]) * diff;
+                        let nF1 = (this.f1[i - 1] + this.f1[i + 1] + this.f1[i - this.cols] + this.f1[i + this.cols]) * 0.25;
+                        nextF1[i] += (nF1 - this.f1[i]) * diff;
                     }
                 }
-                this.ph = nextPh;
-                this.o2 = nextO2;
-                this.co2 = nextCo2;
+                this.f0 = nextF0;
+                this.f1 = nextF1;
             }
         }
 
-        let grid = new FieldGrid(GRID_COLS, GRID_ROWS);
+        let grid = new ReactionGrid(GRID_COLS, GRID_ROWS);
 
-        // 遺伝子構造 (DNA)
-        class DNA {
-            constructor(sequence = null) {
-                if (sequence) {
-                    this.genes = [...sequence];
+        // 生物種ラベルを一切排除し、純粋なポテンシャル数値を保持する遺伝子構造
+        class GeneticAttributes {
+            constructor(genes = null) {
+                if (genes) {
+                    this.dna = [...genes];
                 } else {
-                    // [0: 光合成率, 1: 呼吸効率, 2: 多細胞接着力, 3: DNA修復酵素力, 4: 適正pH, 5: 膜脂質密度(浸透圧耐性)]
-                    this.genes = [
-                        Math.random(),
-                        Math.random(),
-                        Math.random(),
-                        Math.random(),
-                        6.0 + Math.random() * 2.0, // pH 6.0 - 8.0
-                        0.5 + Math.random() * 1.0
+                    this.dna = [
+                        Math.random(),            // [0] g0: 光子吸収断面積 alpha (光を吸収して内部エネルギーを得る)
+                        Math.random(),            // [1] g1: 触媒反応速度 k_cat (基質 F0 を分解しエネルギーを得る)
+                        Math.random(),            // [2] g2: 電気-機械結合係数 beta (エネルギーを物理的伸長振動に変換)
+                        Math.random(),            // [3] g3: 疎水性/表面張力 h (水中で集まり膜化する)
+                        (Math.random() - 0.5)*2,  // [4] g4: 表面電荷 q (静電気力・引き合いと反発)
+                        0.2 + Math.random() * 0.8 // [5] g5: 結合親和力・強度
                     ];
                 }
-                this.speciesId = this.generateSpeciesId();
             }
 
-            mutate(rate) {
-                let mutated = false;
-                for (let i = 0; i < this.genes.length; i++) {
+            mutate(rate = 0.05) {
+                for (let i = 0; i < this.dna.length; i++) {
                     if (Math.random() < rate) {
-                        this.genes[i] += (Math.random() - 0.5) * 0.3;
-                        if (i === 4) this.genes[i] = Math.max(3.0, Math.min(11.0, this.genes[i]));
-                        else this.genes[i] = Math.max(0.01, Math.min(2.5, this.genes[i]));
-                        mutated = true;
+                        this.dna[i] += (Math.random() - 0.5) * 0.2;
+                        if (i !== 4) this.dna[i] = Math.max(0.0, Math.min(2.0, this.dna[i]));
                     }
                 }
-                if (mutated) {
-                    totalMutations++;
-                    this.speciesId = this.generateSpeciesId();
-                }
-                return mutated;
-            }
-
-            generateSpeciesId() {
-                return 'Sp-' + Math.floor(this.genes[0]*50) + '-' + Math.floor(this.genes[1]*50);
             }
         }
 
-        // 分化形態 (Expressed Cell Differentiation Types)
-        const CELL_TYPES = {
-            PHOTOSYNTHETIC: { name: '光合成葉緑細胞', color: '#10b981', radius: 5.5 },
-            RESPIRATORY:    { name: '呼吸ミトコンドリア細胞', color: '#ec4899', radius: 5.0 },
-            MEMBRANE_WALL:  { name: '外骨格・浸透圧保護膜', color: '#f59e0b', radius: 6.0 },
-            DIGESTIVE:      { name: '触媒消化酵素細胞', color: '#a855f7', radius: 5.2 },
-            REPAIR_CORE:    { name: '修復・遺伝核細胞', color: '#38bdf8', radius: 5.8 }
-        };
-
         class Particle {
-            constructor(x, y, dna = null, generation = 0) {
+            constructor(x, y, genetic = null) {
                 this.id = Math.random().toString(36).substr(2, 9);
                 this.x = x;
                 this.y = y;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.mass = 1.0;
-                
-                // 生化学・ATPエネルギー通貨
-                this.atp = 40.0;             // 現存ATP
-                this.adp = 60.0;             // ADP 前駆体
-                this.soluteConc = 0.3;       // 内部溶質濃度 (浸透圧計算用)
-                
-                this.age = 0;
-                this.maxAge = 1500 + Math.floor(Math.random() * 1000);
-                this.generation = generation;
+                this.vx = (Math.random() - 0.5) * 1.0;
+                this.vy = (Math.random() - 0.5) * 1.0;
 
-                // 遺伝 & DNA損傷
-                this.dna = dna || new DNA();
-                this.dnaDamage = 0.0;        // UVによるDNAピリミジン二量体損傷
+                this.genetics = genetic || new GeneticAttributes();
 
-                // 蛋白折りたたみ / 変性状態
-                this.isDenatured = false;     // pH・熱ストレスによる蛋白変性
-
-                // 多細胞 & 遺伝子発現による「細胞分化」
-                this.colonyId = this.id;
-                this.expressedType = 'REPAIR_CORE';
-                this.updateDifferentiation(7.0, 0.21);
-            }
-
-            // 環境シグナル（pH, O2, 光）による動的細胞分化（Differentiation）
-            updateDifferentiation(localPh, localO2) {
-                const g = this.dna.genes;
-                if (g[0] > 0.7 && localO2 < 0.3) {
-                    this.expressedType = 'PHOTOSYNTHETIC';
-                } else if (g[1] > 0.7 && localO2 >= 0.15) {
-                    this.expressedType = 'RESPIRATORY';
-                } else if (g[5] > 1.1) {
-                    this.expressedType = 'MEMBRANE_WALL';
-                } else if (Math.abs(localPh - g[4]) > 1.5) {
-                    this.expressedType = 'DIGESTIVE';
-                } else {
-                    this.expressedType = 'REPAIR_CORE';
-                }
+                // 物理・内部状態
+                this.internalEnergy = 20.0; // 内部励起エネルギー
+                this.phase = Math.random() * Math.PI * 2;
+                this.clusterId = this.id;
+                this.tag = null; // デバッグ用系統追跡タグ { label: string, color: string }
             }
         }
 
         class Bond {
-            constructor(p1, p2, restLength = 16) {
+            constructor(p1, p2, restLength = 14) {
                 this.p1 = p1;
                 this.p2 = p2;
                 this.restLength = restLength;
@@ -508,12 +411,11 @@
         let particles = [];
         let bonds = [];
         let eventLogs = [];
-        let speciesRegistry = new Map();
 
         function addLog(text) {
             const timeStr = new Date().toLocaleTimeString();
             eventLogs.unshift(`[${timeStr}] ${text}`);
-            if (eventLogs.length > 25) eventLogs.pop();
+            if (eventLogs.length > 20) eventLogs.pop();
 
             const logList = document.getElementById('log-list');
             if (logList) {
@@ -525,106 +427,86 @@
         function stepPhysics() {
             globalTicks++;
 
-            // 昼夜・太陽光・UV強度計算
-            let dayPhase = (globalTicks % envConfig.dayCycleTicks) / envConfig.dayCycleTicks;
-            let isDay = dayPhase < 0.5;
-            let currentSunlight = isDay ? Math.sin(dayPhase * Math.PI * 2) * envConfig.solarIntensity : 0.05;
-            let currentUv = isDay ? Math.sin(dayPhase * Math.PI * 2) * envConfig.uvIntensity : 0.0;
+            // 環境光束計算
+            let cyclePhase = (globalTicks % envConfig.cyclePeriod) / envConfig.cyclePeriod;
+            let lightFlux = envConfig.enableCycle ? Math.max(0.05, Math.sin(cyclePhase * Math.PI * 2) * envConfig.maxLight) : envConfig.maxLight;
 
-            updateDayNightHUD(isDay, dayPhase);
-
-            // 拡散場の更新
+            updateDayNightHUD(cyclePhase, lightFlux);
             grid.diffuse();
 
-            // 1. 各粒子の生化学・エネルギー・浸透圧・遺伝子更新
+            // 1. 各粒子の素化学・素物理状態の計算（特定の「役職」はコード上存在しない）
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
-                p.age++;
-
                 let idx = grid.index(p.x, p.y);
-                let localPh = grid.ph[idx];
-                let localO2 = grid.o2[idx];
-                let localCo2 = grid.co2[idx];
-                let localTemp = grid.temp[idx];
 
-                // 動的細胞分化の計算
-                p.updateDifferentiation(localPh, localO2);
+                let g = p.genetics.dna;
+                let alpha = g[0]; // 光吸収
+                let k_cat = g[1]; // 触媒率
+                let beta  = g[2]; // 機械結合
+                let h     = g[3]; // 疎水性
+                let q     = g[4]; // 電荷
 
-                // 🧬 蛋白変性チェック (極端なpHまたは高温)
-                if (Math.abs(localPh - p.dna.genes[4]) > 2.2 || localTemp > 330) {
-                    p.isDenatured = true;
-                } else {
-                    p.isDenatured = false;
+                // 光エネルギー吸収 (純粋な物理過程)
+                p.internalEnergy += lightFlux * alpha * 0.15;
+
+                // 基質 F0 との接触・分解反応 (反応速度論)
+                if (grid.f0[idx] > 0.05 && k_cat > 0.1) {
+                    let reacted = Math.min(grid.f0[idx], k_cat * 0.02);
+                    grid.f0[idx] -= reacted;
+                    grid.f1[idx] += reacted;
+                    p.internalEnergy += reacted * 25.0; // 反応熱/内部エネルギーへの還元
                 }
 
-                // ⚡ 代謝 pathway (ATP合成)
-                if (!p.isDenatured) {
-                    if (p.expressedType === 'PHOTOSYNTHETIC' && currentSunlight > 0.1 && localCo2 > 0.01) {
-                        // 光合成: Light + CO2 -> O2 + ATP
-                        let produce = Math.min(p.adp, currentSunlight * p.dna.genes[0] * 1.5);
-                        p.atp += produce;
-                        p.adp -= produce;
-                        grid.co2[idx] = Math.max(0.001, grid.co2[idx] - 0.005);
-                        grid.o2[idx] = Math.min(1.0, grid.o2[idx] + 0.008);
-                    } else if (p.expressedType === 'RESPIRATORY' && localO2 > 0.05) {
-                        // 有酸素呼吸: O2 + ADP -> CO2 + 36 ATP (高効率)
-                        let produce = Math.min(p.adp, localO2 * p.dna.genes[1] * 2.2);
-                        p.atp += produce;
-                        p.adp -= produce;
-                        grid.o2[idx] = Math.max(0.001, grid.o2[idx] - 0.006);
-                        grid.co2[idx] = Math.min(1.0, grid.co2[idx] + 0.007);
-                    }
-                }
+                // 自然熱散逸
+                p.internalEnergy -= 0.03;
 
-                // 基礎代謝ATP消費
-                p.atp -= bioConfig.metabolismRate;
-                p.adp += bioConfig.metabolismRate * 0.8;
+                // 熱ゆらぎ運動
+                let noise = simParams.thermalNoise;
+                p.vx += (Math.random() - 0.5) * noise;
+                p.vy += (Math.random() - 0.5) * noise;
 
-                // ☀️ 紫外線 (UV) によるDNAピリミジン損傷
-                p.dnaDamage += currentUv * (1.1 - p.dna.genes[5] * 0.4) * 0.02;
-
-                // 🧬 ATP駆動型 DNA修復機構
-                if (p.dnaDamage > 0.1 && p.atp >= bioConfig.repairCost) {
-                    let repairAmt = Math.min(p.dnaDamage, p.dna.genes[3] * 0.08);
-                    p.dnaDamage -= repairAmt;
-                    p.atp -= bioConfig.repairCost * 0.2;
-                    totalDnaRepairs++;
-                }
-
-                // 💧 浸透圧と細胞膨張/収縮力 (Osmotic Pressure)
-                let osmoticDiff = p.soluteConc - (localPh * 0.04);
-                let osmoticForce = osmoticDiff * bioConfig.osmoticSensitivity * 0.05;
-                p.vx += (Math.random() - 0.5) * osmoticForce;
-                p.vy += (Math.random() - 0.5) * osmoticForce;
-
-                // 流体水流・運動抵抗
-                p.vx += Math.sin(p.y * 0.01 + globalTicks * 0.02) * envConfig.flowStrength * 0.04;
-                p.vx *= 0.92;
-                p.vy *= 0.92;
+                // 粘性抵抗
+                p.vx *= 0.93;
+                p.vy *= 0.93;
 
                 p.x += p.vx;
                 p.y += p.vy;
 
                 // 境界条件
                 const margin = 10;
-                if (p.x < margin) { p.x = margin; p.vx *= -0.6; }
-                if (p.x > canvas.width - margin) { p.x = canvas.width - margin; p.vx *= -0.6; }
-                if (p.y < margin) { p.y = margin; p.vy *= -0.6; }
-                if (p.y > canvas.height - margin) { p.y = canvas.height - margin; p.vy *= -0.6; }
+                if (p.x < margin) { p.x = margin; p.vx *= -0.5; }
+                if (p.x > canvas.width - margin) { p.x = canvas.width - margin; p.vx *= -0.5; }
+                if (p.y < margin) { p.y = margin; p.vy *= -0.5; }
+                if (p.y > canvas.height - margin) { p.y = canvas.height - margin; p.vy *= -0.5; }
 
-                // 死亡・溶菌条件 (ATP枯渇、重度DNA損傷、老化)
-                if (p.atp <= 0 || p.dnaDamage > 2.5 || p.age > p.maxAge) {
-                    killAndDecayParticle(i);
+                // 内部エネルギー枯渇による分解（粒子消滅）
+                if (p.internalEnergy <= 0) {
+                    // 周囲に F0 基質を還元
+                    grid.f0[idx] = Math.min(1.0, grid.f0[idx] + 0.1);
+                    removeParticle(i);
                     continue;
                 }
 
-                // 🧬 多細胞/単細胞 自己複製 (Division & Multicellular Sprout)
-                if (p.atp >= bioConfig.reproductionAtpCost && p.dnaDamage < 0.5) {
-                    replicateCell(p);
+                // 高エネルギー状態における自発的質量分裂（自己複製的挙動の創発）
+                if (p.internalEnergy > 90.0) {
+                    p.internalEnergy *= 0.45;
+                    let childGenetics = new GeneticAttributes(p.genetics.dna);
+                    childGenetics.mutate(0.08);
+
+                    let child = new Particle(p.x + (Math.random()-0.5)*12, p.y + (Math.random()-0.5)*12, childGenetics);
+                    if (p.tag) {
+                        child.tag = { label: p.tag.label, color: p.tag.color }; // 親の追跡タグを子孫に継承
+                    }
+                    particles.push(child);
+
+                    // 疎水性が高い場合、分裂後もバネを形成（多細胞的構造の自発的創発）
+                    if (h > 0.4) {
+                        createBond(p, child);
+                    }
                 }
             }
 
-            // 2. 粒子間物理ポテンシャル & 創発捕食・酵素溶菌
+            // 2. 粒子ペア間のポテンシャル相互作用（レナード＝ジョーンズ ＆ 疎水性 ＆ 静電ポテンシャル）
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     let p1 = particles[i];
@@ -633,138 +515,95 @@
                     let dx = p2.x - p1.x;
                     let dy = p2.y - p1.y;
                     let dist = Math.hypot(dx, dy) || 0.001;
-                    let minDist = 12.0;
+                    let minDist = 14.0;
 
-                    if (dist < minDist) {
+                    if (dist < 40.0) {
                         let nx = dx / dist;
                         let ny = dy / dist;
-                        let force = -0.8 * (1.0 - dist / minDist);
 
-                        p1.vx -= nx * force;
-                        p1.vy -= ny * force;
-                        p2.vx += nx * force;
-                        p2.vy += ny * force;
+                        // (a) 静電気力 (Coulomb)
+                        let q1 = p1.genetics.dna[4];
+                        let q2 = p2.genetics.dna[4];
+                        let esForce = (q1 * q2) * 0.15 / (dist * 0.1 + 1.0);
 
-                        // 🧪 触媒消化酵素細胞(DIGESTIVE)による創発捕食・溶菌吸収
-                        if (p1.expressedType === 'DIGESTIVE' && p2.expressedType !== 'DIGESTIVE') {
-                            let absorb = Math.min(p2.atp, 1.2);
-                            p2.atp -= absorb;
-                            p1.atp += absorb * 0.8;
-                        } else if (p2.expressedType === 'DIGESTIVE' && p1.expressedType !== 'DIGESTIVE') {
-                            let absorb = Math.min(p1.atp, 1.2);
-                            p1.atp -= absorb;
-                            p2.atp += absorb * 0.8;
-                        }
+                        // (b) 疎水性排除力 (Hydrophobic attraction in aqueous solvent)
+                        let h1 = p1.genetics.dna[3];
+                        let h2 = p2.genetics.dna[3];
+                        let hydrophobicAttraction = (h1 * h2) * 0.25;
 
-                        // 多細胞接着力に応じた可逆結合
-                        if (Math.random() < (p1.dna.genes[2] * p2.dna.genes[2] * 0.08)) {
-                            tryCreateBond(p1, p2);
+                        // 近距離反発
+                        let repulsion = dist < minDist ? -0.8 * (1.0 - dist / minDist) : 0;
+
+                        let totalForce = esForce - hydrophobicAttraction + repulsion;
+
+                        p1.vx -= nx * totalForce;
+                        p1.vy -= ny * totalForce;
+                        p2.vx += nx * totalForce;
+                        p2.vy += ny * totalForce;
+
+                        // 自発的バネ結合の形成条件
+                        if (dist < simParams.bondDistance && Math.random() < 0.05) {
+                            createBond(p1, p2);
                         }
                     }
                 }
             }
 
-            // 3. 多細胞バネ結合力の計算
+            // 3. バネ結合力 ＆ 電気-機械結合（運動の創発）
             for (let i = bonds.length - 1; i >= 0; i--) {
                 let b = bonds[i];
                 let dx = b.p2.x - b.p1.x;
                 let dy = b.p2.y - b.p1.y;
                 let dist = Math.hypot(dx, dy) || 0.001;
 
-                let delta = dist - b.restLength;
-                let springForce = delta * bioConfig.bondStrength;
+                // 内部エネルギーがバネの自然長を振動させる（電気-機械結合 $\beta$）
+                let beta1 = b.p1.genetics.dna[2];
+                let beta2 = b.p2.genetics.dna[2];
+                let dynamicRestLength = b.restLength + Math.sin(globalTicks * 0.15) * (beta1 + beta2) * 3.0 * (b.p1.internalEnergy / 50.0);
+
+                let delta = dist - dynamicRestLength;
+                let force = delta * simParams.bondStiffness;
 
                 let nx = dx / dist;
                 let ny = dy / dist;
 
-                b.p1.vx += nx * springForce;
-                b.p1.vy += ny * springForce;
-                b.p2.vx -= nx * springForce;
-                b.p2.vy -= ny * springForce;
+                b.p1.vx += nx * force;
+                b.p1.vy += ny * force;
+                b.p2.vx -= nx * force;
+                b.p2.vy -= ny * force;
 
-                // 過剰引張による結合切断
-                if (Math.abs(delta) > 28.0) {
+                // 過酷な引張力による自発的結合破断
+                if (Math.abs(delta) > simParams.breakThreshold) {
                     bonds.splice(i, 1);
+                    totalBondsBroken++;
                 }
-            }
-
-            // マウス操作
-            if (grabbedParticle) {
-                grabbedParticle.x += (mouseX - grabbedParticle.x) * 0.2;
-                grabbedParticle.y += (mouseY - grabbedParticle.y) * 0.2;
             }
 
             updateHUD();
         }
 
-        // 死亡・溶菌処理
-        function killAndDecayParticle(index) {
+        function createBond(p1, p2) {
+            for (let b of bonds) {
+                if ((b.p1 === p1 && b.p2 === p2) || (b.p1 === p2 && b.p2 === p1)) return;
+            }
+            bonds.push(new Bond(p1, p2, 14));
+            totalBondsCreated++;
+        }
+
+        function removeParticle(index) {
             let p = particles[index];
-            totalDeaths++;
-
-            // 粒子遺骸を周辺の拡散場(CO2/酸性)に放出還元
-            let idx = grid.index(p.x, p.y);
-            grid.co2[idx] = Math.min(1.0, grid.co2[idx] + 0.1);
-            grid.ph[idx] = Math.max(3.0, grid.ph[idx] - 0.2); // 溶菌による局所酸性化
-
-            // 結合解除
             for (let i = bonds.length - 1; i >= 0; i--) {
                 if (bonds[i].p1 === p || bonds[i].p2 === p) {
                     bonds.splice(i, 1);
                 }
             }
-
             particles.splice(index, 1);
-        }
-
-        // 遺伝的分裂・多細胞形成
-        function replicateCell(parent) {
-            parent.atp -= bioConfig.reproductionAtpCost * 0.6;
-
-            let childDna = new DNA(parent.dna.genes);
-            let hasMutated = childDna.mutate(bioConfig.mutationRate);
-
-            let angle = Math.random() * Math.PI * 2;
-            let child = new Particle(
-                parent.x + Math.cos(angle) * 14,
-                parent.y + Math.sin(angle) * 14,
-                childDna,
-                parent.generation + 1
-            );
-
-            particles.push(child);
-            totalBirths++;
-
-            if (child.generation > maxGeneration) {
-                maxGeneration = child.generation;
-                addLog(`✨ 最高世代更新: Generation ${maxGeneration} (${childDna.speciesId})`);
-            }
-
-            // 多細胞遺伝特性(Gene 2)が高い場合、分裂後も結合を維持して多細胞体を形成
-            if (parent.dna.genes[2] > 0.4) {
-                child.colonyId = parent.colonyId;
-                bonds.push(new Bond(parent, child, 16));
-            }
-
-            if (!speciesRegistry.has(childDna.speciesId)) {
-                speciesRegistry.set(childDna.speciesId, { count: 1, gen: child.generation });
-                if (hasMutated) addLog(`🧬 突然変異による新種創発: [${childDna.speciesId}]`);
-            } else {
-                speciesRegistry.get(childDna.speciesId).count++;
-            }
-        }
-
-        function tryCreateBond(p1, p2) {
-            for (let b of bonds) {
-                if ((b.p1 === p1 && b.p2 === p2) || (b.p1 === p2 && b.p2 === p1)) return;
-            }
-            bonds.push(new Bond(p1, p2, 16));
         }
 
         function renderUniverse() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 拡散場(pH, O2, CO2, Temp, UV)のオーバーレイ描画
+            // 拡散場の描画
             if (currentOverlay !== 'none') {
                 const cellW = canvas.width / GRID_COLS;
                 const cellH = canvas.height / GRID_ROWS;
@@ -774,237 +613,293 @@
                         let i = r * GRID_COLS + c;
                         let alpha = 0.35;
 
-                        if (currentOverlay === 'ph') {
-                            let phVal = grid.ph[i]; // 3 (酸性:赤) ~ 7 (緑) ~ 11 (紫)
-                            let hue = Math.max(0, Math.min(280, (phVal - 3) * 35));
-                            ctx.fillStyle = `hsla(${hue}, 80%, 45%, ${alpha})`;
-                        } else if (currentOverlay === 'o2') {
-                            let val = grid.o2[i];
-                            ctx.fillStyle = `rgba(56, 189, 248, ${val * alpha})`;
-                        } else if (currentOverlay === 'co2') {
-                            let val = grid.co2[i];
+                        if (currentOverlay === 'substrate') {
+                            let val = grid.f0[i];
+                            ctx.fillStyle = `rgba(16, 185, 129, ${val * alpha})`;
+                        } else if (currentOverlay === 'product') {
+                            let val = grid.f1[i];
                             ctx.fillStyle = `rgba(236, 72, 153, ${val * alpha})`;
-                        } else if (currentOverlay === 'uv') {
-                            let dayPhase = (globalTicks % envConfig.dayCycleTicks) / envConfig.dayCycleTicks;
-                            let uvVal = dayPhase < 0.5 ? Math.sin(dayPhase * Math.PI * 2) * envConfig.uvIntensity : 0;
-                            ctx.fillStyle = `rgba(168, 85, 247, ${uvVal * alpha * 0.8})`;
+                        } else if (currentOverlay === 'ph') {
+                            let val = grid.hPlus[i];
+                            ctx.fillStyle = `rgba(56, 189, 248, ${(val / 14.0) * alpha})`;
+                        } else if (currentOverlay === 'light') {
+                            let cyclePhase = (globalTicks % envConfig.cyclePeriod) / envConfig.cyclePeriod;
+                            let lightVal = envConfig.enableCycle ? Math.max(0.05, Math.sin(cyclePhase * Math.PI * 2) * envConfig.maxLight) : envConfig.maxLight;
+                            ctx.fillStyle = `rgba(245, 158, 11, ${lightVal * alpha * 0.5})`;
                         }
                         ctx.fillRect(c * cellW, r * cellH, cellW + 0.5, cellH + 0.5);
                     }
                 }
             }
 
-            // 多細胞バネ結合
+            // バネ結合描画
             for (let b of bonds) {
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
-                ctx.lineWidth = 1.8;
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.moveTo(b.p1.x, b.p1.y);
                 ctx.lineTo(b.p2.x, b.p2.y);
                 ctx.stroke();
             }
 
-            // 粒子 / 分化細胞
+            // 粒子の物理物性ベース描画 (色・サイズは純粋な物理パラメータ [g0:光吸収, g1:触媒, g3:疎水性] から直接マッピング)
             for (let p of particles) {
                 ctx.save();
                 ctx.translate(p.x, p.y);
 
-                let info = CELL_TYPES[p.expressedType] || CELL_TYPES.REPAIR_CORE;
+                let g = p.genetics.dna;
+                // [Red: 触媒率, Green: 光吸収率, Blue: 疎水性]
+                let r = Math.floor(Math.min(1.0, g[1]) * 255);
+                let green = Math.floor(Math.min(1.0, g[0]) * 255);
+                let b = Math.floor(Math.min(1.0, g[3]) * 255);
 
-                // 変性・変調リング
-                if (p.isDenatured) {
-                    ctx.strokeStyle = '#ef4444';
+                ctx.fillStyle = `rgb(${r}, ${green}, ${b})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, 5.0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 内部エネルギーインジケータ (中心コアの輝き)
+                let energyRatio = Math.min(1.0, p.internalEnergy / 80.0);
+                ctx.fillStyle = `rgba(255, 255, 255, ${energyRatio})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, 2.0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // デバッグタグの描画 (物理法則に影響を与えない純粋な視覚インジケータ)
+                if (p.tag) {
+                    ctx.strokeStyle = p.tag.color;
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    ctx.arc(0, 0, info.radius + 3, 0, Math.PI * 2);
+                    ctx.arc(0, 0, 8.5, 0, Math.PI * 2);
                     ctx.stroke();
+
+                    ctx.fillStyle = p.tag.color;
+                    ctx.font = 'bold 9px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.tag.label, 0, -11);
                 }
-
-                // 細胞本体
-                ctx.fillStyle = info.color;
-                ctx.beginPath();
-                ctx.arc(0, 0, info.radius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // ATP充填インジケータ（中心核）
-                let atpRatio = Math.min(1.0, p.atp / 100.0);
-                ctx.fillStyle = `rgba(250, 204, 21, ${atpRatio})`;
-                ctx.beginPath();
-                ctx.arc(0, 0, info.radius * 0.45, 0, Math.PI * 2);
-                ctx.fill();
 
                 ctx.restore();
             }
         }
 
-        function spawnEmergentPreset(type) {
+        function spawnInitialState(type) {
             particles = [];
             bonds = [];
-            speciesRegistry.clear();
 
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
-            if (type === 'primordial_soup') {
-                for (let i = 0; i < 70; i++) {
-                    let px = cx + (Math.random() - 0.5) * 300;
-                    let py = cy + (Math.random() - 0.5) * 300;
+            if (type === 'random_soup') {
+                for (let i = 0; i < 90; i++) {
+                    let px = cx + (Math.random() - 0.5) * 320;
+                    let py = cy + (Math.random() - 0.5) * 240;
                     particles.push(new Particle(px, py));
                 }
-                addLog("🍲 原初化学スープを初期化：拡散場・ATP生化学の共存モデル");
+                addLog("🧪 ランダム物理粒子スープを生成：非特定のポテンシャル場の初期化");
 
-            } else if (type === 'differentiated_colony') {
-                let center = new Particle(cx, cy);
-                particles.push(center);
-
-                for (let i = 0; i < 18; i++) {
-                    let angle = (i / 18) * Math.PI * 2;
-                    let p = new Particle(cx + Math.cos(angle) * 35, cy + Math.sin(angle) * 35);
-                    p.colonyId = center.colonyId;
-                    particles.push(p);
-                    bonds.push(new Bond(center, p, 35));
+            } else if (type === 'hydrophobic_monolayer') {
+                for (let i = 0; i < 60; i++) {
+                    let px = cx + (Math.random() - 0.5) * 200;
+                    let py = cy + (Math.random() - 0.5) * 200;
+                    // 高疎水性 (g3 = 1.5) のパラメータを付与
+                    let g = new GeneticAttributes([0.1, 0.1, 0.1, 1.5, 0.0, 0.8]);
+                    particles.push(new Particle(px, py, g));
                 }
-                addLog("🧫 多細胞分化コロニーを初期化：細胞外シグナルに応答する機能器官の創発");
-
-            } else if (type === 'symbiosis_ecosystem') {
-                for (let i = 0; i < 25; i++) {
-                    let dna1 = new DNA([1.5, 0.1, 0.1, 0.8, 7.0, 0.8]);
-                    particles.push(new Particle(cx - 80 + (Math.random()-0.5)*100, cy + (Math.random()-0.5)*100, dna1));
-                    
-                    let dna2 = new DNA([0.1, 1.8, 0.1, 0.8, 7.0, 0.8]);
-                    particles.push(new Particle(cx + 80 + (Math.random()-0.5)*100, cy + (Math.random()-0.5)*100, dna2));
-                }
-                addLog("🌿 O₂/CO₂ 相互補完モデル：自律的気体交換による進化共生系");
-
-            } else if (type === 'predator_enzyme') {
-                for (let i = 0; i < 40; i++) {
-                    particles.push(new Particle(cx + (Math.random()-0.5)*260, cy + (Math.random()-0.5)*260));
-                }
-                addLog("🧪 酵素分解・創発捕食系：触媒溶菌によるATP横取りモデル");
+                addLog("🫧 高疎水性分子群を初期化：溶媒排除による自発的自転・小胞形成");
             }
         }
 
-        function updateDayNightHUD(isDay, phase) {
+        function updateDayNightHUD(phase, lightVal) {
             const icon = document.getElementById('hud-day-icon');
             const timeText = document.getElementById('hud-time');
-            let hour = Math.floor(phase * 24);
-            let hourStr = (hour < 10 ? '0' : '') + hour + ':00';
 
-            if (isDay) {
+            if (lightVal > 0.4) {
                 icon.className = 'fa-solid fa-sun text-amber-400';
-                timeText.innerText = `昼 (${hourStr})`;
+                timeText.innerText = `照射中 (${lightVal.toFixed(1)})`;
             } else {
                 icon.className = 'fa-solid fa-moon text-indigo-400';
-                timeText.innerText = `夜 (${hourStr})`;
+                timeText.innerText = `減衰 (${lightVal.toFixed(1)})`;
             }
         }
 
         function updateHUD() {
             document.getElementById('hud-particles').innerText = particles.length;
+            document.getElementById('hud-bonds').innerText = bonds.length;
 
-            let colonySet = new Set(particles.map(p => p.colonyId));
-            document.getElementById('hud-colonies').innerText = colonySet.size;
+            let totalEnergy = particles.reduce((sum, p) => sum + p.internalEnergy, 0);
+            document.getElementById('hud-energy').innerText = totalEnergy.toFixed(1);
 
-            let totalAtp = particles.reduce((sum, p) => sum + p.atp, 0);
-            document.getElementById('hud-atp').innerText = Math.round(totalAtp) + ' ATP';
+            document.getElementById('stat-bonds-created').innerText = totalBondsCreated;
+            document.getElementById('stat-bonds-broken').innerText = totalBondsBroken;
 
-            let avgPh = (grid.ph.reduce((a, b) => a + b, 0) / grid.size).toFixed(1);
-            let avgO2 = Math.round((grid.o2.reduce((a, b) => a + b, 0) / grid.size) * 100);
-            document.getElementById('hud-env-chem').innerText = `${avgPh} / ${avgO2}%`;
+            // 結合された連結成分（クラスタ）の簡易計測
+            document.getElementById('stat-clusters').innerText = calculateClusters();
 
-            document.getElementById('stat-births').innerText = totalBirths;
-            document.getElementById('stat-deaths').innerText = totalDeaths;
-            document.getElementById('stat-repairs').innerText = totalDnaRepairs;
-            document.getElementById('stat-mutations').innerText = totalMutations;
-            document.getElementById('stat-species').innerText = speciesRegistry.size;
-
-            updateLineageTreeUI();
+            // 追跡タグ統計の更新
+            updateTagStatistics();
         }
 
-        function updateLineageTreeUI() {
-            const container = document.getElementById('lineage-tree-container');
-            if (!container) return;
+        function updateTagStatistics() {
+            const tagCounts = {};
+            let totalTagged = 0;
 
-            let html = '';
-            speciesRegistry.forEach((val, key) => {
-                html += `<div class="flex justify-between items-center py-0.5 border-b border-slate-800/60">
-                    <span class="text-pink-400 font-bold">${key} (Gen ${val.gen})</span>
-                    <span class="text-slate-400">${val.count} 細胞</span>
-                </div>`;
+            for (let p of particles) {
+                if (p.tag) {
+                    totalTagged++;
+                    const key = `${p.tag.label}__${p.tag.color}`;
+                    if (!tagCounts[key]) {
+                        tagCounts[key] = { label: p.tag.label, color: p.tag.color, count: 0 };
+                    }
+                    tagCounts[key].count++;
+                }
+            }
+
+            const taggedCountElem = document.getElementById('stat-tagged-count');
+            if (taggedCountElem) taggedCountElem.innerText = totalTagged;
+
+            const taggedDetailsElem = document.getElementById('stat-tagged-details');
+            if (taggedDetailsElem) {
+                let html = '';
+                for (let k in tagCounts) {
+                    const item = tagCounts[k];
+                    html += `
+                        <div class="flex justify-between items-center">
+                            <span class="flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${item.color}"></span>
+                                <span>${item.label}:</span>
+                            </span>
+                            <span style="color:${item.color}" class="font-bold">${item.count}</span>
+                        </div>
+                    `;
+                }
+                taggedDetailsElem.innerHTML = html;
+            }
+        }
+
+        function calculateClusters() {
+            if (particles.length === 0) return 0;
+            const parent = new Map();
+            particles.forEach(p => parent.set(p.id, p.id));
+
+            function find(id) {
+                if (parent.get(id) === id) return id;
+                const root = find(parent.get(id));
+                parent.set(id, root);
+                return root;
+            }
+
+            function union(id1, id2) {
+                const root1 = find(id1);
+                const root2 = find(id2);
+                if (root1 !== root2) {
+                    parent.set(root1, root2);
+                }
+            }
+
+            for (let b of bonds) {
+                if (parent.has(b.p1.id) && parent.has(b.p2.id)) {
+                    union(b.p1.id, b.p2.id);
+                }
+            }
+
+            const uniqueClusters = new Set();
+            let maxClusterSize = 0;
+            const clusterSizes = {};
+
+            for (let p of particles) {
+                const root = find(p.id);
+                uniqueClusters.add(root);
+                clusterSizes[root] = (clusterSizes[root] || 0) + 1;
+                if (clusterSizes[root] > maxClusterSize) {
+                    maxClusterSize = clusterSizes[root];
+                }
+            }
+
+            const maxClusterElem = document.getElementById('stat-max-cluster');
+            if (maxClusterElem) maxClusterElem.innerText = maxClusterSize;
+
+            return uniqueClusters.size;
+        }
+
+        function switchTab(tabName) {
+            ['params', 'env', 'stats'].forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (content) content.classList.add('hidden');
+                if (btn) btn.classList.remove('active');
             });
-            container.innerHTML = html || '<div class="text-slate-500">進化系統樹データ生成中...</div>';
+
+            const activeContent = document.getElementById(`tab-content-${tabName}`);
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
         function setGodTool(tool) {
             activeGodTool = tool;
             document.querySelectorAll('.god-tool').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tool-${tool}`).classList.add('active');
-        }
+            const activeBtn = document.getElementById(`tool-${tool}`);
+            if (activeBtn) activeBtn.classList.add('active');
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-btn-${tab}`).classList.add('active');
-
-            document.getElementById('tab-content-params').classList.add('hidden');
-            document.getElementById('tab-content-env').classList.add('hidden');
-            document.getElementById('tab-content-stats').classList.add('hidden');
-
-            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
-        }
-
-        function setupInteraction() {
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-
-            canvas.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                updateMousePos(e);
-                applyGodTool();
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                updateMousePos(e);
-                if (isMouseDown) applyGodTool();
-            });
-
-            window.addEventListener('mouseup', () => {
-                isMouseDown = false;
-                grabbedParticle = null;
-            });
-
-            canvas.addEventListener('touchstart', (e) => {
-                isMouseDown = true;
-                updateTouchPos(e);
-                applyGodTool();
-            });
-            canvas.addEventListener('touchmove', (e) => {
-                updateTouchPos(e);
-                if (isMouseDown) applyGodTool();
-            });
-            canvas.addEventListener('touchend', () => {
-                isMouseDown = false;
-                grabbedParticle = null;
-            });
-        }
-
-        function resizeCanvas() {
-            const container = document.getElementById('canvas-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-
-        function updateMousePos(e) {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
-        }
-
-        function updateTouchPos(e) {
-            if (e.touches.length > 0) {
-                const rect = canvas.getBoundingClientRect();
-                mouseX = e.touches[0].clientX - rect.left;
-                mouseY = e.touches[0].clientY - rect.top;
+            const tagPalette = document.getElementById('tag-palette-container');
+            if (tagPalette) {
+                if (tool === 'tag' || tool === 'untag') {
+                    tagPalette.classList.remove('hidden');
+                } else {
+                    tagPalette.classList.add('hidden');
+                }
             }
+        }
+
+        function quickSetTag(label, color) {
+            document.getElementById('tag-label-input').value = label;
+            document.getElementById('tag-color-input').value = color;
+        }
+
+        function openTagModal() {
+            const modal = document.getElementById('tag-modal');
+            if (modal) {
+                document.getElementById('modal-tag-label').value = document.getElementById('tag-label-input').value || 'Lineage-A';
+                document.getElementById('modal-tag-color').value = document.getElementById('tag-color-input').value || '#ff3366';
+                document.getElementById('modal-color-preview-text').innerText = document.getElementById('tag-color-input').value || '#ff3366';
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeTagModal() {
+            const modal = document.getElementById('tag-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function setModalPreset(label, color) {
+            document.getElementById('modal-tag-label').value = label;
+            document.getElementById('modal-tag-color').value = color;
+            document.getElementById('modal-color-preview-text').innerText = color;
+        }
+
+        function saveTagModal() {
+            const label = document.getElementById('modal-tag-label').value || 'Lineage-A';
+            const color = document.getElementById('modal-tag-color').value || '#ff3366';
+            
+            document.getElementById('tag-label-input').value = label;
+            document.getElementById('tag-color-input').value = color;
+            
+            setGodTool('tag');
+            closeTagModal();
+            addLog(`🏷️ 追跡タグ設定を更新: [${label}] (${color})`);
+        }
+
+        function clearAllTagsInUniverse() {
+            let count = 0;
+            for (let p of particles) {
+                if (p.tag) {
+                    p.tag = null;
+                    count++;
+                }
+            }
+            closeTagModal();
+            addLog(`🧹 宇宙全体の全粒子から追跡タグを消去しました (${count} 個体)`);
         }
 
         function applyGodTool() {
@@ -1012,24 +907,29 @@
             if (activeGodTool === 'heat') {
                 for (let p of particles) {
                     if (Math.hypot(p.x - mouseX, p.y - mouseY) < 40) {
-                        p.vx += (Math.random() - 0.5) * 2.5;
-                        p.vy += (Math.random() - 0.5) * 2.5;
+                        p.vx += (Math.random() - 0.5) * 3.5;
+                        p.vy += (Math.random() - 0.5) * 3.5;
                     }
                 }
-            } else if (activeGodTool === 'acid') {
-                grid.ph[idx] = Math.max(1.0, grid.ph[idx] - 0.8);
-            } else if (activeGodTool === 'base') {
-                grid.ph[idx] = Math.min(14.0, grid.ph[idx] + 0.8);
-            } else if (activeGodTool === 'atp') {
+            } else if (activeGodTool === 'photon') {
                 for (let p of particles) {
                     if (Math.hypot(p.x - mouseX, p.y - mouseY) < 45) {
-                        p.atp += 25;
+                        p.internalEnergy += 20.0;
                     }
                 }
-            } else if (activeGodTool === 'uv') {
+            } else if (activeGodTool === 'substrate') {
+                grid.f0[idx] = Math.min(1.0, grid.f0[idx] + 0.5);
+            } else if (activeGodTool === 'proton') {
                 for (let p of particles) {
                     if (Math.hypot(p.x - mouseX, p.y - mouseY) < 45) {
-                        p.dnaDamage += 0.4;
+                        p.genetics.dna[4] = (Math.random() - 0.5) * 2.0; // 電荷改変
+                    }
+                }
+            } else if (activeGodTool === 'cleave') {
+                for (let i = bonds.length - 1; i >= 0; i--) {
+                    let b = bonds[i];
+                    if (Math.hypot(b.p1.x - mouseX, b.p1.y - mouseY) < 30) {
+                        bonds.splice(i, 1);
                     }
                 }
             } else if (activeGodTool === 'inspect') {
@@ -1037,6 +937,20 @@
                     if (Math.hypot(p.x - mouseX, p.y - mouseY) < 30) {
                         inspectParticle(p);
                         break;
+                    }
+                }
+            } else if (activeGodTool === 'tag') {
+                const label = document.getElementById('tag-label-input').value || 'Tag';
+                const color = document.getElementById('tag-color-input').value || '#ff3366';
+                for (let p of particles) {
+                    if (Math.hypot(p.x - mouseX, p.y - mouseY) < 35) {
+                        p.tag = { label: label, color: color };
+                    }
+                }
+            } else if (activeGodTool === 'untag') {
+                for (let p of particles) {
+                    if (Math.hypot(p.x - mouseX, p.y - mouseY) < 35) {
+                        p.tag = null;
                     }
                 }
             }
@@ -1048,16 +962,47 @@
             inspector.classList.remove('hidden');
 
             let idx = grid.index(p.x, p.y);
-            let info = CELL_TYPES[p.expressedType];
+            let g = p.genetics.dna;
+
+            let tagHtml = p.tag
+                ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold" style="background:${p.tag.color}33; color:${p.tag.color}; border:1px solid ${p.tag.color}">🏷️ ${p.tag.label}</span>`
+                : `<span class="text-slate-500">なし</span>`;
 
             body.innerHTML = `
-                <div class="flex justify-between"><span>細胞分化形態:</span> <span class="font-bold" style="color:${info.color}">${info.name}</span></div>
-                <div class="flex justify-between"><span>系統種ID:</span> <span class="font-mono text-pink-400 font-bold">${p.dna.speciesId}</span></div>
-                <div class="flex justify-between"><span>現存 ATP 通貨:</span> <span class="font-mono text-yellow-400 font-bold">${Math.round(p.atp)} ATP</span></div>
-                <div class="flex justify-between"><span>DNA 損傷度 (UV):</span> <span class="font-mono text-rose-400">${p.dnaDamage.toFixed(2)}</span></div>
-                <div class="flex justify-between"><span>蛋白折りたたみ状態:</span> <span class="font-mono ${p.isDenatured ? 'text-red-400 font-bold' : 'text-emerald-400'}">${p.isDenatured ? '変性 (Denatured)' : '正常 (Active)'}</span></div>
-                <div class="flex justify-between"><span>局所環境 (pH / O₂):</span> <span class="font-mono text-cyan-400">${grid.ph[idx].toFixed(1)} / ${(grid.o2[idx]*100).toFixed(0)}%</span></div>
+                <div class="flex justify-between items-center pb-1 border-b border-slate-700/60 mb-1">
+                    <span>追跡タグ:</span> ${tagHtml}
+                </div>
+                <div class="flex space-x-1 mb-2">
+                    <button onclick="tagSingleParticle('${p.id}')" class="flex-1 py-0.5 bg-pink-900/50 hover:bg-pink-800 border border-pink-500/40 text-pink-300 rounded text-[9px]">タグ付与</button>
+                    <button onclick="untagSingleParticle('${p.id}')" class="flex-1 py-0.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 rounded text-[9px]">タグ削除</button>
+                    <button onclick="openTagModal()" class="flex-1 py-0.5 bg-cyan-900/50 hover:bg-cyan-800 border border-cyan-500/40 text-cyan-300 rounded text-[9px]">モダール編集</button>
+                </div>
+                <div class="flex justify-between"><span>粒子ID:</span> <span class="font-mono text-cyan-400 font-bold">${p.id}</span></div>
+                <div class="flex justify-between"><span>内部エネルギー:</span> <span class="font-mono text-yellow-400 font-bold">${p.internalEnergy.toFixed(1)}</span></div>
+                <div class="flex justify-between"><span>光励起率 (α):</span> <span class="font-mono text-emerald-400">${g[0].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>触媒率 (k_cat):</span> <span class="font-mono text-pink-400">${g[1].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>電気-機械結合 (β):</span> <span class="font-mono text-amber-400">${g[2].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>疎水性度 (h):</span> <span class="font-mono text-indigo-400">${g[3].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>表面電荷 (q):</span> <span class="font-mono text-slate-200">${g[4].toFixed(2)}</span></div>
             `;
+        }
+
+        function tagSingleParticle(id) {
+            let p = particles.find(item => item.id === id);
+            if (p) {
+                const label = document.getElementById('tag-label-input')?.value || 'Tag';
+                const color = document.getElementById('tag-color-input')?.value || '#ff3366';
+                p.tag = { label: label, color: color };
+                inspectParticle(p);
+            }
+        }
+
+        function untagSingleParticle(id) {
+            let p = particles.find(item => item.id === id);
+            if (p) {
+                p.tag = null;
+                inspectParticle(p);
+            }
         }
 
         function closeInspector() {
@@ -1077,18 +1022,96 @@
             }
         }
 
+        function stepFrame() {
+            if (isRunning) {
+                togglePlay(); // 実行中の場合は一時停止してからコマ送り
+            }
+            stepPhysics();
+            renderUniverse();
+        }
+
         function resetUniverse() {
             particles = [];
             bonds = [];
-            grid = new FieldGrid(GRID_COLS, GRID_ROWS);
+            grid = new ReactionGrid(GRID_COLS, GRID_ROWS);
             globalTicks = 0;
-            totalBirths = 0;
-            totalDeaths = 0;
-            totalMutations = 0;
-            totalDnaRepairs = 0;
-            maxGeneration = 0;
-            spawnEmergentPreset('primordial_soup');
-            addLog("🌌 宇宙リセット：生化学・拡散場・ATPエネルギー通貨モデルの初期化");
+            totalBondsCreated = 0;
+            totalBondsBroken = 0;
+            spawnInitialState('random_soup');
+            addLog("🌌 世界再生成：基本ポテンシャルおよび反応拡散場の初期化");
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            if (container) {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+        }
+
+        function setupInteraction() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            function updateMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                updateMousePos(e);
+                applyGodTool();
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                updateMousePos(e);
+                if (isMouseDown) {
+                    applyGodTool();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isMouseDown = false;
+            });
+
+            canvas.addEventListener('touchstart', (e) => {
+                isMouseDown = true;
+                if (e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    mouseX = e.touches[0].clientX - rect.left;
+                    mouseY = e.touches[0].clientY - rect.top;
+                    applyGodTool();
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    mouseX = e.touches[0].clientX - rect.left;
+                    mouseY = e.touches[0].clientY - rect.top;
+                    if (isMouseDown) {
+                        applyGodTool();
+                    }
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+                isMouseDown = false;
+            });
+
+            // キーボードショートカット (Space: 再生/停止, → または N: コマ送り)
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    togglePlay();
+                } else if (e.code === 'ArrowRight' || e.code === 'KeyN') {
+                    e.preventDefault();
+                    stepFrame();
+                }
+            });
         }
 
         function loop() {
@@ -1101,9 +1124,56 @@
 
         window.onload = function() {
             setupInteraction();
-            spawnEmergentPreset('primordial_soup');
+            spawnInitialState('random_soup');
             loop();
         };
     </script>
+
+    <!-- 追跡タグ設定モダール (Modal Window) -->
+    <div id="tag-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 hidden">
+        <div class="glass-panel p-5 rounded-2xl border border-cyan-500/40 w-80 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+                <h3 class="font-bold text-cyan-400 flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-tag"></i> 追跡タグ設定モダール
+                </h3>
+                <button onclick="closeTagModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] text-slate-300 font-bold mb-1">タグ名 (系統識別子):</label>
+                    <input type="text" id="modal-tag-label" value="Lineage-A" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-400">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] text-slate-300 font-bold mb-1">表示カラー:</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="color" id="modal-tag-color" value="#ff3366" onchange="document.getElementById('modal-color-preview-text').innerText = this.value;" class="w-8 h-8 bg-transparent border-0 cursor-pointer rounded">
+                        <span id="modal-color-preview-text" class="font-mono text-[11px] text-slate-400">#ff3366</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] text-slate-400 font-bold mb-1">クイックプリセット:</label>
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="setModalPreset('Alpha', '#ff3366')" class="px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-300 border border-red-500/40 rounded text-[10px]">🔴 α</button>
+                        <button onclick="setModalPreset('Beta', '#38bdf8')" class="px-2 py-1 bg-sky-900/50 hover:bg-sky-800 text-sky-300 border border-sky-500/40 rounded text-[10px]">🔵 β</button>
+                        <button onclick="setModalPreset('Gamma', '#34d399')" class="px-2 py-1 bg-emerald-900/50 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 rounded text-[10px]">🟢 γ</button>
+                        <button onclick="setModalPreset('Delta', '#f59e0b')" class="px-2 py-1 bg-amber-900/50 hover:bg-amber-800 text-amber-300 border border-amber-500/40 rounded text-[10px]">🟡 δ</button>
+                        <button onclick="setModalPreset('Omega', '#a855f7')" class="px-2 py-1 bg-purple-900/50 hover:bg-purple-800 text-purple-300 border border-purple-500/40 rounded text-[10px]">🟣 ω</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-700/60 space-y-2">
+                <button onclick="saveTagModal()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition active:scale-95 shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-check mr-1"></i> 保存してタグブラシを適用
+                </button>
+                <button onclick="clearAllTagsInUniverse()" class="w-full py-1.5 bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-700/50 font-bold rounded-lg text-[10px] transition active:scale-95">
+                    <i class="fa-solid fa-trash-can mr-1"></i> 宇宙全体の全タグを一括消去
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

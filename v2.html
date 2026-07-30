@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENESIS - Ab-Initio Physical Universe & Emergence Simulator</title>
+    <title>GENESIS - Ab-Initio Physics & Emergence Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -63,37 +63,46 @@
             </div>
             <div>
                 <h1 class="font-black text-xs sm:text-sm tracking-widest bg-gradient-to-r from-cyan-400 via-emerald-300 to-pink-500 bg-clip-text text-transparent">
-                    GENESIS <span class="text-[10px] text-slate-400 font-mono font-normal">Ab-Initio Physics & Reaction Engine</span>
+                    GENESIS <span class="text-[10px] text-slate-400 font-mono font-normal">v12 - Spatial Hash & Angle Potential</span>
                 </h1>
-                <p class="text-[9px] text-slate-400 hidden sm:block">非平衡ポテンシャル &bull; 拡散反応場 &bull; 光電励起 &bull; 電磁場 &bull; 構造自発創発</p>
+                <p class="text-[9px] text-slate-400 hidden sm:block">空間ハッシュ $O(N)$ &bull; 結合角ポテンシャル &bull; 鎖・膜・リング高分子構造創発</p>
             </div>
         </div>
 
         <!-- リアルタイムデータ & コントロール -->
         <div class="flex items-center space-x-2 text-xs font-mono">
             <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1">
-                <span class="text-slate-400">基本粒子:</span>
+                <span class="text-slate-400">粒子数:</span>
                 <span id="hud-particles" class="text-cyan-400 font-bold">0</span>
             </div>
             <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1 hidden sm:flex">
-                <span class="text-slate-400">バネ結合:</span>
+                <span class="text-slate-400">結合数:</span>
                 <span id="hud-bonds" class="text-emerald-400 font-bold">0</span>
             </div>
             <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1 hidden md:flex">
-                <span class="text-slate-400">総内部エネルギー:</span>
-                <span id="hud-energy" class="text-yellow-400 font-bold">0.0</span>
+                <span class="text-slate-400">FPS:</span>
+                <span id="hud-fps" class="text-amber-400 font-bold">60</span>
             </div>
-            <div class="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60 flex items-center space-x-1">
-                <i id="hud-day-icon" class="fa-solid fa-sun text-amber-400"></i>
-                <span id="hud-time" class="text-slate-200 font-bold">00:00</span>
+
+            <!-- 時間進行速度切替 -->
+            <div class="bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700/60 flex items-center space-x-1">
+                <i class="fa-solid fa-gauge text-cyan-400 text-[10px]"></i>
+                <select id="select-speed" onchange="simSpeed = parseFloat(this.value);" class="bg-slate-900 text-cyan-300 border border-slate-700 rounded text-[10px] px-1 py-0.5 focus:outline-none">
+                    <option value="0.25">0.25x (低速)</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="1.0" selected>1.0x (標準)</option>
+                    <option value="2.0">2.0x (2倍速)</option>
+                    <option value="5.0">5.0x (5倍速)</option>
+                </select>
             </div>
+
             <button onclick="togglePlay()" id="btn-global-play" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold flex items-center space-x-1 transition active:scale-95">
                 <i id="icon-global-play" class="fa-solid fa-pause"></i>
                 <span id="text-global-play" class="hidden sm:inline">実行中</span>
             </button>
-            <button onclick="stepFrame()" id="btn-step-frame" title="1コマ進める (ショートカット: → または Nキー)" class="px-2 py-1 bg-cyan-700 hover:bg-cyan-600 text-white rounded font-bold flex items-center space-x-1 transition active:scale-95">
+            <button onclick="stepFrame()" id="btn-step-frame" title="1コマ進める (Space: 再生/停止, → / N: コマ送り)" class="px-2 py-1 bg-cyan-700 hover:bg-cyan-600 text-white rounded font-bold flex items-center space-x-1 transition active:scale-95">
                 <i class="fa-solid fa-forward-step"></i>
-                <span class="hidden sm:inline">1コマコマ送り</span>
+                <span class="hidden sm:inline">コマ送り</span>
             </button>
         </div>
     </header>
@@ -108,7 +117,7 @@
 
             <!-- 拡散場オーバーレイ選択 -->
             <div class="absolute top-4 left-4 glass-panel p-2 rounded-xl text-xs border border-cyan-500/30 shadow-2xl flex items-center space-x-2 z-10">
-                <span class="text-slate-400 font-bold ml-1"><i class="fa-solid fa-layer-group text-cyan-400 mr-1"></i> 連続反応場表示:</span>
+                <span class="text-slate-400 font-bold ml-1"><i class="fa-solid fa-layer-group text-cyan-400 mr-1"></i> 反応拡散表示:</span>
                 <select id="select-overlay" onchange="currentOverlay = this.value;" class="bg-slate-900 border border-slate-700 rounded text-slate-200 px-2 py-1 focus:outline-none focus:border-cyan-400">
                     <option value="none">なし (粒子のみ)</option>
                     <option value="substrate">基質濃度 (F₀ Substrate)</option>
@@ -146,7 +155,7 @@
                     <i class="fa-solid fa-sliders mr-1"></i> 物理・相互作用
                 </button>
                 <button onclick="switchTab('env')" id="tab-btn-env" class="tab-btn flex-1 py-2.5 text-center font-bold text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-flask mr-1"></i> 拡散・光放射
+                    <i class="fa-solid fa-flask mr-1"></i> 拡散・環境
                 </button>
                 <button onclick="switchTab('stats')" id="tab-btn-stats" class="tab-btn flex-1 py-2.5 text-center font-bold text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-chart-line mr-1"></i> 統計・自発構造
@@ -173,6 +182,13 @@
                         </div>
                         <div>
                             <div class="flex justify-between mb-1">
+                                <span class="text-slate-300">結合角剛性 (Angle Stiffness):</span>
+                                <span id="val-anglestiff" class="font-mono text-amber-400 font-bold">0.30</span>
+                            </div>
+                            <input type="range" min="0.00" max="1.00" step="0.05" value="0.30" oninput="simParams.angleStiffness=parseFloat(this.value); document.getElementById('val-anglestiff').innerText=this.value;" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
                                 <span class="text-slate-300">熱ゆらぎ (Thermal Motion):</span>
                                 <span id="val-thermo" class="font-mono text-amber-400 font-bold">0.20</span>
                             </div>
@@ -188,15 +204,19 @@
                     </div>
 
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="font-bold text-cyan-400 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 素粒子のランダム初期配置</div>
+                        <div class="font-bold text-cyan-400 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 初期生成プリセット</div>
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="spawnInitialState('random_soup')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-emerald-300">🧪 ランダム粒子スープ</div>
-                                <div class="text-[9px] text-slate-400">多様な物理物性パラメータの混相</div>
+                                <div class="font-bold text-emerald-300">🧪 粒子スープ (500個)</div>
+                                <div class="text-[9px] text-slate-400">多様な物性の混相場</div>
                             </button>
                             <button onclick="spawnInitialState('hydrophobic_monolayer')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95">
-                                <div class="font-bold text-pink-300">🫧 高疎水性分子群</div>
-                                <div class="text-[9px] text-slate-400">自発的な小胞・膜形成実験</div>
+                                <div class="font-bold text-pink-300">🫧 疎水性膜・小胞</div>
+                                <div class="text-[9px] text-slate-400">二重膜・リング自己組織化</div>
+                            </button>
+                            <button onclick="spawnInitialState('dense_crowd')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-left transition active:scale-95 col-span-2">
+                                <div class="font-bold text-amber-300">⚡ 高密度1200粒子テスト (空間ハッシュ検証)</div>
+                                <div class="text-[9px] text-slate-400">Spatial Hash による高速演算性能のテスト</div>
                             </button>
                         </div>
                     </div>
@@ -206,13 +226,41 @@
                         <div class="grid grid-cols-3 gap-1.5">
                             <button id="tool-heat" onclick="setGodTool('heat')" class="god-tool active p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded font-bold text-center">🔥 熱エネルギー</button>
                             <button id="tool-photon" onclick="setGodTool('photon')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">☀️ 光束照射</button>
-                            <button id="tool-substrate" onclick="setGodTool('substrate')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🧪 基質注入</button>
-                            <button id="tool-proton" onclick="setGodTool('proton')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">⚡ 電荷刺激</button>
+                            <button id="tool-spawn" onclick="setGodTool('spawn')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center text-cyan-300 font-bold">✨ 粒子注入</button>
+                            <button id="tool-delete" onclick="setGodTool('delete')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center text-red-300 font-bold">🧹 粒子消去</button>
                             <button id="tool-cleave" onclick="setGodTool('cleave')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">✂️ 結合切断</button>
                             <button id="tool-inspect" onclick="setGodTool('inspect')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🔬 物性解析</button>
                             <button id="tool-tag" onclick="setGodTool('tag')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center col-span-2">🏷️ タグ付与</button>
                             <button id="tool-untag" onclick="setGodTool('untag')" class="god-tool p-1.5 bg-slate-800 border border-slate-700 text-slate-300 rounded text-center">🏷️❌ タグ消去</button>
                         </div>
+
+                        <!-- 粒子スポーン設定コントロール -->
+                        <div id="spawn-config-container" class="mt-2 pt-2 border-t border-slate-700/60 hidden space-y-2">
+                            <div class="font-bold text-cyan-300 text-[10px]"><i class="fa-solid fa-plus-circle mr-1"></i> 注入する特定ステータス粒子の設定:</div>
+                            <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                <div>
+                                    <span class="text-slate-400">光吸収 ($\alpha$):</span>
+                                    <input type="range" id="spawn-g0" min="0" max="2" step="0.1" value="0.8" class="w-full">
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">触媒率 ($k_{cat}$):</span>
+                                    <input type="range" id="spawn-g1" min="0" max="2" step="0.1" value="0.5" class="w-full">
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">疎水性 ($h$):</span>
+                                    <input type="range" id="spawn-g3" min="0" max="2" step="0.1" value="1.2" class="w-full">
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">目標角度 ($\theta_0$):</span>
+                                    <select id="spawn-g6" class="bg-slate-900 border border-slate-700 rounded text-slate-200 px-1 py-0.5 w-full">
+                                        <option value="3.14159">180° (直線・鎖)</option>
+                                        <option value="2.0944">120° (六角格子)</option>
+                                        <option value="1.5708">90° (直角・リング)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div id="tag-palette-container" class="mt-2 pt-2 border-t border-slate-700/60 hidden space-y-1.5">
                             <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold">
                                 <span>付与するタグ設定:</span>
@@ -268,6 +316,7 @@
                     <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 space-y-2">
                         <div class="font-bold text-emerald-400 border-b border-slate-700/60 pb-1"><i class="fa-solid fa-chart-pie mr-1"></i> 統計 & 創発クラスタデータ</div>
                         <div class="space-y-1.5 text-slate-300 font-mono text-[11px]">
+                            <div class="flex justify-between"><span>演算アルゴリズム:</span><span class="text-cyan-400 font-bold">Spatial Hash O(N)</span></div>
                             <div class="flex justify-between"><span>自発的結合クラスタ数:</span><span id="stat-clusters" class="text-cyan-400">0</span></div>
                             <div class="flex justify-between"><span>最大分子複合体サイズ:</span><span id="stat-max-cluster" class="text-emerald-400">0</span></div>
                             <div class="flex justify-between"><span>結合生成回数:</span><span id="stat-bonds-created" class="text-pink-400">0</span></div>
@@ -291,6 +340,7 @@
         let animationFrameId = null;
         let activeGodTool = 'heat';
         let currentOverlay = 'none';
+        let simSpeed = 1.0;
 
         let mouseX = -100, mouseY = -100;
         let isMouseDown = false;
@@ -299,9 +349,15 @@
         let totalBondsCreated = 0;
         let totalBondsBroken = 0;
 
+        // FPS カウンタ
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let currentFps = 60;
+
         // 全般的な物理パラメータ
         const simParams = {
             bondStiffness: 0.40,
+            angleStiffness: 0.30,
             thermalNoise: 0.20,
             breakThreshold: 85,
             bondDistance: 14.0
@@ -314,7 +370,59 @@
             cyclePeriod: 1200
         };
 
-        // 連続拡散格子 (Substrate F0, Product F1, Proton H+, Radiative Light)
+        // ----------------------------------------------------
+        // 1. Spatial Hash Grid (空間ハッシュによる O(N) 高速化)
+        // ----------------------------------------------------
+        class SpatialHash {
+            constructor(cellSize = 40) {
+                this.cellSize = cellSize;
+                this.grid = new Map();
+            }
+
+            clear() {
+                this.grid.clear();
+            }
+
+            key(cx, cy) {
+                return (cx & 0xFFFF) | ((cy & 0xFFFF) << 16);
+            }
+
+            insert(p) {
+                const cx = Math.floor(p.x / this.cellSize);
+                const cy = Math.floor(p.y / this.cellSize);
+                const k = this.key(cx, cy);
+                let list = this.grid.get(k);
+                if (!list) {
+                    list = [];
+                    this.grid.set(k, list);
+                }
+                list.push(p);
+            }
+
+            getNeighbors(p, radius = 40) {
+                const neighbors = [];
+                const minCx = Math.floor((p.x - radius) / this.cellSize);
+                const maxCx = Math.floor((p.x + radius) / this.cellSize);
+                const minCy = Math.floor((p.y - radius) / this.cellSize);
+                const maxCy = Math.floor((p.y + radius) / this.cellSize);
+
+                for (let cx = minCx; cx <= maxCx; cx++) {
+                    for (let cy = minCy; cy <= maxCy; cy++) {
+                        const list = this.grid.get(this.key(cx, cy));
+                        if (list) {
+                            for (let i = 0; i < list.length; i++) {
+                                if (list[i] !== p) neighbors.push(list[i]);
+                            }
+                        }
+                    }
+                }
+                return neighbors;
+            }
+        }
+
+        const spatialGrid = new SpatialHash(40);
+
+        // 連続拡散格子 (Substrate F0, Product F1, Proton H+)
         const GRID_COLS = 48;
         const GRID_ROWS = 32;
         class ReactionGrid {
@@ -355,19 +463,20 @@
 
         let grid = new ReactionGrid(GRID_COLS, GRID_ROWS);
 
-        // 生物種ラベルを一切排除し、純粋なポテンシャル数値を保持する遺伝子構造
+        // 遺伝子ポテンシャル配列 (純粋な物理属性数値)
         class GeneticAttributes {
             constructor(genes = null) {
                 if (genes) {
                     this.dna = [...genes];
                 } else {
                     this.dna = [
-                        Math.random(),            // [0] g0: 光子吸収断面積 alpha (光を吸収して内部エネルギーを得る)
-                        Math.random(),            // [1] g1: 触媒反応速度 k_cat (基質 F0 を分解しエネルギーを得る)
-                        Math.random(),            // [2] g2: 電気-機械結合係数 beta (エネルギーを物理的伸長振動に変換)
-                        Math.random(),            // [3] g3: 疎水性/表面張力 h (水中で集まり膜化する)
-                        (Math.random() - 0.5)*2,  // [4] g4: 表面電荷 q (静電気力・引き合いと反発)
-                        0.2 + Math.random() * 0.8 // [5] g5: 結合親和力・強度
+                        Math.random(),            // [0] g0: 光子吸収断面積 alpha
+                        Math.random(),            // [1] g1: 触媒反応速度 k_cat
+                        Math.random(),            // [2] g2: 電気-機械結合係数 beta
+                        Math.random(),            // [3] g3: 疎水性/表面張力 h
+                        (Math.random() - 0.5)*2,  // [4] g4: 表面電荷 q
+                        0.2 + Math.random() * 0.8,// [5] g5: 結合強度
+                        Math.PI                   // [6] g6: 固有目標結合角 theta_0 (デフォルト: 180° 直線)
                     ];
                 }
             }
@@ -376,7 +485,11 @@
                 for (let i = 0; i < this.dna.length; i++) {
                     if (Math.random() < rate) {
                         this.dna[i] += (Math.random() - 0.5) * 0.2;
-                        if (i !== 4) this.dna[i] = Math.max(0.0, Math.min(2.0, this.dna[i]));
+                        if (i === 6) {
+                            this.dna[i] = Math.max(0.5, Math.min(Math.PI, this.dna[i]));
+                        } else if (i !== 4) {
+                            this.dna[i] = Math.max(0.0, Math.min(2.0, this.dna[i]));
+                        }
                     }
                 }
             }
@@ -393,10 +506,11 @@
                 this.genetics = genetic || new GeneticAttributes();
 
                 // 物理・内部状態
-                this.internalEnergy = 20.0; // 内部励起エネルギー
+                this.internalEnergy = 20.0;
                 this.phase = Math.random() * Math.PI * 2;
                 this.clusterId = this.id;
-                this.tag = null; // デバッグ用系統追跡タグ { label: string, color: string }
+                this.tag = null;
+                this.neighborsBonds = []; // 自身に繋がっているバネ結合の参照リスト
             }
         }
 
@@ -427,6 +541,17 @@
         function stepPhysics() {
             globalTicks++;
 
+            // 空間ハッシュのクリアと全粒子の再登録 ($O(N)$)
+            spatialGrid.clear();
+            for (let p of particles) {
+                p.neighborsBonds = [];
+                spatialGrid.insert(p);
+            }
+            for (let b of bonds) {
+                b.p1.neighborsBonds.push(b);
+                b.p2.neighborsBonds.push(b);
+            }
+
             // 環境光束計算
             let cyclePhase = (globalTicks % envConfig.cyclePeriod) / envConfig.cyclePeriod;
             let lightFlux = envConfig.enableCycle ? Math.max(0.05, Math.sin(cyclePhase * Math.PI * 2) * envConfig.maxLight) : envConfig.maxLight;
@@ -434,60 +559,50 @@
             updateDayNightHUD(cyclePhase, lightFlux);
             grid.diffuse();
 
-            // 1. 各粒子の素化学・素物理状態の計算（特定の「役職」はコード上存在しない）
+            // 1. 各粒子の状態およびポテンシャル計算
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 let idx = grid.index(p.x, p.y);
 
                 let g = p.genetics.dna;
-                let alpha = g[0]; // 光吸収
-                let k_cat = g[1]; // 触媒率
-                let beta  = g[2]; // 機械結合
-                let h     = g[3]; // 疎水性
-                let q     = g[4]; // 電荷
+                let alpha = g[0];
+                let k_cat = g[1];
+                let beta  = g[2];
+                let h     = g[3];
 
-                // 光エネルギー吸収 (純粋な物理過程)
                 p.internalEnergy += lightFlux * alpha * 0.15;
 
-                // 基質 F0 との接触・分解反応 (反応速度論)
                 if (grid.f0[idx] > 0.05 && k_cat > 0.1) {
                     let reacted = Math.min(grid.f0[idx], k_cat * 0.02);
                     grid.f0[idx] -= reacted;
                     grid.f1[idx] += reacted;
-                    p.internalEnergy += reacted * 25.0; // 反応熱/内部エネルギーへの還元
+                    p.internalEnergy += reacted * 25.0;
                 }
 
-                // 自然熱散逸
                 p.internalEnergy -= 0.03;
 
-                // 熱ゆらぎ運動
                 let noise = simParams.thermalNoise;
                 p.vx += (Math.random() - 0.5) * noise;
                 p.vy += (Math.random() - 0.5) * noise;
 
-                // 粘性抵抗
                 p.vx *= 0.93;
                 p.vy *= 0.93;
 
                 p.x += p.vx;
                 p.y += p.vy;
 
-                // 境界条件
                 const margin = 10;
                 if (p.x < margin) { p.x = margin; p.vx *= -0.5; }
                 if (p.x > canvas.width - margin) { p.x = canvas.width - margin; p.vx *= -0.5; }
                 if (p.y < margin) { p.y = margin; p.vy *= -0.5; }
                 if (p.y > canvas.height - margin) { p.y = canvas.height - margin; p.vy *= -0.5; }
 
-                // 内部エネルギー枯渇による分解（粒子消滅）
                 if (p.internalEnergy <= 0) {
-                    // 周囲に F0 基質を還元
                     grid.f0[idx] = Math.min(1.0, grid.f0[idx] + 0.1);
                     removeParticle(i);
                     continue;
                 }
 
-                // 高エネルギー状態における自発的質量分裂（自己複製的挙動の創発）
                 if (p.internalEnergy > 90.0) {
                     p.internalEnergy *= 0.45;
                     let childGenetics = new GeneticAttributes(p.genetics.dna);
@@ -495,22 +610,24 @@
 
                     let child = new Particle(p.x + (Math.random()-0.5)*12, p.y + (Math.random()-0.5)*12, childGenetics);
                     if (p.tag) {
-                        child.tag = { label: p.tag.label, color: p.tag.color }; // 親の追跡タグを子孫に継承
+                        child.tag = { label: p.tag.label, color: p.tag.color };
                     }
                     particles.push(child);
 
-                    // 疎水性が高い場合、分裂後もバネを形成（多細胞的構造の自発的創発）
                     if (h > 0.4) {
                         createBond(p, child);
                     }
                 }
             }
 
-            // 2. 粒子ペア間のポテンシャル相互作用（レナード＝ジョーンズ ＆ 疎水性 ＆ 静電ポテンシャル）
+            // 2. 空間ハッシュを用いた近傍粒子のポテンシャル相互作用 ($O(N)$ 近傍検索)
             for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    let p1 = particles[i];
-                    let p2 = particles[j];
+                let p1 = particles[i];
+                let neighbors = spatialGrid.getNeighbors(p1, 40);
+
+                for (let j = 0; j < neighbors.length; j++) {
+                    let p2 = neighbors[j];
+                    if (p1.id >= p2.id) continue; // 重複計算の防止
 
                     let dx = p2.x - p1.x;
                     let dy = p2.y - p1.y;
@@ -521,19 +638,15 @@
                         let nx = dx / dist;
                         let ny = dy / dist;
 
-                        // (a) 静電気力 (Coulomb)
                         let q1 = p1.genetics.dna[4];
                         let q2 = p2.genetics.dna[4];
                         let esForce = (q1 * q2) * 0.15 / (dist * 0.1 + 1.0);
 
-                        // (b) 疎水性排除力 (Hydrophobic attraction in aqueous solvent)
                         let h1 = p1.genetics.dna[3];
                         let h2 = p2.genetics.dna[3];
                         let hydrophobicAttraction = (h1 * h2) * 0.25;
 
-                        // 近距離反発
                         let repulsion = dist < minDist ? -0.8 * (1.0 - dist / minDist) : 0;
-
                         let totalForce = esForce - hydrophobicAttraction + repulsion;
 
                         p1.vx -= nx * totalForce;
@@ -541,7 +654,6 @@
                         p2.vx += nx * totalForce;
                         p2.vy += ny * totalForce;
 
-                        // 自発的バネ結合の形成条件
                         if (dist < simParams.bondDistance && Math.random() < 0.05) {
                             createBond(p1, p2);
                         }
@@ -549,14 +661,13 @@
                 }
             }
 
-            // 3. バネ結合力 ＆ 電気-機械結合（運動の創発）
+            // 3. 2粒子間バネ結合力
             for (let i = bonds.length - 1; i >= 0; i--) {
                 let b = bonds[i];
                 let dx = b.p2.x - b.p1.x;
                 let dy = b.p2.y - b.p1.y;
                 let dist = Math.hypot(dx, dy) || 0.001;
 
-                // 内部エネルギーがバネの自然長を振動させる（電気-機械結合 $\beta$）
                 let beta1 = b.p1.genetics.dna[2];
                 let beta2 = b.p2.genetics.dna[2];
                 let dynamicRestLength = b.restLength + Math.sin(globalTicks * 0.15) * (beta1 + beta2) * 3.0 * (b.p1.internalEnergy / 50.0);
@@ -572,10 +683,58 @@
                 b.p2.vx -= nx * force;
                 b.p2.vy -= ny * force;
 
-                // 過酷な引張力による自発的結合破断
                 if (Math.abs(delta) > simParams.breakThreshold) {
                     bonds.splice(i, 1);
                     totalBondsBroken++;
+                }
+            }
+
+            // 4. 結合角ポテンシャル (Angular Springs: p1 - p2 - p3 の角度保持)
+            if (simParams.angleStiffness > 0.001) {
+                for (let p2 of particles) {
+                    if (p2.neighborsBonds.length >= 2) {
+                        // p2 を中心とする隣接粒子トリプレットを抽出
+                        let connectedParticles = [];
+                        for (let b of p2.neighborsBonds) {
+                            connectedParticles.push(b.p1 === p2 ? b.p2 : b.p1);
+                        }
+
+                        for (let a = 0; a < connectedParticles.length; a++) {
+                            for (let c = a + 1; c < connectedParticles.length; c++) {
+                                let p1 = connectedParticles[a];
+                                let p3 = connectedParticles[c];
+
+                                let v1x = p1.x - p2.x, v1y = p1.y - p2.y;
+                                let v2x = p3.x - p2.x, v2y = p3.y - p2.y;
+
+                                let d1 = Math.hypot(v1x, v1y) || 0.001;
+                                let d2 = Math.hypot(v2x, v2y) || 0.001;
+
+                                // ベクトルの内積とクロス積から現在の角度を算出
+                                let dot = (v1x * v2x + v1y * v2y) / (d1 * d2);
+                                dot = Math.max(-1.0, Math.min(1.0, dot));
+                                let currentAngle = Math.acos(dot);
+
+                                // 目標角度 theta_0 (p2 の固有遺伝子パラメータ)
+                                let targetAngle = p2.genetics.dna[6] || Math.PI;
+                                let angleDiff = currentAngle - targetAngle;
+
+                                // 復元トルク・力の計算
+                                let torqueForce = angleDiff * simParams.angleStiffness * 0.1;
+
+                                // 各アームの法線ベクトル
+                                let n1x = -v1y / d1, n1y = v1x / d1;
+                                let n2x = v2y / d2, n2y = -v2x / d2;
+
+                                p1.vx += n1x * torqueForce;
+                                p1.vy += n1y * torqueForce;
+                                p3.vx += n2x * torqueForce;
+                                p3.vy += n2y * torqueForce;
+                                p2.vx -= (n1x + n2x) * torqueForce;
+                                p2.vy -= (n1y + n2y) * torqueForce;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -603,7 +762,6 @@
         function renderUniverse() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 拡散場の描画
             if (currentOverlay !== 'none') {
                 const cellW = canvas.width / GRID_COLS;
                 const cellH = canvas.height / GRID_ROWS;
@@ -642,13 +800,12 @@
                 ctx.stroke();
             }
 
-            // 粒子の物理物性ベース描画 (色・サイズは純粋な物理パラメータ [g0:光吸収, g1:触媒, g3:疎水性] から直接マッピング)
+            // 粒子描画
             for (let p of particles) {
                 ctx.save();
                 ctx.translate(p.x, p.y);
 
                 let g = p.genetics.dna;
-                // [Red: 触媒率, Green: 光吸収率, Blue: 疎水性]
                 let r = Math.floor(Math.min(1.0, g[1]) * 255);
                 let green = Math.floor(Math.min(1.0, g[0]) * 255);
                 let b = Math.floor(Math.min(1.0, g[3]) * 255);
@@ -658,14 +815,12 @@
                 ctx.arc(0, 0, 5.0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 内部エネルギーインジケータ (中心コアの輝き)
                 let energyRatio = Math.min(1.0, p.internalEnergy / 80.0);
                 ctx.fillStyle = `rgba(255, 255, 255, ${energyRatio})`;
                 ctx.beginPath();
                 ctx.arc(0, 0, 2.0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // デバッグタグの描画 (物理法則に影響を与えない純粋な視覚インジケータ)
                 if (p.tag) {
                     ctx.strokeStyle = p.tag.color;
                     ctx.lineWidth = 1.5;
@@ -691,22 +846,29 @@
             const cy = canvas.height / 2;
 
             if (type === 'random_soup') {
-                for (let i = 0; i < 90; i++) {
-                    let px = cx + (Math.random() - 0.5) * 320;
-                    let py = cy + (Math.random() - 0.5) * 240;
+                for (let i = 0; i < 500; i++) {
+                    let px = cx + (Math.random() - 0.5) * 550;
+                    let py = cy + (Math.random() - 0.5) * 400;
                     particles.push(new Particle(px, py));
                 }
-                addLog("🧪 ランダム物理粒子スープを生成：非特定のポテンシャル場の初期化");
+                addLog("🧪 粒子スープ生成：500個の素粒子スープを初期化");
 
             } else if (type === 'hydrophobic_monolayer') {
-                for (let i = 0; i < 60; i++) {
-                    let px = cx + (Math.random() - 0.5) * 200;
-                    let py = cy + (Math.random() - 0.5) * 200;
-                    // 高疎水性 (g3 = 1.5) のパラメータを付与
-                    let g = new GeneticAttributes([0.1, 0.1, 0.1, 1.5, 0.0, 0.8]);
+                for (let i = 0; i < 200; i++) {
+                    let px = cx + (Math.random() - 0.5) * 300;
+                    let py = cy + (Math.random() - 0.5) * 300;
+                    let g = new GeneticAttributes([0.2, 0.2, 0.2, 1.5, 0.0, 0.8, Math.PI]);
                     particles.push(new Particle(px, py, g));
                 }
-                addLog("🫧 高疎水性分子群を初期化：溶媒排除による自発的自転・小胞形成");
+                addLog("🫧 疎水性膜・小胞生成：角度保持ポテンシャル付き二重膜初期化");
+
+            } else if (type === 'dense_crowd') {
+                for (let i = 0; i < 1200; i++) {
+                    let px = cx + (Math.random() - 0.5) * 700;
+                    let py = cy + (Math.random() - 0.5) * 500;
+                    particles.push(new Particle(px, py));
+                }
+                addLog("⚡ 高密度1200粒子生成：Spatial Hash O(N) 演算性能テスト");
             }
         }
 
@@ -714,12 +876,8 @@
             const icon = document.getElementById('hud-day-icon');
             const timeText = document.getElementById('hud-time');
 
-            if (lightVal > 0.4) {
-                icon.className = 'fa-solid fa-sun text-amber-400';
-                timeText.innerText = `照射中 (${lightVal.toFixed(1)})`;
-            } else {
-                icon.className = 'fa-solid fa-moon text-indigo-400';
-                timeText.innerText = `減衰 (${lightVal.toFixed(1)})`;
+            if (timeText) {
+                timeText.innerText = lightVal > 0.4 ? `照射中 (${lightVal.toFixed(1)})` : `減衰 (${lightVal.toFixed(1)})`;
             }
         }
 
@@ -727,16 +885,10 @@
             document.getElementById('hud-particles').innerText = particles.length;
             document.getElementById('hud-bonds').innerText = bonds.length;
 
-            let totalEnergy = particles.reduce((sum, p) => sum + p.internalEnergy, 0);
-            document.getElementById('hud-energy').innerText = totalEnergy.toFixed(1);
-
             document.getElementById('stat-bonds-created').innerText = totalBondsCreated;
             document.getElementById('stat-bonds-broken').innerText = totalBondsBroken;
 
-            // 結合された連結成分（クラスタ）の簡易計測
             document.getElementById('stat-clusters').innerText = calculateClusters();
-
-            // 追跡タグ統計の更新
             updateTagStatistics();
         }
 
@@ -850,6 +1002,15 @@
                     tagPalette.classList.add('hidden');
                 }
             }
+
+            const spawnConfig = document.getElementById('spawn-config-container');
+            if (spawnConfig) {
+                if (tool === 'spawn') {
+                    spawnConfig.classList.remove('hidden');
+                } else {
+                    spawnConfig.classList.add('hidden');
+                }
+            }
         }
 
         function quickSetTag(label, color) {
@@ -917,12 +1078,22 @@
                         p.internalEnergy += 20.0;
                     }
                 }
-            } else if (activeGodTool === 'substrate') {
-                grid.f0[idx] = Math.min(1.0, grid.f0[idx] + 0.5);
-            } else if (activeGodTool === 'proton') {
-                for (let p of particles) {
-                    if (Math.hypot(p.x - mouseX, p.y - mouseY) < 45) {
-                        p.genetics.dna[4] = (Math.random() - 0.5) * 2.0; // 電荷改変
+            } else if (activeGodTool === 'spawn') {
+                // カスタム属性粒子の注入口
+                let g0 = parseFloat(document.getElementById('spawn-g0')?.value || 0.8);
+                let g1 = parseFloat(document.getElementById('spawn-g1')?.value || 0.5);
+                let g3 = parseFloat(document.getElementById('spawn-g3')?.value || 1.2);
+                let g6 = parseFloat(document.getElementById('spawn-g6')?.value || Math.PI);
+
+                let genes = new GeneticAttributes([g0, g1, 0.4, g3, 0.0, 0.8, g6]);
+                let p = new Particle(mouseX + (Math.random()-0.5)*10, mouseY + (Math.random()-0.5)*10, genes);
+                particles.push(p);
+
+            } else if (activeGodTool === 'delete') {
+                // 粒子消去ブラシ
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    if (Math.hypot(particles[i].x - mouseX, particles[i].y - mouseY) < 25) {
+                        removeParticle(i);
                     }
                 }
             } else if (activeGodTool === 'cleave') {
@@ -961,7 +1132,6 @@
             const body = document.getElementById('inspector-body');
             inspector.classList.remove('hidden');
 
-            let idx = grid.index(p.x, p.y);
             let g = p.genetics.dna;
 
             let tagHtml = p.tag
@@ -975,15 +1145,14 @@
                 <div class="flex space-x-1 mb-2">
                     <button onclick="tagSingleParticle('${p.id}')" class="flex-1 py-0.5 bg-pink-900/50 hover:bg-pink-800 border border-pink-500/40 text-pink-300 rounded text-[9px]">タグ付与</button>
                     <button onclick="untagSingleParticle('${p.id}')" class="flex-1 py-0.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 rounded text-[9px]">タグ削除</button>
-                    <button onclick="openTagModal()" class="flex-1 py-0.5 bg-cyan-900/50 hover:bg-cyan-800 border border-cyan-500/40 text-cyan-300 rounded text-[9px]">モダール編集</button>
                 </div>
                 <div class="flex justify-between"><span>粒子ID:</span> <span class="font-mono text-cyan-400 font-bold">${p.id}</span></div>
                 <div class="flex justify-between"><span>内部エネルギー:</span> <span class="font-mono text-yellow-400 font-bold">${p.internalEnergy.toFixed(1)}</span></div>
-                <div class="flex justify-between"><span>光励起率 (α):</span> <span class="font-mono text-emerald-400">${g[0].toFixed(2)}</span></div>
-                <div class="flex justify-between"><span>触媒率 (k_cat):</span> <span class="font-mono text-pink-400">${g[1].toFixed(2)}</span></div>
-                <div class="flex justify-between"><span>電気-機械結合 (β):</span> <span class="font-mono text-amber-400">${g[2].toFixed(2)}</span></div>
-                <div class="flex justify-between"><span>疎水性度 (h):</span> <span class="font-mono text-indigo-400">${g[3].toFixed(2)}</span></div>
-                <div class="flex justify-between"><span>表面電荷 (q):</span> <span class="font-mono text-slate-200">${g[4].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>光励起率 ($\alpha$):</span> <span class="font-mono text-emerald-400">${g[0].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>触媒率 ($k_{cat}$):</span> <span class="font-mono text-pink-400">${g[1].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>電気-機械結合 ($\beta$):</span> <span class="font-mono text-amber-400">${g[2].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>疎水性度 ($h$):</span> <span class="font-mono text-indigo-400">${g[3].toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>固有目標角度 ($\theta_0$):</span> <span class="font-mono text-cyan-300">${((g[6]||Math.PI)*(180/Math.PI)).toFixed(1)}°</span></div>
             `;
         }
 
@@ -1024,7 +1193,7 @@
 
         function stepFrame() {
             if (isRunning) {
-                togglePlay(); // 実行中の場合は一時停止してからコマ送り
+                togglePlay();
             }
             stepPhysics();
             renderUniverse();
@@ -1101,7 +1270,6 @@
                 isMouseDown = false;
             });
 
-            // キーボードショートカット (Space: 再生/停止, → または N: コマ送り)
             window.addEventListener('keydown', (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
                 if (e.code === 'Space') {
@@ -1115,8 +1283,26 @@
         }
 
         function loop() {
+            const now = performance.now();
+            frameCount++;
+            if (now - lastFrameTime >= 1000) {
+                currentFps = frameCount;
+                frameCount = 0;
+                lastFrameTime = now;
+                const fpsElem = document.getElementById('hud-fps');
+                if (fpsElem) fpsElem.innerText = currentFps;
+            }
+
             if (isRunning) {
-                stepPhysics();
+                // simSpeed に応じた物理ステップ実行
+                let steps = Math.floor(simSpeed);
+                if (simSpeed < 1.0) {
+                    if (Math.random() < simSpeed) steps = 1;
+                    else steps = 0;
+                }
+                for (let s = 0; s < steps; s++) {
+                    stepPhysics();
+                }
             }
             renderUniverse();
             animationFrameId = requestAnimationFrame(loop);
@@ -1129,7 +1315,7 @@
         };
     </script>
 
-    <!-- 追跡タグ設定モダール (Modal Window) -->
+    <!-- 追跡タグ設定モダール -->
     <div id="tag-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 hidden">
         <div class="glass-panel p-5 rounded-2xl border border-cyan-500/40 w-80 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">

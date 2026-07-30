@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-slate-950 text-slate-100 select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENESIS v4.5 - Unified Physical Fields Ecology</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#111827', 950: '#030712' }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #080d1a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        canvas { touch-action: none; }
+        .glass-panel {
+            background: rgba(13, 20, 36, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="h-full w-full overflow-hidden flex flex-col font-sans antialiased text-slate-200 bg-slate-950">
+
+    <!-- Top Navigation Header -->
+    <header class="h-14 glass-panel z-30 px-4 flex items-center justify-between shrink-0 border-b border-slate-800">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 via-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-cyan-500/20">
+                G4
+            </div>
+            <div>
+                <h1 class="text-sm font-bold tracking-wider text-slate-100 flex items-center gap-2">
+                    GENESIS <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono border border-cyan-500/30">v4.5 Dynamic Fields Engine</span>
+                </h1>
+                <p class="text-[10px] text-slate-400">Continuous 5-Field Continuous Thermodynamic Ecosystem</p>
+            </div>
+        </div>
+
+        <!-- Simulation Controls -->
+        <div class="flex items-center space-x-2 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+            <button id="btnPlay" class="w-8 h-8 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-all shadow-md shadow-cyan-600/30" title="再生/一時停止">
+                <i class="fa-solid fa-pause text-xs" id="iconPlay"></i>
+            </button>
+            <button id="btnStep" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-all" title="1ステップ進める">
+                <i class="fa-solid fa-forward-step text-xs"></i>
+            </button>
+            <button id="btnReset" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-slate-300 flex items-center justify-center transition-all" title="世界のリセット">
+                <i class="fa-solid fa-rotate-right text-xs"></i>
+            </button>
+            <div class="h-4 w-px bg-slate-800 my-auto"></div>
+            <span class="text-xs font-mono text-slate-400 px-2 flex items-center gap-1.5">
+                <i class="fa-regular fa-clock text-slate-500"></i>
+                <span id="txtStepCount" class="text-cyan-400 font-semibold">0</span>
+            </span>
+        </div>
+
+        <!-- 5-Field Observation Overlays -->
+        <div class="hidden lg:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+            <button data-overlay="normal" class="overlay-btn active px-2 py-1 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/30 transition-all">標準</button>
+            <button data-overlay="light" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-amber-300 transition-all">☀️ 光場(影)</button>
+            <button data-overlay="temp" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-rose-300 transition-all">🌡 温度場</button>
+            <button data-overlay="electric" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-yellow-300 transition-all">⚡ 電位場</button>
+            <button data-overlay="sound" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-cyan-300 transition-all">🔊 音圧波形</button>
+            <button data-overlay="phero" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-300 transition-all">🧪 フェロモン</button>
+            <button data-overlay="flow" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-blue-300 transition-all">🌊 流体渦</button>
+            <button data-overlay="species" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-fuchsia-300 transition-all">🧬 系統種</button>
+        </div>
+
+        <!-- Disasters Dropdown -->
+        <div class="relative">
+            <button id="btnDisasterMenu" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600/30 to-rose-600/30 hover:from-amber-600/50 hover:to-rose-600/50 border border-amber-500/40 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-md">
+                <i class="fa-solid fa-volcano text-amber-400"></i>
+                環境摂理・大災害
+            </button>
+            <div id="disasterDropdown" class="hidden absolute right-0 mt-2 w-52 glass-panel rounded-xl shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 border border-slate-700">
+                <button onclick="triggerDisaster('meteor')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-rose-300 text-xs flex items-center gap-2">☄️ 巨大隕石衝突（衝撃音波・落熱）</button>
+                <button onclick="triggerDisaster('volcano')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 text-xs flex items-center gap-2">🌋 底層熱湧昇（極高熱＋熱風流）</button>
+                <button onclick="triggerDisaster('lightning')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-yellow-300 text-xs flex items-center gap-2">⚡ 超高電圧嵐（全域強磁場スパイク）</button>
+                <button onclick="triggerDisaster('eclipse')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 text-xs flex items-center gap-2">🌑 遮光日蝕（全光場シャットダウン）</button>
+                <button onclick="triggerDisaster('blizzard')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-cyan-300 text-xs flex items-center gap-2">❄ 全球氷河期（熱場急速冷却）</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex overflow-hidden relative">
+        <!-- Left Sidebar: Fields Physics Parameters -->
+        <aside class="w-64 glass-panel border-r border-slate-800 flex flex-col z-10 shrink-0 text-xs">
+            <div class="p-3 border-b border-slate-800 font-semibold text-slate-300 flex items-center justify-between">
+                <span><i class="fa-solid fa-atom text-cyan-400 mr-1.5"></i>場の物理定数パラメーター</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-3 space-y-4">
+                <!-- Sun Light Field Intensity -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400">
+                        <span>☀️ 太陽光場強度</span>
+                        <span id="lblSunlight" class="font-mono text-amber-400">1.5</span>
+                    </div>
+                    <input type="range" id="sliderSunlight" min="0" max="3" step="0.1" value="1.5" class="w-full accent-amber-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Temperature Baseline -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400"><span>🌡 環境拡散温度</span><span id="lblBaseTemp" class="font-mono text-rose-400">22°C</span></div>
+                    <input type="range" id="sliderBaseTemp" min="-10" max="60" step="1" value="22" class="w-full accent-rose-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Electric Conductivity Field -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400"><span>⚡ 電場感応誘電率</span><span id="lblConductivity" class="font-mono text-yellow-400">1.0</span></div>
+                    <input type="range" id="sliderConductivity" min="0.1" max="3" step="0.1" value="1.0" class="w-full accent-yellow-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Sound Speed Wave Prop -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400"><span>🔊 音圧伝播速度(c)</span><span id="lblSoundSpeed" class="font-mono text-cyan-400">1.0</span></div>
+                    <input type="range" id="sliderSoundSpeed" min="0.2" max="2.5" step="0.1" value="1.0" class="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Pheromone Decay Rate -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400"><span>🧪 フェロモン消失速度</span><span id="lblPheroDecay" class="font-mono text-emerald-400">0.97</span></div>
+                    <input type="range" id="sliderPheroDecay" min="0.90" max="0.999" step="0.005" value="0.97" class="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Ocean Flow Drag -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400"><span>🌊 流体渦・ドラッグ</span><span id="lblFlowForce" class="font-mono text-blue-400">0.8</span></div>
+                    <input type="range" id="sliderFlowForce" min="0" max="2.5" step="0.1" value="0.8" class="w-full accent-blue-500 h-1.5 bg-slate-800 rounded">
+                </div>
+
+                <!-- Auto Reseed Toggle -->
+                <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                    <span class="text-slate-400">絶滅時自動播種</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chkAutoReseed" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                    </label>
+                </div>
+
+                <!-- Manual Injection Tools -->
+                <div class="pt-3 border-t border-slate-800/80 space-y-2">
+                    <div class="font-semibold text-slate-400">空間介入・手動注入</div>
+                    <button id="btnSpawn10" class="w-full py-1.5 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-dna"></i> 原始生命 12体創生
+                    </button>
+                    <button id="btnSpawnFoodPhero" class="w-full py-1.5 rounded bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-flask"></i> 餌フェロモン源配置
+                    </button>
+                    <button id="btnPulseElectric" class="w-full py-1.5 rounded bg-yellow-950 hover:bg-yellow-900 border border-yellow-700/50 text-yellow-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> 大容量電位パルスバースト
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Main Canvas Area -->
+        <main class="flex-1 relative bg-slate-950 overflow-hidden flex flex-col">
+            <canvas id="simCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+            <!-- Realtime Multi-Field HUD Stats Overlay -->
+            <div class="absolute top-3 left-3 pointer-events-none space-y-1 font-mono text-[11px] text-slate-300 bg-slate-950/85 p-3 rounded-xl border border-slate-800/80 backdrop-blur-md shadow-2xl">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>生命個体数: <span id="hudPopulation" class="text-cyan-400 font-bold">0</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-fuchsia-400"></span>種多様性: <span id="hudSpeciesCount" class="text-fuchsia-400 font-bold">0</span> 種</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-400"></span>電位場総エネルギー: <span id="hudElectricEnergy" class="text-yellow-400 font-bold">0</span> J</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>フェロモン総濃度: <span id="hudPheroConc" class="text-emerald-400 font-bold">0</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>遮光率(平均影): <span id="hudShadowAvg" class="text-amber-400 font-bold">0%</span></div>
+            </div>
+
+            <!-- Event Toast Container -->
+            <div id="eventLog" class="absolute bottom-4 left-4 pointer-events-none space-y-1.5 font-mono text-xs max-w-sm z-20"></div>
+        </main>
+
+        <!-- Right Sidebar: Individual DNA & Species Tree Inspector -->
+        <aside class="w-80 glass-panel border-l border-slate-800 flex flex-col z-10 shrink-0 text-xs">
+            <div class="flex border-b border-slate-800 text-slate-400 font-mono">
+                <button id="tabInspect" class="flex-1 py-2.5 text-center border-b-2 border-cyan-400 text-cyan-300 font-semibold transition-all">個体ゲノム解析</button>
+                <button id="tabSpecies" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-slate-200 transition-all">種・系統樹</button>
+            </div>
+
+            <!-- Tab 1: Inspector -->
+            <div id="panelInspect" class="flex-1 overflow-y-auto p-3 space-y-3">
+                <div id="inspectorEmpty" class="text-slate-500 text-center py-12 italic space-y-2">
+                    <i class="fa-solid fa-microscope text-2xl text-slate-600 block"></i>
+                    <span>キャンバス上の個体をクリックして<br>5つの場における生理・遺伝状態を解析</span>
+                </div>
+                <div id="inspectorDetail" class="hidden space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <div id="inspColor" class="w-4 h-4 rounded-full border border-white/20 shadow"></div>
+                            <span id="inspId" class="font-mono font-bold text-slate-100 text-sm">#0000</span>
+                        </div>
+                        <span id="inspSpecies" class="px-2 py-0.5 rounded bg-slate-800 font-mono text-[10px] text-cyan-300 border border-slate-700">Species A</span>
+                    </div>
+
+                    <!-- Internal Biological State Gauges -->
+                    <div class="space-y-2 font-mono text-[10px]">
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>内部代謝エネルギー</span><span id="valIntEnergy" class="text-cyan-300">0/100</span></div>
+                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="barIntEnergy" class="h-full bg-cyan-400 transition-all duration-300 w-0"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>蓄電量 (Bio-Battery)</span><span id="valCharge" class="text-yellow-300">0/100</span></div>
+                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="barCharge" class="h-full bg-yellow-400 transition-all duration-300 w-0"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>フェロモン保有量</span><span id="valPheroRes" class="text-emerald-300">0/100</span></div>
+                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="barPheroRes" class="h-full bg-emerald-400 transition-all duration-300 w-0"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>現在地の電位差勾配 |∇V|</span><span id="valGradV" class="text-indigo-300">0.00</span></div>
+                        </div>
+                    </div>
+
+                    <!-- DNA Parameters List (24 Genes) -->
+                    <div class="pt-2 border-t border-slate-800">
+                        <div class="font-semibold text-slate-300 mb-1.5 flex justify-between items-center">
+                            <span>24遺伝子ゲノム構成</span>
+                            <span id="inspGeneration" class="text-[10px] font-mono text-cyan-400">Gen 1</span>
+                        </div>
+                        <div id="dnaGrid" class="grid grid-cols-2 gap-1 font-mono text-[10px] text-slate-400 max-h-48 overflow-y-auto p-1.5 bg-slate-900/90 rounded-lg border border-slate-800/80"></div>
+                    </div>
+
+                    <!-- Spatial Memory Map -->
+                    <div class="pt-2 border-t border-slate-800">
+                        <div class="font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                            <span>空間記憶ベクトル (Spatial Memory)</span>
+                            <span id="inspMemCount" class="text-cyan-400 font-mono">0</span>
+                        </div>
+                        <div id="memList" class="space-y-1 font-mono text-[10px] text-slate-400 max-h-24 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Species Tree -->
+            <div id="panelSpecies" class="hidden flex-1 flex flex-col overflow-hidden p-3 space-y-3">
+                <div class="text-slate-300 font-semibold flex justify-between items-center">
+                    <span>種分類ランキング</span>
+                    <span id="lblTotalSpecies" class="text-cyan-400 font-mono">0 種</span>
+                </div>
+                <div id="speciesList" class="space-y-1.5 overflow-y-auto max-h-40 pr-1 font-mono text-[11px]"></div>
+
+                <!-- Realtime Phylogenetic Tree Canvas -->
+                <div class="pt-2 border-t border-slate-800 flex-1 flex flex-col min-h-0">
+                    <div class="text-slate-300 font-semibold mb-1 flex justify-between items-center">
+                        <span>分岐系統樹 (Phylogeny)</span>
+                    </div>
+                    <div class="flex-1 bg-slate-900/90 rounded-lg border border-slate-800 relative overflow-hidden">
+                        <canvas id="treeCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        /* --- 5-Field Physical System Configuration --- */
+        const GRID_RES = 32; // 32x32 Grid Fields Resolution
+        const GRID_COUNT = GRID_RES * GRID_RES;
+        let simCanvas, ctx, treeCanvas, treeCtx;
+        let width = 800, height = 600;
+
+        // 1. Light Field (Top-down propagation with shadow occlusion)
+        let lightGrid = new Float32Array(GRID_COUNT);
+        
+        // 2. Temperature Field (Diffusion & Heat Sources)
+        let tempGrid = new Float32Array(GRID_COUNT);
+        let tempGridNext = new Float32Array(GRID_COUNT);
+
+        // 3. Electric Potential Field (Voltage Grid & Electric Current)
+        let electricPotential = new Float32Array(GRID_COUNT);
+        let electricPotentialNext = new Float32Array(GRID_COUNT);
+
+        // 4. Sound Pressure Field (2D Wave Equation: Pressure & Velocity)
+        let soundPressure = new Float32Array(GRID_COUNT);
+        let soundVel = new Float32Array(GRID_COUNT);
+
+        // 5. Chemical Pheromone Fields (3 Channels: Food / Danger / Trail)
+        let pheroFood = new Float32Array(GRID_COUNT);
+        let pheroDanger = new Float32Array(GRID_COUNT);
+        let pheroTrail = new Float32Array(GRID_COUNT);
+
+        // 6. Fluid Field (Navier-Stokes Curl & Flow Drift)
+        let flowX = new Float32Array(GRID_COUNT);
+        let flowY = new Float32Array(GRID_COUNT);
+
+        // Environmental Sliders & State Variables
+        let sunlightIntensity = 1.5;
+        let baseTemperature = 22.0;
+        let conductivityMultiplier = 1.0;
+        let soundSpeed = 1.0;
+        let pheroDecayRate = 0.97;
+        let flowForceMultiplier = 0.8;
+        let autoReseedEnabled = true;
+
+        let stepCounter = 0;
+        let isRunning = true;
+        let currentOverlayMode = 'normal';
+
+        // Simulation Entities
+        let particles = [];
+        let selectedParticle = null;
+        let speciesMap = new Map();
+        let nextParticleId = 1;
+        let nextSpeciesId = 1;
+
+        // 24 DNA Genomic Attributes
+        const DNA_KEYS = [
+            'speed', 'size', 'photosynthesis', 'attack', 'defense',
+            'emitSoundFreq', 'hearSoundFreq', 'soundEcholocation',
+            'bioElectricityGen', 'electricCapacitance', 'electricConductivity', 'chargeTheft',
+            'heatResistance', 'preferredTemp', 'mutationRate', 'camouflage',
+            'aggression', 'sociality', 'curiosity', 'reprodThreshold',
+            'pheroEmitFood', 'pheroEmitDanger', 'pheroEmitTrail', 'lifespan'
+        ];
+
+        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+        function distSq(x1, y1, x2, y2) { return (x2 - x1) ** 2 + (y2 - y1) ** 2; }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            if (s === 0) { r = g = b = l; } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        /* --- STREAMING_CHUNK:Implementing Particle (Organism) Life Logic & 5-Field Sensory... --- */
+        class Particle {
+            constructor(x, y, dna = null, parent = null) {
+                this.id = nextParticleId++;
+                this.parentId = parent ? parent.id : null;
+                this.generation = parent ? (parent.generation + 1) : 1;
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+
+                // Internal State
+                this.internalEnergy = 70;
+                this.electricCharge = (Math.random() - 0.5) * 10;
+                this.pheroReserve = 30;
+                this.heat = baseTemperature;
+                this.age = 0;
+                this.alive = true;
+                this.memory = [];
+
+                // DNA Gene Copying / Mutation
+                this.dna = {};
+                if (dna) {
+                    const mutRate = dna.mutationRate || 0.05;
+                    for (let key of DNA_KEYS) {
+                        let val = dna[key];
+                        if (Math.random() < mutRate) {
+                            val += (Math.random() - 0.5) * 0.16;
+                        }
+                        this.dna[key] = clamp(val, 0.01, 1.0);
+                    }
+                } else {
+                    for (let key of DNA_KEYS) {
+                        this.dna[key] = Math.random();
+                    }
+                }
+
+                this.speciesId = classifySpecies(this.dna, parent ? parent.speciesId : null);
+            }
+
+            get radius() {
+                return 3.5 + this.dna.size * 7.5;
+            }
+
+            get color() {
+                const sp = speciesMap.get(this.speciesId);
+                return sp ? sp.color : '#38bdf8';
+            }
+
+            update() {
+                this.age++;
+                const safeW = width || 800;
+                const safeH = height || 600;
+
+                const gx = clamp(Math.floor((this.x / safeW) * GRID_RES), 0, GRID_RES - 1);
+                const gy = clamp(Math.floor((this.y / safeH) * GRID_RES), 0, GRID_RES - 1);
+                const gIdx = gy * GRID_RES + gx;
+
+                /* --- FIELD INTERACTION 1: Light Field & Photosynthesis --- */
+                const ambientLight = lightGrid[gIdx] || 0;
+                const sunHarvest = ambientLight * this.dna.photosynthesis * 0.35;
+                this.internalEnergy += sunHarvest;
+
+                /* --- FIELD INTERACTION 2: Electric Field & Potential Harvest --- */
+                // Calculate electric potential gradient vector: Grad V = (dV/dx, dV/dy)
+                const gxL = clamp(gx - 1, 0, GRID_RES - 1);
+                const gxR = clamp(gx + 1, 0, GRID_RES - 1);
+                const gyU = clamp(gy - 1, 0, GRID_RES - 1);
+                const gyD = clamp(gy + 1, 0, GRID_RES - 1);
+
+                const dVdx = (electricPotential[gy * GRID_RES + gxR] - electricPotential[gy * GRID_RES + gxL]) * 0.5;
+                const dVdy = (electricPotential[gyD * GRID_RES + gx] - electricPotential[gyU * GRID_RES + gx]) * 0.5;
+                const gradV = Math.sqrt(dVdx * dVdx + dVdy * dVdy);
+
+                // Bio-electric harvest from gradient
+                const electricHarvest = gradV * this.dna.bioElectricityGen * 1.8;
+                this.internalEnergy += electricHarvest;
+                this.electricCharge += dVdx * 0.2;
+
+                // Charge accumulation & field deposition
+                electricPotential[gIdx] += this.electricCharge * 0.02 * (this.dna.electricConductivity * conductivityMultiplier);
+
+                /* --- FIELD INTERACTION 3: Temperature Field Metabolism --- */
+                const envTemp = tempGrid[gIdx] || baseTemperature;
+                this.heat += (envTemp - this.heat) * 0.1;
+                const tempFactor = Math.pow(1.04, clamp(this.heat - 20, -20, 40));
+                const basalMetabolism = (0.04 + this.dna.size * 0.05 + this.dna.speed * 0.04) * tempFactor;
+                this.internalEnergy -= basalMetabolism;
+
+                /* --- FIELD INTERACTION 4: Pheromone Emission & Sensing --- */
+                // Emit pheromones into 3 chemical fields
+                if (this.pheroReserve > 0.5) {
+                    if (this.dna.pheroEmitFood > 0.6) { pheroFood[gIdx] += 0.4; this.pheroReserve -= 0.1; }
+                    if (this.dna.pheroEmitDanger > 0.6) { pheroDanger[gIdx] += 0.4; this.pheroReserve -= 0.1; }
+                    if (this.dna.pheroEmitTrail > 0.4) { pheroTrail[gIdx] += 0.3; this.pheroReserve -= 0.05; }
+                }
+                this.pheroReserve = Math.min(100, this.pheroReserve + 0.15); // Passive recharge
+
+                // Pheromone Gradient Steering (Ant/Swarm behaviour)
+                const pFoodU = pheroFood[gyU * GRID_RES + gx], pFoodD = pheroFood[gyD * GRID_RES + gx];
+                const pFoodL = pheroFood[gy * GRID_RES + gxL], pFoodR = pheroFood[gy * GRID_RES + gxR];
+                const pDangerU = pheroDanger[gyU * GRID_RES + gx], pDangerD = pheroDanger[gyD * GRID_RES + gx];
+
+                let pheroSteerX = (pFoodR - pFoodL) * 0.6;
+                let pheroSteerY = (pFoodD - pFoodU) * 0.6 - (pDangerD - pDangerU) * 0.8;
+
+                /* --- FIELD INTERACTION 5: Sound Pressure Sensing & Echolocation --- */
+                const currentSound = soundPressure[gIdx];
+                if (Math.abs(currentSound) > 0.1) {
+                    // Sound pulse emission / reaction
+                    if (this.dna.soundEcholocation > 0.5) {
+                        // Steer towards or away from sound source
+                        pheroSteerX += (Math.random() - 0.5) * currentSound * 2;
+                    }
+                }
+                // Emit sound wave into sound field when moving fast or attacking
+                if (Math.random() < 0.08) {
+                    soundPressure[gIdx] += (this.dna.emitSoundFreq - 0.5) * 1.5;
+                }
+
+                /* --- Fluid Drag Drift --- */
+                this.vx += flowX[gIdx] * flowForceMultiplier * 0.06 + pheroSteerX * 0.15;
+                this.vy += flowY[gIdx] * flowForceMultiplier * 0.06 + pheroSteerY * 0.15;
+
+                // Velocity clamping
+                const maxSpeed = 0.5 + this.dna.speed * 2.2;
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy) || 1;
+                if (speed > maxSpeed) {
+                    this.vx = (this.vx / speed) * maxSpeed;
+                    this.vy = (this.vy / speed) * maxSpeed;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.94;
+                this.vy *= 0.94;
+
+                // Boundary bounce & Sound reflection on walls
+                if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; soundPressure[gIdx] += 0.5; }
+                if (this.x > safeW - this.radius) { this.x = safeW - this.radius; this.vx *= -1; soundPressure[gIdx] += 0.5; }
+                if (this.y < this.radius) { this.y = this.radius; this.vy *= -1; soundPressure[gIdx] += 0.5; }
+                if (this.y > safeH - this.radius) { this.y = safeH - this.radius; this.vy *= -1; soundPressure[gIdx] += 0.5; }
+
+                /* --- Life Checks & Reproduction --- */
+                const maxAge = 700 + this.dna.lifespan * 2500;
+                const maxTemp = 60 + this.dna.heatResistance * 30;
+
+                if (this.internalEnergy <= 0 || this.age > maxAge || this.heat > maxTemp) {
+                    this.die();
+                } else {
+                    const reproThresh = 80 + this.dna.reprodThreshold * 80;
+                    if (this.internalEnergy > reproThresh) {
+                        this.reproduce();
+                    }
+                }
+            }
+
+            addMemory(x, y, type) {
+                if (this.memory.length > 5) this.memory.shift();
+                this.memory.push({ x, y, type, age: 0 });
+            }
+
+            reproduce() {
+                this.internalEnergy *= 0.45;
+                const child = new Particle(
+                    this.x + (Math.random() - 0.5) * 16,
+                    this.y + (Math.random() - 0.5) * 16,
+                    this.dna,
+                    this
+                );
+                particles.push(child);
+            }
+
+            die() {
+                this.alive = false;
+                // Dead body deposits heat & food pheromone into the fields
+                const gx = clamp(Math.floor((this.x / (width || 800)) * GRID_RES), 0, GRID_RES - 1);
+                const gy = clamp(Math.floor((this.y / (height || 600)) * GRID_RES), 0, GRID_RES - 1);
+                const idx = gy * GRID_RES + gx;
+                pheroFood[idx] += 3.5 + this.dna.size * 3.0;
+                tempGrid[idx] += 2.0;
+            }
+
+            draw(ctx, mode) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                if (mode === 'normal' || mode === 'species') {
+                    // Outer Membrane
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = 0.3 + this.dna.camouflage * 0.6;
+                    ctx.fill();
+
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = Math.abs(this.electricCharge) > 5 ? '#facc15' : this.color;
+                    ctx.stroke();
+
+                    // Energy Core
+                    ctx.beginPath();
+                    const eRatio = clamp(this.internalEnergy / 100, 0, 1);
+                    ctx.arc(0, 0, Math.max(1, this.radius * eRatio * 0.65), 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.globalAlpha = 0.9;
+                    ctx.fill();
+                } else if (mode === 'light') {
+                    // Draw shadow footprint
+                    ctx.beginPath();
+                    ctx.arc(0, 4, this.radius * 1.4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fill();
+                } else if (mode === 'electric') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius + Math.abs(this.electricCharge) * 0.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = this.electricCharge > 0 ? '#facc15' : '#38bdf8';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+
+                // Selection Ring
+                if (selectedParticle === this) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius + 6, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#22d3ee';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        /* --- STREAMING_CHUNK:Species Classification & Dynamic Field Differential Solvers... --- */
+        function classifySpecies(dna, parentSpeciesId) {
+            let bestId = null;
+            let minDist = Infinity;
+
+            speciesMap.forEach((sp, id) => {
+                let dist = 0;
+                for (let key of DNA_KEYS) {
+                    dist += (dna[key] - sp.avgDna[key]) ** 2;
+                }
+                dist = Math.sqrt(dist);
+                if (dist < minDist) {
+                    minDist = dist;
+                    bestId = id;
+                }
+            });
+
+            if (minDist < 0.60 && bestId !== null) {
+                return bestId;
+            } else {
+                const newId = nextSpeciesId++;
+                const hue = (newId * 137.5) % 360;
+                const [r, g, b] = hslToRgb(hue / 360, 0.85, 0.6);
+                const colorHex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+
+                speciesMap.set(newId, {
+                    id: newId,
+                    name: `Species ${String.fromCharCode(65 + (newId - 1) % 26)}-${newId}`,
+                    color: colorHex,
+                    count: 0,
+                    avgDna: Object.assign({}, dna),
+                    ancestorId: parentSpeciesId
+                });
+                return newId;
+            }
+        }
+
+        /* --- 5 Dynamic Fields PDE Math Differential Solvers --- */
+        function updateAllFields() {
+            // 1. Light Field Computation (Top-down ray occlusion)
+            // Clear light grid
+            lightGrid.fill(0);
+            const occlusionGrid = new Float32Array(GRID_COUNT);
+
+            // Compute organism opacity footprint
+            for (let p of particles) {
+                if (!p.alive) continue;
+                const gx = clamp(Math.floor((p.x / (width || 800)) * GRID_RES), 0, GRID_RES - 1);
+                const gy = clamp(Math.floor((p.y / (height || 600)) * GRID_RES), 0, GRID_RES - 1);
+                occlusionGrid[gy * GRID_RES + gx] += 0.3 + p.dna.size * 0.4;
+            }
+
+            for (let x = 0; x < GRID_RES; x++) {
+                let currentLight = sunlightIntensity;
+                for (let y = 0; y < GRID_RES; y++) {
+                    const idx = y * GRID_RES + x;
+                    lightGrid[idx] = currentLight;
+                    // Light gets absorbed as it travels downwards
+                    currentLight = Math.max(0, currentLight - occlusionGrid[idx]);
+                }
+            }
+
+            // 2. Temperature Field Diffusion
+            for (let y = 0; y < GRID_RES; y++) {
+                for (let x = 0; x < GRID_RES; x++) {
+                    const idx = y * GRID_RES + x;
+                    let sum = tempGrid[idx] * 4;
+                    let count = 4;
+                    if (x > 0) { sum += tempGrid[idx - 1]; count++; }
+                    if (x < GRID_RES - 1) { sum += tempGrid[idx + 1]; count++; }
+                    if (y > 0) { sum += tempGrid[idx - GRID_RES]; count++; }
+                    if (y < GRID_RES - 1) { sum += tempGrid[idx + GRID_RES]; count++; }
+                    const avg = sum / count;
+                    tempGridNext[idx] = avg + (baseTemperature - avg) * 0.02;
+                }
+            }
+            tempGrid.set(tempGridNext);
+
+            // 3. Electric Potential Poisson Diffusion Grid
+            for (let y = 0; y < GRID_RES; y++) {
+                for (let x = 0; x < GRID_RES; x++) {
+                    const idx = y * GRID_RES + x;
+                    let sum = 0;
+                    let count = 0;
+                    if (x > 0) { sum += electricPotential[idx - 1]; count++; }
+                    if (x < GRID_RES - 1) { sum += electricPotential[idx + 1]; count++; }
+                    if (y > 0) { sum += electricPotential[idx - GRID_RES]; count++; }
+                    if (y < GRID_RES - 1) { sum += electricPotential[idx + GRID_RES]; count++; }
+                    const avg = sum / count;
+                    electricPotentialNext[idx] = avg * 0.95; // Natural voltage discharge
+                }
+            }
+            electricPotential.set(electricPotentialNext);
+
+            // 4. Sound Pressure 2D Wave Equation Solver: ∂²p/∂t² = c² ∇²p
+            const c2 = 0.25 * soundSpeed * soundSpeed;
+            for (let y = 1; y < GRID_RES - 1; y++) {
+                for (let x = 1; x < GRID_RES - 1; x++) {
+                    const idx = y * GRID_RES + x;
+                    const laplacian = soundPressure[idx - 1] + soundPressure[idx + 1] + 
+                                      soundPressure[idx - GRID_RES] + soundPressure[idx + GRID_RES] - 4 * soundPressure[idx];
+                    soundVel[idx] += laplacian * c2;
+                    soundVel[idx] *= 0.96; // Damping
+                    soundPressure[idx] += soundVel[idx];
+                }
+            }
+
+            // 5. Pheromone Decay & Diffusion
+            for (let i = 0; i < GRID_COUNT; i++) {
+                pheroFood[i] *= pheroDecayRate;
+                pheroDanger[i] *= pheroDecayRate;
+                pheroTrail[i] *= pheroDecayRate;
+            }
+
+            // 6. Ocean Fluid Flow Simulation
+            const time = stepCounter * 0.02;
+            for (let y = 0; y < GRID_RES; y++) {
+                for (let x = 0; x < GRID_RES; x++) {
+                    const idx = y * GRID_RES + x;
+                    flowX[idx] = Math.sin(y * 0.2 + time) * 1.5;
+                    flowY[idx] = Math.cos(x * 0.2 + time) * 1.5;
+                }
+            }
+
+            // Automatic Reseed Safety Check
+            if (autoReseedEnabled && particles.length === 0 && stepCounter % 80 === 0) {
+                logEvent('🌱 個体数がゼロのため生命を再播種しました');
+                for (let i = 0; i < 12; i++) {
+                    particles.push(new Particle(Math.random() * width, Math.random() * height));
+                }
+            }
+        }
+
+        /* --- Organism Inter-actions (Predation, Electric Theft) --- */
+        function handleInteractions() {
+            const pCount = particles.length;
+            for (let i = 0; i < pCount; i++) {
+                const p1 = particles[i];
+                if (!p1.alive) continue;
+
+                for (let j = i + 1; j < pCount; j++) {
+                    const p2 = particles[j];
+                    if (!p2.alive) continue;
+
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const rSum = p1.radius + p2.radius;
+                    const d2 = dx * dx + dy * dy;
+
+                    if (d2 < rSum * rSum) {
+                        // Electric Theft (Power Drain)
+                        if (p1.dna.chargeTheft > p2.dna.electricConductivity) {
+                            const drain = Math.min(p2.electricCharge, 2.0);
+                            p2.electricCharge -= drain;
+                            p1.electricCharge += drain;
+                        }
+
+                        // Predation Check
+                        if (p1.dna.aggression > p2.dna.defense + 0.2 && p1.radius > p2.radius * 0.8) {
+                            p1.internalEnergy += p2.internalEnergy * 0.7;
+                            p2.die();
+                            soundPressure[clamp(Math.floor((p1.y / height) * GRID_RES), 0, GRID_RES - 1) * GRID_RES + clamp(Math.floor((p1.x / width) * GRID_RES), 0, GRID_RES - 1)] += 2.0;
+                            continue;
+                        } else if (p2.dna.aggression > p1.dna.defense + 0.2 && p2.radius > p1.radius * 0.8) {
+                            p2.internalEnergy += p1.internalEnergy * 0.7;
+                            p1.die();
+                            soundPressure[clamp(Math.floor((p2.y / height) * GRID_RES), 0, GRID_RES - 1) * GRID_RES + clamp(Math.floor((p2.x / width) * GRID_RES), 0, GRID_RES - 1)] += 2.0;
+                            break;
+                        }
+
+                        // Physical Elastic Bounce
+                        const d = Math.sqrt(d2) || 1;
+                        const overlap = rSum - d;
+                        const nx = dx / d;
+                        const ny = dy / d;
+                        p1.x -= nx * overlap * 0.5;
+                        p1.y -= ny * overlap * 0.5;
+                        p2.x += nx * overlap * 0.5;
+                        p2.y += ny * overlap * 0.5;
+                    }
+                }
+            }
+        }
+
+        /* --- Global Disasters Engine --- */
+        function triggerDisaster(type) {
+            logEvent(`⚠️ 環境摂理災害: ${type.toUpperCase()}`);
+
+            if (type === 'meteor') {
+                const cx = Math.floor(GRID_RES / 2);
+                soundPressure[cx * GRID_RES + cx] += 15.0;
+                for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] += 25;
+                for (let p of particles) p.internalEnergy -= 50;
+            } else if (type === 'volcano') {
+                for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] += 40;
+            } else if (type === 'lightning') {
+                for (let i = 0; i < GRID_COUNT; i++) electricPotential[i] += (Math.random() - 0.5) * 80;
+            } else if (type === 'eclipse') {
+                sunlightIntensity = 0.0;
+                document.getElementById('sliderSunlight').value = 0;
+                document.getElementById('lblSunlight').innerText = '0.0';
+                setTimeout(() => {
+                    sunlightIntensity = 1.5;
+                    document.getElementById('sliderSunlight').value = 1.5;
+                    document.getElementById('lblSunlight').innerText = '1.5';
+                }, 7000);
+            } else if (type === 'blizzard') {
+                for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] -= 35;
+            }
+        }
+
+        /* --- STREAMING_CHUNK:Canvas Rendering Engine for 5 Multi-Fields & Entities... --- */
+        function renderCanvas(mode) {
+            ctx.clearRect(0, 0, width, height);
+            const cellW = width / GRID_RES;
+            const cellH = height / GRID_RES;
+
+            // Render Field Overlays
+            if (mode === 'light') {
+                for (let y = 0; y < GRID_RES; y++) {
+                    for (let x = 0; x < GRID_RES; x++) {
+                        const val = lightGrid[y * GRID_RES + x];
+                        const norm = clamp(val / 2.0, 0, 1);
+                        ctx.fillStyle = `rgba(245, 158, 11, ${0.4 * (1 - norm)})`; // Darker shadow
+                        ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
+                    }
+                }
+            } else if (mode === 'temp') {
+                for (let y = 0; y < GRID_RES; y++) {
+                    for (let x = 0; x < GRID_RES; x++) {
+                        const temp = tempGrid[y * GRID_RES + x];
+                        const norm = clamp((temp + 10) / 70, 0, 1);
+                        const [r, g, b] = hslToRgb((1 - norm) * 0.65, 0.85, 0.45);
+                        ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+                        ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
+                    }
+                }
+            } else if (mode === 'electric') {
+                for (let y = 0; y < GRID_RES; y++) {
+                    for (let x = 0; x < GRID_RES; x++) {
+                        const v = electricPotential[y * GRID_RES + x];
+                        if (Math.abs(v) > 0.1) {
+                            ctx.fillStyle = v > 0 ? `rgba(250, 204, 21, ${clamp(v / 20, 0, 0.7)})` : `rgba(56, 189, 248, ${clamp(-v / 20, 0, 0.7)})`;
+                            ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
+                        }
+                    }
+                }
+            } else if (mode === 'sound') {
+                for (let y = 0; y < GRID_RES; y++) {
+                    for (let x = 0; x < GRID_RES; x++) {
+                        const p = soundPressure[y * GRID_RES + x];
+                        if (Math.abs(p) > 0.05) {
+                            ctx.fillStyle = `rgba(34, 211, 238, ${clamp(Math.abs(p), 0, 0.8)})`;
+                            ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
+                        }
+                    }
+                }
+            } else if (mode === 'phero') {
+                for (let y = 0; y < GRID_RES; y++) {
+                    for (let x = 0; x < GRID_RES; x++) {
+                        const idx = y * GRID_RES + x;
+                        const f = pheroFood[idx];
+                        const d = pheroDanger[idx];
+                        if (f > 0.05 || d > 0.05) {
+                            ctx.fillStyle = f > d ? `rgba(16, 185, 129, ${clamp(f / 5, 0, 0.7)})` : `rgba(244, 63, 94, ${clamp(d / 5, 0, 0.7)})`;
+                            ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
+                        }
+                    }
+                }
+            }
+
+            // Render Organism Particles
+            for (let p of particles) {
+                p.draw(ctx, mode);
+            }
+        }
+
+        /* --- STREAMING_CHUNK:Phylogenetic Tree Rendering & Realtime Dashboard Updates... --- */
+        function renderPhylogeneticTree() {
+            if (!treeCtx) return;
+            const tw = treeCanvas.width;
+            const th = treeCanvas.height;
+            treeCtx.clearRect(0, 0, tw, th);
+
+            const activeSpecies = Array.from(speciesMap.values()).filter(s => s.count > 0);
+            if (activeSpecies.length === 0) return;
+
+            const nodeYStep = th / (activeSpecies.length + 1);
+
+            activeSpecies.forEach((sp, idx) => {
+                const ny = (idx + 1) * nodeYStep;
+                const nx = tw - 25;
+
+                treeCtx.beginPath();
+                treeCtx.arc(nx, ny, 4.5, 0, Math.PI * 2);
+                treeCtx.fillStyle = sp.color;
+                treeCtx.fill();
+
+                if (sp.ancestorId && speciesMap.has(sp.ancestorId)) {
+                    const ancIdx = activeSpecies.findIndex(s => s.id === sp.ancestorId);
+                    if (ancIdx !== -1) {
+                        const any = (ancIdx + 1) * nodeYStep;
+                        const anx = nx - 55;
+                        treeCtx.beginPath();
+                        treeCtx.moveTo(nx, ny);
+                        treeCtx.lineTo(anx, ny);
+                        treeCtx.lineTo(anx, any);
+                        treeCtx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+                        treeCtx.lineWidth = 1.2;
+                        treeCtx.stroke();
+                    }
+                }
+
+                treeCtx.fillStyle = '#cbd5e1';
+                treeCtx.font = '9px JetBrains Mono, monospace';
+                treeCtx.fillText(sp.name, nx - 85, ny - 6);
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('txtStepCount').innerText = stepCounter;
+            document.getElementById('hudPopulation').innerText = particles.length;
+
+            speciesMap.forEach(sp => sp.count = 0);
+            let totalElectric = 0;
+            let totalPhero = 0;
+            let totalShadow = 0;
+
+            for (let p of particles) {
+                const sp = speciesMap.get(p.speciesId);
+                if (sp) sp.count++;
+            }
+
+            for (let i = 0; i < GRID_COUNT; i++) {
+                totalElectric += Math.abs(electricPotential[i]);
+                totalPhero += pheroFood[i] + pheroDanger[i] + pheroTrail[i];
+                totalShadow += (sunlightIntensity - lightGrid[i]);
+            }
+
+            const activeSpeciesCount = Array.from(speciesMap.values()).filter(s => s.count > 0).length;
+            document.getElementById('hudSpeciesCount').innerText = activeSpeciesCount;
+            document.getElementById('hudElectricEnergy').innerText = Math.round(totalElectric);
+            document.getElementById('hudPheroConc').innerText = Math.round(totalPhero);
+            document.getElementById('hudShadowAvg').innerText = `${Math.round((totalShadow / (GRID_COUNT * sunlightIntensity || 1)) * 100)}%`;
+
+            // Inspector Detail Panel Update
+            if (selectedParticle) {
+                if (!selectedParticle.alive) {
+                    selectedParticle = null;
+                    document.getElementById('inspectorEmpty').classList.remove('hidden');
+                    document.getElementById('inspectorDetail').classList.add('hidden');
+                } else {
+                    document.getElementById('inspectorEmpty').classList.add('hidden');
+                    document.getElementById('inspectorDetail').classList.remove('hidden');
+
+                    document.getElementById('inspId').innerText = `#${selectedParticle.id}`;
+                    document.getElementById('inspGeneration').innerText = `Gen ${selectedParticle.generation}`;
+                    document.getElementById('inspColor').style.backgroundColor = selectedParticle.color;
+
+                    const sp = speciesMap.get(selectedParticle.speciesId);
+                    document.getElementById('inspSpecies').innerText = sp ? sp.name : 'Unknown';
+
+                    document.getElementById('valIntEnergy').innerText = `${Math.round(selectedParticle.internalEnergy)}/100`;
+                    document.getElementById('barIntEnergy').style.width = `${clamp(selectedParticle.internalEnergy, 0, 100)}%`;
+
+                    document.getElementById('valCharge').innerText = `${Math.round(selectedParticle.electricCharge)}`;
+                    document.getElementById('barCharge').style.width = `${clamp(Math.abs(selectedParticle.electricCharge), 0, 100)}%`;
+
+                    document.getElementById('valPheroRes').innerText = `${Math.round(selectedParticle.pheroReserve)}/100`;
+                    document.getElementById('barPheroRes').style.width = `${clamp(selectedParticle.pheroReserve, 0, 100)}%`;
+
+                    // DNA Grid Table (24 Genes)
+                    const dnaGrid = document.getElementById('dnaGrid');
+                    dnaGrid.innerHTML = '';
+                    for (let key of DNA_KEYS) {
+                        const div = document.createElement('div');
+                        div.className = 'flex justify-between border-b border-slate-800/60 py-0.5 px-1';
+                        div.innerHTML = `<span class="text-slate-500">${key}:</span><span class="text-slate-200">${selectedParticle.dna[key].toFixed(2)}</span>`;
+                        dnaGrid.appendChild(div);
+                    }
+                }
+            }
+
+            // Species Ranking List UI
+            const speciesListEl = document.getElementById('speciesList');
+            document.getElementById('lblTotalSpecies').innerText = `${activeSpeciesCount} 種アクティブ`;
+            speciesListEl.innerHTML = '';
+
+            const sortedSpecies = Array.from(speciesMap.values()).sort((a, b) => b.count - a.count);
+            for (let sp of sortedSpecies) {
+                if (sp.count === 0) continue;
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800/80';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full" style="background-color:${sp.color}"></div>
+                        <span class="text-slate-200">${sp.name}</span>
+                    </div>
+                    <span class="text-cyan-400 font-bold">${sp.count}体</span>
+                `;
+                speciesListEl.appendChild(item);
+            }
+        }
+
+        function logEvent(msg) {
+            const logEl = document.getElementById('eventLog');
+            const div = document.createElement('div');
+            div.className = 'bg-slate-900/95 text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/40 backdrop-blur-md shadow-lg transition-all';
+            div.innerText = msg;
+            logEl.appendChild(div);
+            setTimeout(() => { div.remove(); }, 4000);
+        }
+
+        /* --- Main Event Loop & Window Bindings --- */
+        function simLoop() {
+            if (isRunning) {
+                stepCounter++;
+                updateAllFields();
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    if (!particles[i].alive) particles.splice(i, 1);
+                }
+                handleInteractions();
+            }
+
+            renderCanvas(currentOverlayMode);
+            renderPhylogeneticTree();
+            updateUI();
+
+            requestAnimationFrame(simLoop);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            simCanvas = document.getElementById('simCanvas');
+            ctx = simCanvas.getContext('2d');
+            treeCanvas = document.getElementById('treeCanvas');
+            treeCtx = treeCanvas.getContext('2d');
+
+            function resize() {
+                const parent = simCanvas.parentElement;
+                width = simCanvas.width = Math.max(1, parent.clientWidth);
+                height = simCanvas.height = Math.max(1, parent.clientHeight);
+
+                const treeParent = treeCanvas.parentElement;
+                treeCanvas.width = Math.max(1, treeParent.clientWidth);
+                treeCanvas.height = Math.max(1, treeParent.clientHeight);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Initialize Temperature Field
+            for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] = baseTemperature;
+
+            // Spawn Initial Organism Population
+            for (let i = 0; i < 24; i++) {
+                particles.push(new Particle(Math.random() * width, Math.random() * height));
+            }
+
+            // Click Selection
+            simCanvas.addEventListener('pointerdown', (e) => {
+                const rect = simCanvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                let clicked = null;
+                for (let p of particles) {
+                    if (distSq(clickX, clickY, p.x, p.y) < (p.radius + 8) ** 2) {
+                        clicked = p;
+                        break;
+                    }
+                }
+                selectedParticle = clicked;
+            });
+
+            // Control Buttons
+            document.getElementById('btnPlay').addEventListener('click', function() {
+                isRunning = !isRunning;
+                document.getElementById('iconPlay').className = isRunning ? 'fa-solid fa-pause text-xs' : 'fa-solid fa-play text-xs';
+            });
+            document.getElementById('btnStep').addEventListener('click', () => {
+                isRunning = false;
+                document.getElementById('iconPlay').className = 'fa-solid fa-play text-xs';
+                stepCounter++;
+                updateAllFields();
+                for (let p of particles) p.update();
+                handleInteractions();
+            });
+            document.getElementById('btnReset').addEventListener('click', () => {
+                particles = [];
+                speciesMap.clear();
+                stepCounter = 0;
+                nextParticleId = 1;
+                nextSpeciesId = 1;
+                selectedParticle = null;
+                pheroFood.fill(0); pheroDanger.fill(0); pheroTrail.fill(0);
+                electricPotential.fill(0); soundPressure.fill(0);
+                for (let i = 0; i < 24; i++) {
+                    particles.push(new Particle(Math.random() * width, Math.random() * height));
+                }
+            });
+
+            // Disaster Popover
+            const disasterMenuBtn = document.getElementById('btnDisasterMenu');
+            const disasterDropdown = document.getElementById('disasterDropdown');
+            disasterMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                disasterDropdown.classList.toggle('hidden');
+            });
+            document.addEventListener('click', () => {
+                disasterDropdown.classList.add('hidden');
+            });
+
+            // Overlay Tabs
+            document.querySelectorAll('.overlay-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.overlay-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-slate-800', 'text-cyan-400', 'border', 'border-cyan-500/30');
+                        b.classList.add('text-slate-400');
+                    });
+                    this.classList.add('active', 'bg-slate-800', 'text-cyan-400', 'border', 'border-cyan-500/30');
+                    currentOverlayMode = this.dataset.overlay;
+                });
+            });
+
+            // Physics Sliders Bindings
+            document.getElementById('sliderSunlight').addEventListener('input', (e) => {
+                sunlightIntensity = parseFloat(e.target.value);
+                document.getElementById('lblSunlight').innerText = sunlightIntensity.toFixed(1);
+            });
+            document.getElementById('sliderBaseTemp').addEventListener('input', (e) => {
+                baseTemperature = parseFloat(e.target.value);
+                document.getElementById('lblBaseTemp').innerText = `${baseTemperature}°C`;
+            });
+            document.getElementById('sliderConductivity').addEventListener('input', (e) => {
+                conductivityMultiplier = parseFloat(e.target.value);
+                document.getElementById('lblConductivity').innerText = conductivityMultiplier.toFixed(1);
+            });
+            document.getElementById('sliderSoundSpeed').addEventListener('input', (e) => {
+                soundSpeed = parseFloat(e.target.value);
+                document.getElementById('lblSoundSpeed').innerText = soundSpeed.toFixed(1);
+            });
+            document.getElementById('sliderPheroDecay').addEventListener('input', (e) => {
+                pheroDecayRate = parseFloat(e.target.value);
+                document.getElementById('lblPheroDecay').innerText = pheroDecayRate.toFixed(3);
+            });
+            document.getElementById('sliderFlowForce').addEventListener('input', (e) => {
+                flowForceMultiplier = parseFloat(e.target.value);
+                document.getElementById('lblFlowForce').innerText = flowForceMultiplier.toFixed(1);
+            });
+            document.getElementById('chkAutoReseed').addEventListener('change', (e) => {
+                autoReseedEnabled = e.target.checked;
+            });
+
+            // Sidebar Tabs
+            document.getElementById('tabInspect').addEventListener('click', function() {
+                this.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                document.getElementById('tabSpecies').classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                document.getElementById('tabSpecies').classList.add('border-transparent');
+                document.getElementById('panelInspect').classList.remove('hidden');
+                document.getElementById('panelSpecies').classList.add('hidden');
+            });
+            document.getElementById('tabSpecies').addEventListener('click', function() {
+                this.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                document.getElementById('tabInspect').classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                document.getElementById('tabInspect').classList.add('border-transparent');
+                document.getElementById('panelSpecies').classList.remove('hidden');
+                document.getElementById('panelInspect').classList.add('hidden');
+            });
+
+            // Manual Spawner Actions
+            document.getElementById('btnSpawn10').addEventListener('click', () => {
+                for (let i = 0; i < 12; i++) {
+                    particles.push(new Particle(Math.random() * width, Math.random() * height));
+                }
+            });
+            document.getElementById('btnSpawnFoodPhero').addEventListener('click', () => {
+                for (let i = 0; i < 10; i++) {
+                    const idx = Math.floor(Math.random() * GRID_COUNT);
+                    pheroFood[idx] += 15.0;
+                }
+            });
+            document.getElementById('btnPulseElectric').addEventListener('click', () => {
+                for (let i = 0; i < GRID_COUNT; i++) {
+                    electricPotential[i] += (Math.random() - 0.5) * 40;
+                }
+            });
+
+            // Start Main Simulation Engine Loop
+            simLoop();
+        });
+    </script>
+</body>
+</html>

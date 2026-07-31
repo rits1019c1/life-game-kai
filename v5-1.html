@@ -126,9 +126,10 @@
                         <button data-brush="select" class="brush-btn active py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/40 text-center" title="個体選択・解析">🔍 選択</button>
                         <button data-brush="food" class="brush-btn py-1 rounded text-slate-400 hover:text-emerald-300 text-center" title="餌フェロモン塗布">🍏 餌</button>
                         <button data-brush="wall" class="brush-btn py-1 rounded text-slate-400 hover:text-amber-300 text-center" title="地形障壁（壁）描画">🧱 障壁</button>
+                        <button data-brush="bond" class="brush-btn py-1 rounded text-slate-400 hover:text-fuchsia-300 text-center" title="細胞結合・合体">🧩 結合</button>
                         <button data-brush="heat" class="brush-btn py-1 rounded text-slate-400 hover:text-rose-300 text-center" title="局所加熱">🔥 加熱</button>
                         <button data-brush="cold" class="brush-btn py-1 rounded text-slate-400 hover:text-cyan-300 text-center" title="局所冷却">❄️ 冷却</button>
-                        <button data-brush="mutate" class="brush-btn py-1 rounded text-slate-400 hover:text-fuchsia-300 text-center" title="変異線量照射">🧬 変異</button>
+                        <button data-brush="mutate" class="brush-btn py-1 rounded text-slate-400 hover:text-amber-300 text-center" title="変異線量照射">🧬 変異</button>
                     </div>
                 </div>
 
@@ -204,7 +205,8 @@
             <!-- Realtime Multi-Field HUD Stats Overlay -->
             <div class="absolute top-3 left-3 pointer-events-none space-y-1 font-mono text-[11px] text-slate-300 bg-slate-950/85 p-3 rounded-xl border border-slate-800/80 backdrop-blur-md shadow-2xl">
                 <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>生命個体数: <span id="hudPopulation" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-fuchsia-400"></span>種多様性: <span id="hudSpeciesCount" class="text-fuchsia-400 font-bold">0</span> 種</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-fuchsia-400"></span>アクティブ系統種: <span id="hudSpeciesCount" class="text-fuchsia-400 font-bold">0</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-400"></span>多細胞群体 (Colonies): <span id="hudColonyCount" class="text-fuchsia-400 font-bold">0</span></div>
                 <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-400"></span>電位場総エネルギー: <span id="hudElectricEnergy" class="text-yellow-400 font-bold">0</span> J</div>
                 <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>フェロモン総濃度: <span id="hudPheroConc" class="text-emerald-400 font-bold">0</span></div>
                 <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>平均遮光率: <span id="hudShadowAvg" class="text-amber-400 font-bold">0%</span></div>
@@ -321,78 +323,67 @@
     </div>
 
     <script>
-        /* --- 5-Field Physical System & Canvas Setup --- */
-        const GRID_RES = 32;
+        // Simulation Grid Dimensions & Constant Definition
+        const GRID_RES = 64;
         const GRID_COUNT = GRID_RES * GRID_RES;
-        let simCanvas, ctx, treeCanvas, treeCtx, graphCanvas, graphCtx;
-        let width = 800, height = 600;
 
-        // 1. Light Field
-        let lightGrid = new Float32Array(GRID_COUNT);
-        
-        // 2. Temperature Field
-        let tempGrid = new Float32Array(GRID_COUNT);
-        let tempGridNext = new Float32Array(GRID_COUNT);
+        // 5 Physical Fields Data Buffers
+        const lightGrid = new Float32Array(GRID_COUNT);
+        const tempGrid = new Float32Array(GRID_COUNT);
+        const tempGridNext = new Float32Array(GRID_COUNT);
+        const electricPotential = new Float32Array(GRID_COUNT);
+        const electricPotentialNext = new Float32Array(GRID_COUNT);
+        const soundPressure = new Float32Array(GRID_COUNT);
+        const soundVel = new Float32Array(GRID_COUNT);
+        const pheroFood = new Float32Array(GRID_COUNT);
+        const pheroDanger = new Float32Array(GRID_COUNT);
+        const pheroTrail = new Float32Array(GRID_COUNT);
+        const wallGrid = new Uint8Array(GRID_COUNT);
+        const flowX = new Float32Array(GRID_COUNT);
+        const flowY = new Float32Array(GRID_COUNT);
 
-        // 3. Electric Field
-        let electricPotential = new Float32Array(GRID_COUNT);
-        let electricPotentialNext = new Float32Array(GRID_COUNT);
+        // Simulation State & Engine Variables
+        let particles = [];
+        const speciesMap = new Map();
+        let nextParticleId = 1;
+        let nextSpeciesId = 1;
+        let selectedParticle = null;
+        let lastBuiltParticle = null;
 
-        // 4. Sound Wave Field
-        let soundPressure = new Float32Array(GRID_COUNT);
-        let soundVel = new Float32Array(GRID_COUNT);
+        let isRunning = true;
+        let soundEnabled = false;
+        let audioCtx = null;
+        let currentOverlayMode = 'normal';
+        let currentBrushMode = 'select';
+        let stepCounter = 0;
 
-        // 5. Pheromone Fields
-        let pheroFood = new Float32Array(GRID_COUNT);
-        let pheroDanger = new Float32Array(GRID_COUNT);
-        let pheroTrail = new Float32Array(GRID_COUNT);
+        let historyPop = [];
+        let historySpecies = [];
+        const MAX_HISTORY = 50;
 
-        // 6. Terrain Obstacles Grid (Walls)
-        let wallGrid = new Uint8Array(GRID_COUNT);
-
-        // Fluid Flow Field
-        let flowX = new Float32Array(GRID_COUNT);
-        let flowY = new Float32Array(GRID_COUNT);
-
-        // Environmental Sliders & State
         let sunlightIntensity = 1.5;
-        let baseTemperature = 22.0;
+        let baseTemperature = 22;
         let conductivityMultiplier = 1.0;
         let soundSpeed = 1.0;
         let pheroDecayRate = 0.97;
         let autoReseedEnabled = true;
-
-        let stepCounter = 0;
-        let isRunning = true;
-        let currentOverlayMode = 'normal';
-        let currentBrushMode = 'select';
         let isMouseDown = false;
 
-        // Sound Engine (Web Audio API)
-        let audioCtx = null;
-        let soundEnabled = false;
+        // Render Canvas Contexts & Dimensions
+        let simCanvas, ctx;
+        let treeCanvas, treeCtx;
+        let graphCanvas, graphCtx;
+        let width = 800, height = 600;
 
-        // Simulation Entities & History
-        let particles = [];
-        let selectedParticle = null;
-        let lastBuiltParticle = null;
-        let speciesMap = new Map();
-        let nextParticleId = 1;
-        let nextSpeciesId = 1;
-
-        // History Data for Realtime Chart
-        let historyPop = [];
-        let historySpecies = [];
-        const MAX_HISTORY = 60;
-
-        // 24 DNA Genomic Attributes & Japanese Descriptions
+        // 26 DNA Genomic Attributes & Japanese Descriptions
         const DNA_KEYS = [
             'speed', 'size', 'photosynthesis', 'attack', 'defense',
             'emitSoundFreq', 'hearSoundFreq', 'soundEcholocation',
             'bioElectricityGen', 'electricCapacitance', 'electricConductivity', 'chargeTheft',
             'heatResistance', 'preferredTemp', 'mutationRate', 'camouflage',
             'aggression', 'sociality', 'curiosity', 'reprodThreshold',
-            'pheroEmitFood', 'pheroEmitDanger', 'pheroEmitTrail', 'lifespan'
+            'pheroEmitFood', 'pheroEmitDanger', 'pheroEmitTrail', 'lifespan',
+            'adhesion', 'colonySignal'
         ];
 
         const DNA_LABELS = {
@@ -401,7 +392,8 @@
             bioElectricityGen: '生体発電', electricCapacitance: '蓄電容量', electricConductivity: '導電率', chargeTheft: '電荷奪取',
             heatResistance: '耐熱性', preferredTemp: '適正温度', mutationRate: '変異率', camouflage: '擬態・保護色',
             aggression: '捕食攻撃性', sociality: '群集性', curiosity: '探求・行動性', reprodThreshold: '繁殖閾値',
-            pheroEmitFood: '餌フェロモン', pheroEmitDanger: '危険フェロモン', pheroEmitTrail: '軌跡フェロモン', lifespan: '寿命耐久性'
+            pheroEmitFood: '餌フェロモン', pheroEmitDanger: '危険フェロモン', pheroEmitTrail: '軌跡フェロモン', lifespan: '寿命耐久性',
+            adhesion: '細胞接着力', colonySignal: '群体通信力'
         };
 
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -476,6 +468,9 @@
                 this.state = 'Gathering'; // Gathering, Hunting, Fleeing, Resting, Mating
                 this.flagellaPhase = Math.random() * Math.PI * 2;
 
+                // Multicellular Bond Links (Cellular Adhesion)
+                this.bonds = new Set(); // Set of bonded particle IDs
+
                 // Copy / Mutate Genome
                 this.dna = {};
                 if (dna) {
@@ -521,6 +516,9 @@
 
                 this.age++;
                 this.flagellaPhase += 0.2 + this.dna.speed * 0.3;
+
+                // Multicellular Spring Constraints & Metabolic Sharing with Bonded Neighbors
+                this.updateBondsAndSharing();
 
                 const gx = clamp(Math.floor((this.x / width) * GRID_RES), 0, GRID_RES - 1);
                 const gy = clamp(Math.floor((this.y / height) * GRID_RES), 0, GRID_RES - 1);
@@ -647,6 +645,41 @@
                 }
             }
 
+            updateBondsAndSharing() {
+                if (this.bonds.size === 0) return;
+
+                for (let otherId of Array.from(this.bonds)) {
+                    const partner = particles.find(p => p.id === otherId && p.alive);
+                    if (!partner) {
+                        this.bonds.delete(otherId);
+                        continue;
+                    }
+
+                    // 1. Spring force to maintain target cellular distance
+                    const dx = partner.x - this.x;
+                    const dy = partner.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+                    const targetDist = (this.radius + partner.radius) * 1.1;
+                    const delta = dist - targetDist;
+
+                    const stiffness = 0.08 * (this.dna.adhesion + partner.dna.adhesion) * 0.5;
+                    const fx = (dx / dist) * delta * stiffness;
+                    const fy = (dy / dist) * delta * stiffness;
+
+                    this.vx += fx;
+                    this.vy += fy;
+
+                    // 2. Metabolic Sharing (Share Energy and Charge between attached cells)
+                    const energyDiff = (partner.internalEnergy - this.internalEnergy) * 0.04;
+                    this.internalEnergy += energyDiff;
+                    partner.internalEnergy -= energyDiff;
+
+                    const chargeDiff = (partner.electricCharge - this.electricCharge) * 0.05;
+                    this.electricCharge += chargeDiff;
+                    partner.electricCharge -= chargeDiff;
+                }
+            }
+
             reproduce() {
                 this.internalEnergy *= 0.45;
                 const child = new Particle(
@@ -662,6 +695,14 @@
             die() {
                 if (this.isFrozen) return; // Prevent death when frozen
                 this.alive = false;
+
+                // Remove bonds from all connected partner cells
+                for (let otherId of this.bonds) {
+                    const partner = particles.find(p => p.id === otherId);
+                    if (partner) partner.bonds.delete(this.id);
+                }
+                this.bonds.clear();
+
                 const gx = clamp(Math.floor((this.x / width) * GRID_RES), 0, GRID_RES - 1);
                 const gy = clamp(Math.floor((this.y / height) * GRID_RES), 0, GRID_RES - 1);
                 const idx = gy * GRID_RES + gx;
@@ -671,6 +712,27 @@
 
             draw(ctx, mode) {
                 ctx.save();
+
+                // Draw Cytoplasmic Membrane Links / Bridges to bonded cells
+                if (this.bonds.size > 0 && (mode === 'normal' || mode === 'species')) {
+                    for (let otherId of this.bonds) {
+                        if (otherId > this.id) { // Avoid double drawing link
+                            const partner = particles.find(p => p.id === otherId && p.alive);
+                            if (partner) {
+                                ctx.beginPath();
+                                ctx.moveTo(this.x, this.y);
+                                ctx.lineTo(partner.x, partner.y);
+                                ctx.strokeStyle = this.color;
+                                ctx.lineWidth = Math.min(this.radius, partner.radius) * 1.4;
+                                ctx.globalAlpha = 0.5;
+                                ctx.lineCap = 'round';
+                                ctx.stroke();
+                                ctx.globalAlpha = 1.0;
+                            }
+                        }
+                    }
+                }
+
                 ctx.translate(this.x, this.y);
 
                 if (mode === 'normal' || mode === 'species') {
@@ -697,8 +759,12 @@
                     ctx.globalAlpha = 0.35 + this.dna.camouflage * 0.5;
                     ctx.fill();
 
-                    // Defense Ring / Armor
-                    if (this.dna.defense > 0.5) {
+                    // Defense Ring / Armor or Multicellular Adhesion Ring
+                    if (this.bonds.size > 0) {
+                        ctx.lineWidth = 2.2;
+                        ctx.strokeStyle = '#e879f9'; // Multicellular Bond Indicator
+                        ctx.stroke();
+                    } else if (this.dna.defense > 0.5) {
                         ctx.lineWidth = 2.0;
                         ctx.strokeStyle = '#94a3b8';
                         ctx.stroke();
@@ -903,7 +969,19 @@
                     const rSum = p1.radius + p2.radius;
                     const d2 = dx * dx + dy * dy;
 
-                    if (d2 < rSum * rSum) {
+                    if (d2 < (rSum * 1.2) ** 2) {
+                        // CELLULAR ADHESION: Form Bond Link to build Multicellular Organism
+                        const isClose = d2 < (rSum * 1.1) ** 2;
+                        const sameOrCloseSpecies = p1.speciesId === p2.speciesId;
+                        const highAdhesion = (p1.dna.adhesion + p2.dna.adhesion) * 0.5 > 0.35;
+
+                        if (isClose && (sameOrCloseSpecies || highAdhesion) && p1.bonds.size < 4 && p2.bonds.size < 4) {
+                            if (!p1.bonds.has(p2.id)) {
+                                p1.bonds.add(p2.id);
+                                p2.bonds.add(p1.id);
+                            }
+                        }
+
                         // Electric Charge Theft
                         if (p1.dna.chargeTheft > p2.dna.electricConductivity) {
                             const drain = Math.min(p2.electricCharge, 2.0);
@@ -911,13 +989,16 @@
                             p1.electricCharge += drain;
                         }
 
-                        // Predation Check
-                        if (p1.dna.aggression > p2.dna.defense + 0.2 && p1.radius > p2.radius * 0.8 && p1.stage !== 'Egg') {
+                        // Predation Check (Bonded multicellular clusters gain bonus defense against predators)
+                        const p1Defense = p1.dna.defense + (p1.bonds.size * 0.25);
+                        const p2Defense = p2.dna.defense + (p2.bonds.size * 0.25);
+
+                        if (p1.dna.aggression > p2Defense + 0.2 && p1.radius > p2.radius * 0.8 && p1.stage !== 'Egg' && !p1.bonds.has(p2.id)) {
                             p1.internalEnergy += p2.internalEnergy * 0.7;
                             p2.die();
                             playSoundPulse(150, 0.15, 'sawtooth');
                             continue;
-                        } else if (p2.dna.aggression > p1.dna.defense + 0.2 && p2.radius > p1.radius * 0.8 && p2.stage !== 'Egg') {
+                        } else if (p2.dna.aggression > p1Defense + 0.2 && p2.radius > p1.radius * 0.8 && p2.stage !== 'Egg' && !p2.bonds.has(p1.id)) {
                             p2.internalEnergy += p1.internalEnergy * 0.7;
                             p1.die();
                             playSoundPulse(150, 0.15, 'sawtooth');
@@ -925,14 +1006,16 @@
                         }
 
                         // Elastic Bounce
-                        const d = Math.sqrt(d2) || 1;
-                        const overlap = rSum - d;
-                        const nx = dx / d;
-                        const ny = dy / d;
-                        p1.x -= nx * overlap * 0.5;
-                        p1.y -= ny * overlap * 0.5;
-                        p2.x += nx * overlap * 0.5;
-                        p2.y += ny * overlap * 0.5;
+                        if (d2 < rSum * rSum) {
+                            const d = Math.sqrt(d2) || 1;
+                            const overlap = rSum - d;
+                            const nx = dx / d;
+                            const ny = dy / d;
+                            p1.x -= nx * overlap * 0.5;
+                            p1.y -= ny * overlap * 0.5;
+                            p2.x += nx * overlap * 0.5;
+                            p2.y += ny * overlap * 0.5;
+                        }
                     }
                 }
             }
@@ -965,6 +1048,15 @@
                 pheroFood[gIdx] += 12.0;
             } else if (currentBrushMode === 'wall') {
                 wallGrid[gIdx] = 1;
+            } else if (currentBrushMode === 'bond') {
+                // Multicellular Bonding Brush: Force bond particles together inside radius
+                const nearParticles = particles.filter(p => p.alive && distSq(mouseX, mouseY, p.x, p.y) < 55 ** 2);
+                for (let i = 0; i < nearParticles.length; i++) {
+                    for (let j = i + 1; j < nearParticles.length; j++) {
+                        nearParticles[i].bonds.add(nearParticles[j].id);
+                        nearParticles[j].bonds.add(nearParticles[i].id);
+                    }
+                }
             } else if (currentBrushMode === 'heat') {
                 tempGrid[gIdx] += 30.0;
             } else if (currentBrushMode === 'cold') {
@@ -1225,10 +1317,12 @@
             let totalElectric = 0;
             let totalPhero = 0;
             let totalShadow = 0;
+            let colonyCount = 0;
 
             for (let p of particles) {
                 const sp = speciesMap.get(p.speciesId);
                 if (sp) sp.count++;
+                if (p.bonds.size > 0) colonyCount++;
             }
 
             for (let i = 0; i < GRID_COUNT; i++) {
@@ -1239,6 +1333,7 @@
 
             const activeSpeciesCount = Array.from(speciesMap.values()).filter(s => s.count > 0).length;
             document.getElementById('hudSpeciesCount').innerText = activeSpeciesCount;
+            document.getElementById('hudColonyCount').innerText = Math.floor(colonyCount / 2);
             document.getElementById('hudElectricEnergy').innerText = Math.round(totalElectric);
             document.getElementById('hudPheroConc').innerText = Math.round(totalPhero);
             document.getElementById('hudShadowAvg').innerText = `${Math.round((totalShadow / (GRID_COUNT * sunlightIntensity || 1)) * 100)}%`;

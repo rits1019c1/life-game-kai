@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENESIS v7.0 - Dynamic Eco-Balance, Pandemic & Symbiosis Engine</title>
+    <title>GENESIS v8.0 - Full Genomic DNA, Neural Brain & Biome Eco-Engine</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,8 +30,8 @@
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
         canvas { touch-action: none; }
         .glass-panel {
-            background: rgba(13, 20, 36, 0.88);
-            backdrop-filter: blur(14px);
+            background: rgba(11, 17, 32, 0.90);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .custom-range::-webkit-slider-thumb {
@@ -39,27 +39,28 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #22d3ee;
+            background: #06b6d4;
             cursor: pointer;
         }
     </style>
 </head>
 <body class="h-full w-full overflow-hidden flex flex-col font-sans antialiased text-slate-200 bg-slate-950">
 
+    <!-- Top Bar Navigation & Controls -->
     <header class="h-14 glass-panel z-30 px-4 flex items-center justify-between shrink-0 border-b border-slate-800">
         <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-rose-600 to-amber-500 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-rose-500/20">
-                G7
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 via-cyan-600 to-purple-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-cyan-500/20">
+                G8
             </div>
             <div>
                 <h1 class="text-sm font-bold tracking-wider text-slate-100 flex items-center gap-2">
-                    GENESIS <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono border border-purple-500/30">v7.0 Eco-Balance & Pandemic Engine</span>
+                    GENESIS <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30">v8.0 Full DNA, Brain & Biomes Engine</span>
                 </h1>
-                <p class="text-[10px] text-slate-400">Pathogens • Density Stress • Lotka-Volterra • Symbiosis & Parasitism • Gene Regulatory Network</p>
+                <p class="text-[10px] text-slate-400">ATGC DNA • Neural Brain • XX/XY Sex • Parasites • Biome Terrain • Season Engine</p>
             </div>
         </div>
 
-        <!-- Simulation Controls -->
+        <!-- Master Controls -->
         <div class="flex items-center space-x-2 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
             <button id="btnPlay" class="w-8 h-8 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-all shadow-md shadow-cyan-600/30" title="再生/一時停止">
                 <i class="fa-solid fa-pause text-xs" id="iconPlay"></i>
@@ -74,11 +75,11 @@
                 <i class="fa-solid fa-volume-xmark text-xs" id="iconAudio"></i>
             </button>
             <div class="h-4 w-px bg-slate-800 my-auto"></div>
-            <!-- Day/Night & Pandemic Status -->
+            <!-- Climate & Season HUD Badge -->
             <div class="flex items-center space-x-2 px-2 py-0.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs font-mono">
-                <span id="badgeDayNight" class="text-amber-400 flex items-center gap-1"><i class="fa-solid fa-sun"></i> 昼 12:00</span>
+                <span id="badgeSeason" class="text-amber-400 flex items-center gap-1"><i class="fa-solid fa-sun"></i> 🌸 春 (Day 1)</span>
                 <span class="text-slate-600">|</span>
-                <span id="badgePandemic" class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-shield-virus"></i> 生態系正常</span>
+                <span id="badgeWeather" class="text-cyan-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-cloud-rain"></i> 恵みの雨</span>
             </div>
             <div class="h-4 w-px bg-slate-800 my-auto"></div>
             <span class="text-xs font-mono text-slate-400 px-1 flex items-center gap-1.5">
@@ -87,153 +88,156 @@
             </span>
         </div>
 
-        <!-- 6-Field Observation Overlays -->
+        <!-- Visual Map Overlay Mode Selectors -->
         <div class="hidden xl:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs font-mono">
-            <button data-overlay="normal" class="overlay-btn active px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/30 transition-all">標準(生態・器官)</button>
-            <button data-overlay="virus" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-purple-300 transition-all">🦠 病原体</button>
-            <button data-overlay="light" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-amber-300 transition-all">☀️ 照度</button>
-            <button data-overlay="temp" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-rose-300 transition-all">🌡 温度</button>
-            <button data-overlay="phero" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-300 transition-all">🧪 栄養</button>
-            <button data-overlay="spatial" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-indigo-300 transition-all">⚡ Grid</button>
+            <button data-overlay="normal" class="overlay-btn active px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/30 transition-all">🌿 生態系・個体</button>
+            <button data-overlay="biome" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-300 transition-all">🗺 地形・バイオーム</button>
+            <button data-overlay="temp" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-rose-300 transition-all">🌡 気温・季節</button>
+            <button data-overlay="parasite" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-purple-300 transition-all">👾 寄生・感染</button>
+            <button data-overlay="dna" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-amber-300 transition-all">🧬 DNA多様性</button>
         </div>
 
-        <!-- Disasters Dropdown -->
+        <!-- Disasters / God Events Menu -->
         <div class="relative">
-            <button id="btnDisasterMenu" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600/30 to-rose-600/30 hover:from-purple-600/50 hover:to-rose-600/50 border border-purple-500/40 text-purple-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-md">
-                <i class="fa-solid fa-biohazard text-purple-400"></i>
-                環境変化・試練
+            <button id="btnDisasterMenu" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600/30 to-emerald-600/30 hover:from-purple-600/50 hover:to-emerald-600/50 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-md">
+                <i class="fa-solid fa-meteor text-amber-400"></i>
+                気候変異・天地創造
             </button>
-            <div id="disasterDropdown" class="hidden absolute right-0 mt-2 w-56 glass-panel rounded-xl shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 border border-slate-700">
-                <button onclick="triggerDisaster('pandemic')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-purple-300 text-xs flex items-center gap-2">🦠 未知のウイルス爆発（パンデミック）</button>
-                <button onclick="triggerDisaster('meteor')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-rose-300 text-xs flex items-center gap-2">☄️ 巨大隕石衝突（落熱・大量減衰）</button>
-                <button onclick="triggerDisaster('famine')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 text-xs flex items-center gap-2">🥀 大飢餓（栄養場急速消滅）</button>
-                <button onclick="triggerDisaster('radiation')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-yellow-300 text-xs flex items-center gap-2">☢️ 放射能サージ（超高確率遺伝子変異）</button>
+            <div id="disasterDropdown" class="hidden absolute right-0 mt-2 w-60 glass-panel rounded-xl shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 border border-slate-700">
+                <button onclick="triggerEvent('iceage')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-cyan-300 text-xs flex items-center gap-2">🧊 大氷河期到来（極冷＆海氷化）</button>
+                <button onclick="triggerEvent('drought')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 text-xs flex items-center gap-2">☀️ 猛暑・超干ばつ（水干渇＆荒野化）</button>
+                <button onclick="triggerEvent('radiation')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-yellow-300 text-xs flex items-center gap-2">☢️ 宇宙線バースト（全DNA突然変異）</button>
+                <button onclick="triggerEvent('parasiteOutbreak')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-purple-300 text-xs flex items-center gap-2">👾 寄生生物の大発生（パラスーム）</button>
+                <button onclick="triggerEvent('reseedTerrain')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-emerald-300 text-xs flex items-center gap-2">🌍 地形再生成（バイオームリセット）</button>
             </div>
         </div>
     </header>
 
+    <!-- Main Content Grid Layout -->
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- Left Sidebar: God Tools & Eco Pressure Control -->
+        <!-- Left Sidebar: Ecosystem God Tools & Evolutionary Control -->
         <aside class="w-64 glass-panel border-r border-slate-800 flex flex-col z-10 shrink-0 text-xs">
             <div class="p-3 border-b border-slate-800 font-semibold text-slate-300 flex items-center justify-between">
-                <span><i class="fa-solid fa-scale-balanced text-purple-400 mr-1.5"></i>生態系抑制 & 神ツール</span>
+                <span><i class="fa-solid fa-dna text-cyan-400 mr-1.5"></i>遺伝・進化パラメータ</span>
             </div>
             
             <div class="flex-1 overflow-y-auto p-3 space-y-4">
-                <!-- Interactive Brush Selector -->
+                <!-- Interactive Brush Tools -->
                 <div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
                     <div class="text-[11px] font-semibold text-slate-300 flex justify-between">
                         <span>キャンバス介入ブラシ</span>
-                        <span id="lblBrushMode" class="text-cyan-400 font-mono text-[10px]">選択</span>
+                        <span id="lblBrushMode" class="text-cyan-400 font-mono text-[10px]">🔍 選択</span>
                     </div>
                     <div class="grid grid-cols-3 gap-1 text-[10px]">
-                        <button data-brush="select" class="brush-btn active py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/40 text-center" title="個体選択・解析">🔍 選択</button>
-                        <button data-brush="virus" class="brush-btn py-1 rounded text-slate-400 hover:text-purple-300 text-center" title="ウイルス散布">🦠 病原体</button>
-                        <button data-brush="food" class="brush-btn py-1 rounded text-slate-400 hover:text-emerald-300 text-center" title="栄養投下">🍏 栄養</button>
-                        <button data-brush="predator" class="brush-btn py-1 rounded text-slate-400 hover:text-rose-300 text-center" title="巨大捕食者注入">🦖 捕食体</button>
-                        <button data-brush="wall" class="brush-btn py-1 rounded text-slate-400 hover:text-amber-300 text-center" title="壁描画">🧱 障壁</button>
-                        <button data-brush="radiation" class="brush-btn py-1 rounded text-slate-400 hover:text-yellow-300 text-center" title="放射能照射">☢️ 変異</button>
+                        <button data-brush="select" class="brush-btn active py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/40 text-center" title="個体・脳解析">🔍 選択</button>
+                        <button data-brush="food" class="brush-btn py-1 rounded text-slate-400 hover:text-emerald-300 text-center" title="有機物投下">🍏 栄養</button>
+                        <button data-brush="parasite" class="brush-btn py-1 rounded text-slate-400 hover:text-purple-300 text-center" title="寄生生物投入">👾 寄生体</button>
+                        <button data-brush="male" class="brush-btn py-1 rounded text-slate-400 hover:text-blue-300 text-center" title="オス創生">♂ オス</button>
+                        <button data-brush="female" class="brush-btn py-1 rounded text-slate-400 hover:text-pink-300 text-center" title="メス創生">♀ メス</button>
+                        <button data-brush="radiation" class="brush-btn py-1 rounded text-slate-400 hover:text-yellow-300 text-center" title="変異線照射">☢️ 変異線</button>
                     </div>
                 </div>
 
-                <!-- Environmental Ecosystem Pressure Sliders -->
+                <!-- Genome Mutation & Structural Alteration Sliders -->
                 <div class="space-y-3 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-                    <div class="text-[11px] font-semibold text-purple-300 flex justify-between items-center">
-                        <span>⚖️ 生態系抑制力（増えすぎ防止）</span>
+                    <div class="text-[11px] font-semibold text-cyan-300 flex justify-between items-center">
+                        <span>🧬 DNA変異強度 (Mutations)</span>
                     </div>
 
-                    <!-- Carrying Capacity & Stress Slider -->
+                    <!-- Point Mutation Rate -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>過密密度ストレス強度</span>
-                            <span id="lblDensityStress" class="font-mono text-purple-400">1.5x</span>
+                            <span>塩基置換率 (ATGC Point Mut)</span>
+                            <span id="lblPointMut" class="font-mono text-cyan-400">1.2%</span>
                         </div>
-                        <input type="range" id="sliderDensityStress" min="0.2" max="4.0" step="0.2" value="1.5" class="w-full accent-purple-500 h-1.5 bg-slate-800 rounded custom-range">
+                        <input type="range" id="sliderPointMut" min="0.1" max="5.0" step="0.1" value="1.2" class="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded custom-range">
                     </div>
 
-                    <!-- Virus Mutation / Sprout Rate -->
+                    <!-- Chromosome Structural Mutation -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>ウイルス自律発生率</span>
-                            <span id="lblVirusSprout" class="font-mono text-fuchsia-400">中 (Medium)</span>
+                            <span>染色体構造異常 (重複・欠失・逆位)</span>
+                            <span id="lblStructMut" class="font-mono text-amber-400">0.8%</span>
                         </div>
-                        <input type="range" id="sliderVirusSprout" min="0" max="3" step="1" value="1" class="w-full accent-fuchsia-500 h-1.5 bg-slate-800 rounded custom-range">
+                        <input type="range" id="sliderStructMut" min="0.0" max="3.0" step="0.1" value="0.8" class="w-full accent-amber-500 h-1.5 bg-slate-800 rounded custom-range">
                     </div>
 
-                    <!-- Metabolism Cost Slider -->
+                    <!-- Season Speed Slider -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>基礎代謝コスト (維持費)</span>
-                            <span id="lblMetabolism" class="font-mono text-rose-400">1.2x</span>
+                            <span>季節周期速度</span>
+                            <span id="lblSeasonSpeed" class="font-mono text-emerald-400">1.0x</span>
                         </div>
-                        <input type="range" id="sliderMetabolism" min="0.5" max="3.0" step="0.1" value="1.2" class="w-full accent-rose-500 h-1.5 bg-slate-800 rounded custom-range">
+                        <input type="range" id="sliderSeasonSpeed" min="0.2" max="3.0" step="0.2" value="1.0" class="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded custom-range">
                     </div>
                 </div>
 
-                <!-- Reproduction Settings -->
+                <!-- Reproduction & Sex Ratio Rules -->
                 <div class="space-y-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                     <div class="flex items-center justify-between text-[10px] text-slate-300">
-                        <span>有性生殖の必須化</span>
+                        <span>性染色体(XX/XY) 厳格有性生殖</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="chkSexualRepro" checked class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-600"></div>
+                            <input type="checkbox" id="chkStrictSex" checked class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-600"></div>
                         </label>
                     </div>
-                    <p class="text-[9px] text-slate-400">ONにすると相方がいないと繁殖できず、爆発的増加が抑制されます。</p>
+                    <p class="text-[9px] text-slate-400">オス(XY)とメス(XX)が遭遇した時のみ減数分裂交配が行われます。</p>
                 </div>
 
-                <!-- Manual Injection Tools -->
+                <!-- Quick Action Buttons -->
                 <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
-                    <button id="btnSpawn15" class="w-full py-1.5 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-dna"></i> 原始生命 15体創生
+                    <button id="btnSpawnAdamuEva" class="w-full py-1.5 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-venus-mars"></i> アダム＆イヴ 10つがい創生
                     </button>
-                    <button id="btnClearWalls" class="w-full py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-[11px] transition-all">
-                        🧱 障壁を消去
+                    <button id="btnSpawnParasite" class="w-full py-1 rounded bg-purple-950 hover:bg-purple-900 border border-purple-800/50 text-purple-300 font-mono text-[11px] transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-bug"></i> 寄生生物 5体放流
                     </button>
                 </div>
 
-                <!-- Population Oscillation Realtime Graph -->
+                <!-- Niche Differentiation Breakdown Panel -->
                 <div class="pt-2 border-t border-slate-800/80 space-y-1">
                     <div class="text-[10px] font-semibold text-slate-400 flex justify-between">
-                        <span>個体数 vs ウイルス サイクル</span>
-                        <span class="text-purple-400 font-mono text-[9px]">Pop / Virus</span>
+                        <span>バイオーム別適応個体数</span>
+                        <span class="text-emerald-400 font-mono text-[9px]">Niche Distribution</span>
                     </div>
-                    <div class="h-20 bg-slate-900/90 rounded-lg border border-slate-800 overflow-hidden relative">
-                        <canvas id="graphCanvas" class="w-full h-full block"></canvas>
+                    <div id="nicheDistribution" class="space-y-1 text-[10px] font-mono">
+                        <div class="flex justify-between items-center"><span class="text-cyan-400">🌊 海洋・水域:</span><span id="cntOcean" class="text-slate-200">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-emerald-400">🌲 森林・密林:</span><span id="cntForest" class="text-slate-200">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-amber-400">🏜 砂漠・荒野:</span><span id="cntDesert" class="text-slate-200">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-slate-400">🏔 高山・冷原:</span><span id="cntMountain" class="text-slate-200">0</span></div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- Center Main Simulation Canvas -->
+        <!-- Center Main Canvas & Simulation Environment -->
         <main class="flex-1 relative bg-slate-950 overflow-hidden flex flex-col">
             <canvas id="simCanvas" class="w-full h-full block cursor-crosshair"></canvas>
 
-            <!-- Realtime Eco-Metrics Overlay -->
+            <!-- Realtime Metrics HUD -->
             <div class="absolute top-3 left-3 pointer-events-none space-y-1 font-mono text-[11px] text-slate-300 bg-slate-950/85 p-3 rounded-xl border border-slate-800/80 backdrop-blur-md shadow-2xl">
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>生命個体数: <span id="hudPopulation" class="text-cyan-400 font-bold">0</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span>病原体濃度 (Virus): <span id="hudVirusLoad" class="text-purple-400 font-bold">0%</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>平均免疫獲得率: <span id="hudImmunity" class="text-emerald-400 font-bold">0%</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-400"></span>捕食者数: <span id="hudPredators" class="text-rose-400 font-bold">0</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>共生ペア数: <span id="hudSymbiosis" class="text-amber-400 font-bold">0</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>総生命体数: <span id="hudPopulation" class="text-cyan-400 font-bold">0</span> (♂ <span id="hudMale">0</span> / ♀ <span id="hudFemale">0</span>)</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span>寄生体 (Parasites): <span id="hudParasites" class="text-purple-400 font-bold">0</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>平均ゲノム長: <span id="hudDnaLength" class="text-amber-400 font-bold">128 bp</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>脳ニューロン活性: <span id="hudBrainAct" class="text-emerald-400 font-bold">0%</span></div>
             </div>
 
-            <!-- Event Toast Container -->
+            <!-- Event Log Toast Notification -->
             <div id="eventLog" class="absolute bottom-4 left-4 pointer-events-none space-y-1.5 font-mono text-xs max-w-sm z-20"></div>
         </main>
 
-        <!-- Right Sidebar: Individual Inspector & Genetic Network Analysis -->
+        <!-- Right Sidebar: DNA Inspector, Neural Brain Diagram & Speciation Tree -->
         <aside class="w-80 glass-panel border-l border-slate-800 flex flex-col z-10 shrink-0 text-xs">
             <div class="flex border-b border-slate-800 text-slate-400 font-mono">
-                <button id="tabInspect" class="flex-1 py-2.5 text-center border-b-2 border-cyan-400 text-cyan-300 font-semibold transition-all">個体・免疫解析</button>
-                <button id="tabSpecies" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-slate-200 transition-all">系統樹・種分類</button>
+                <button id="tabInspect" class="flex-1 py-2.5 text-center border-b-2 border-cyan-400 text-cyan-300 font-semibold transition-all">🧠 脳＆DNA解析</button>
+                <button id="tabTree" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-slate-200 transition-all">🌳 系統樹・進化</button>
             </div>
 
-            <!-- Tab 1: Inspector -->
+            <!-- Tab 1: DNA & Neural Brain Inspector -->
             <div id="panelInspect" class="flex-1 overflow-y-auto p-3 space-y-3">
-                <div id="inspectorEmpty" class="text-slate-500 text-center py-12 italic space-y-2">
-                    <i class="fa-solid fa-virus-covid text-3xl text-purple-600 block"></i>
-                    <span>キャンバス上の個体をクリックして<br>免疫力・病原体感染率・GRN遺伝子を解析</span>
+                <div id="inspectorEmpty" class="text-slate-500 text-center py-16 italic space-y-2">
+                    <i class="fa-solid fa-brain text-4xl text-cyan-600 block"></i>
+                    <span>キャンバス上の個体をクリックして<br>ニューラルネット脳とATGC DNA配列を解析</span>
                 </div>
                 
                 <div id="inspectorDetail" class="hidden space-y-3">
@@ -243,110 +247,98 @@
                             <span id="inspId" class="font-mono font-bold text-slate-100 text-sm">#0000</span>
                         </div>
                         <div class="flex items-center space-x-1">
-                            <span id="inspStage" class="px-1.5 py-0.5 rounded bg-cyan-950 font-mono text-[10px] text-cyan-300 border border-cyan-700/50">Adult</span>
-                            <span id="inspInfected" class="px-1.5 py-0.5 rounded bg-purple-950 font-mono text-[10px] text-purple-300 border border-purple-800/50">Healthy</span>
+                            <span id="inspSex" class="px-1.5 py-0.5 rounded bg-blue-950 font-mono text-[10px] text-blue-300 border border-blue-700/50">♂ Male (XY)</span>
+                            <span id="inspRole" class="px-1.5 py-0.5 rounded bg-emerald-950 font-mono text-[10px] text-emerald-300 border border-emerald-800/50">自立個体</span>
                         </div>
                     </div>
 
-                    <!-- Gauges & Medical Analytics -->
+                    <!-- Organism Vitals & Energy -->
                     <div class="space-y-2 font-mono text-[10px]">
                         <div class="flex justify-between items-center text-slate-300 bg-slate-900/90 p-1.5 rounded-lg border border-slate-800">
-                            <span>現在の行動状態:</span>
-                            <span id="inspState" class="font-bold text-amber-400">採餌中 (Gathering)</span>
+                            <span>脳の行動判断:</span>
+                            <span id="inspAction" class="font-bold text-cyan-400">採餌探索 (Gathering)</span>
                         </div>
 
                         <div>
-                            <div class="flex justify-between text-slate-400 mb-0.5"><span>内部エネルギー</span><span id="valIntEnergy" class="text-cyan-300">0/100</span></div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>蓄積エネルギー</span><span id="valEnergy" class="text-cyan-300">0/100</span></div>
                             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="barIntEnergy" class="h-full bg-cyan-400 transition-all duration-300 w-0"></div>
+                                <div id="barEnergy" class="h-full bg-cyan-400 transition-all duration-300 w-0"></div>
                             </div>
                         </div>
 
                         <div>
-                            <div class="flex justify-between text-slate-400 mb-0.5"><span>🛡 免疫抗体値 (Immunity)</span><span id="valImmunity" class="text-emerald-300">0%</span></div>
+                            <div class="flex justify-between text-slate-400 mb-0.5"><span>寄生被害 / 感染度</span><span id="valParasite" class="text-purple-300">0%</span></div>
                             <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="barImmunity" class="h-full bg-emerald-400 transition-all duration-300 w-0"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-slate-400 mb-0.5"><span>🦠 ウイルス感染度</span><span id="valInfection" class="text-purple-300">0%</span></div>
-                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="barInfection" class="h-full bg-purple-500 transition-all duration-300 w-0"></div>
+                                <div id="barParasite" class="h-full bg-purple-500 transition-all duration-300 w-0"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Evolved Organs Breakdown Panel -->
+                    <!-- Visual Neural Network Brain Diagram -->
                     <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800 space-y-1.5">
                         <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
-                            <span>🧬 器官構造 & 特殊適応</span>
-                            <span id="lblOrganCount" class="text-purple-400 font-mono text-[10px]">0 器官</span>
+                            <span>🧠 ニューラルネットワーク脳回路 (Brain)</span>
+                            <span class="text-cyan-400 font-mono text-[9px]">MLP (9-8-5)</span>
                         </div>
-                        <div id="organList" class="grid grid-cols-2 gap-1 text-[10px] font-mono"></div>
+                        <div class="h-32 bg-slate-950 rounded border border-slate-800 relative overflow-hidden">
+                            <canvas id="brainCanvas" class="w-full h-full block"></canvas>
+                        </div>
                     </div>
 
-                    <!-- Controls for Frozen/Duplicate -->
+                    <!-- ATGC Genome Sequence & Chromosome Viewer -->
+                    <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800 space-y-1.5">
+                        <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
+                            <span>🧬 DNA塩基配列 (ATGC Sequence)</span>
+                            <span id="lblGenomeLen" class="text-amber-400 font-mono text-[9px]">128 bp</span>
+                        </div>
+                        <div id="dnaSeqBox" class="p-2 bg-slate-950 rounded border border-slate-800 font-mono text-[9px] text-emerald-400 break-all h-20 overflow-y-auto leading-relaxed"></div>
+                    </div>
+
+                    <!-- Controls for Selected Organism -->
                     <div class="flex gap-1.5 pt-1">
-                        <button id="btnFreezeParticle" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-snowflake text-cyan-400"></i> <span id="lblFreezeText">個体を固定</span>
+                        <button id="btnFreeze" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-snowflake text-cyan-400"></i> <span id="lblFreezeText">固定</span>
                         </button>
-                        <button id="btnInfectParticle" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-virus text-purple-400"></i> ウイルス注入
+                        <button id="btnMutateNow" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-bolt text-yellow-400"></i> 変異誘発
                         </button>
-                    </div>
-
-                    <!-- GRN Expression Matrix -->
-                    <div class="pt-2 border-t border-slate-800 space-y-1.5">
-                        <div class="font-semibold text-slate-300 flex justify-between items-center text-[11px]">
-                            <span>遺伝子ネットワーク (GRN) 発現率</span>
-                            <span id="inspGeneration" class="text-[10px] font-mono text-cyan-400">Gen 1</span>
-                        </div>
-                        <div id="grnGrid" class="space-y-1.5 font-mono text-[10px] max-h-48 overflow-y-auto p-2 bg-slate-900/90 rounded-lg border border-slate-800"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Species Tree -->
-            <div id="panelSpecies" class="hidden flex-1 flex flex-col overflow-hidden p-3 space-y-3">
+            <!-- Tab 2: Phylogeny Tree & Species Matrix -->
+            <div id="panelTree" class="hidden flex-1 flex flex-col overflow-hidden p-3 space-y-3">
                 <div class="text-slate-300 font-semibold flex justify-between items-center">
-                    <span>種分類ランキング</span>
-                    <span id="lblTotalSpecies" class="text-cyan-400 font-mono">0 種</span>
+                    <span>系統樹 (Phylogenetic Tree)</span>
+                    <span id="lblSpeciesCount" class="text-cyan-400 font-mono">0 種</span>
                 </div>
-                <div id="speciesList" class="space-y-1.5 overflow-y-auto max-h-40 pr-1 font-mono text-[11px]"></div>
-
-                <div class="pt-2 border-t border-slate-800 flex-1 flex flex-col min-h-0">
-                    <div class="text-slate-300 font-semibold mb-1 flex justify-between items-center">
-                        <span>系統樹 (Phylogeny)</span>
-                    </div>
-                    <div class="flex-1 bg-slate-900/90 rounded-lg border border-slate-800 relative overflow-hidden">
-                        <canvas id="treeCanvas" class="w-full h-full block"></canvas>
-                    </div>
+                <div class="flex-1 bg-slate-900/90 rounded-lg border border-slate-800 relative overflow-hidden">
+                    <canvas id="treeCanvas" class="w-full h-full block"></canvas>
                 </div>
             </div>
         </aside>
     </div>
 
+    <!-- Main JavaScript Simulation Architecture -->
     <script>
-        // Simulation Grid & Spatial Dimensions
+        // Grid & Biome Dimensions
         const GRID_RES = 64;
         const GRID_COUNT = GRID_RES * GRID_RES;
-        const SPATIAL_CELL_SIZE = 48;
 
-        // Physical Fields Data Buffers
-        const lightGrid = new Float32Array(GRID_COUNT);
+        // Biome Terrain Identifiers
+        const BIOME_OCEAN = 0;    // 🌊 Ocean / Deep Water
+        const BIOME_FOREST = 1;   // 🌲 Forest / Jungle
+        const BIOME_DESERT = 2;   // 🏜 Arid / Desert
+        const BIOME_MOUNTAIN = 3; // 🏔 Mountain / Cold Alpine
+
+        // Physical Spatial Grids
+        const terrainGrid = new Uint8Array(GRID_COUNT);
         const tempGrid = new Float32Array(GRID_COUNT);
-        const tempGridNext = new Float32Array(GRID_COUNT);
-        const pheroFood = new Float32Array(GRID_COUNT);
-        const virusGrid = new Float32Array(GRID_COUNT);
-        const virusGridNext = new Float32Array(GRID_COUNT);
-        const wallGrid = new Uint8Array(GRID_COUNT);
+        const foodGrid = new Float32Array(GRID_COUNT);
 
-        // State Engine Variables
+        // Simulation State
         let particles = [];
-        const speciesMap = new Map();
-        let nextParticleId = 1;
-        let nextSpeciesId = 1;
+        let parasites = [];
         let selectedParticle = null;
         let isRunning = true;
         let soundEnabled = false;
@@ -354,447 +346,284 @@
         let currentOverlayMode = 'normal';
         let currentBrushMode = 'select';
         let stepCounter = 0;
+        let nextParticleId = 1;
 
-        let historyPop = [];
-        let historyVirus = [];
-        const MAX_HISTORY = 50;
-
-        // Ecosystem Dynamic Pressure Knobs
-        let sunlightBaseIntensity = 1.6;
-        let baseTemperature = 22;
-        let densityStressFactor = 1.5;
-        let virusSproutSetting = 1; // 0: None, 1: Low, 2: Mid, 3: High
-        let metabolismCostFactor = 1.2;
-        let allowSexualReproduction = true;
+        // Climate & Season Engine Parameters
+        let seasonPhase = 0; // 0: Spring, 1: Summer, 2: Autumn, 3: Winter
+        let pointMutationRate = 0.012;
+        let structMutationRate = 0.008;
+        let seasonSpeed = 1.0;
+        let strictSex = true;
         let isMouseDown = false;
 
-        // Render Canvas Contexts
+        // Render Canvases
         let simCanvas, ctx;
+        let brainCanvas, brainCtx;
         let treeCanvas, treeCtx;
-        let graphCanvas, graphCtx;
         let width = 800, height = 600;
 
-        class SpatialHash {
-            constructor(cellSize) {
-                this.cellSize = cellSize;
-                this.grid = new Map();
+        // DNA Bases
+        const BASES = ['A', 'T', 'G', 'C'];
+
+        // Generate random ATGC DNA String
+        function createRandomDNA(length = 128) {
+            let dna = '';
+            for (let i = 0; i < length; i++) {
+                dna += BASES[Math.floor(Math.random() * 4)];
             }
+            return dna;
+        }
 
-            clear() { this.grid.clear(); }
+        // Advanced Mutations: Point Mutation, Duplication, Deletion, Inversion
+        function mutateDNA(dnaString) {
+            let dna = dnaString.split('');
 
-            key(x, y) {
-                const cx = Math.floor(x / this.cellSize);
-                const cy = Math.floor(y / this.cellSize);
-                return `${cx},${cy}`;
-            }
-
-            insert(particle) {
-                const k = this.key(particle.x, particle.y);
-                if (!this.grid.has(k)) this.grid.set(k, []);
-                this.grid.get(k).push(particle);
-            }
-
-            queryRadius(x, y, radius) {
-                const results = [];
-                const minCx = Math.floor((x - radius) / this.cellSize);
-                const maxCx = Math.floor((x + radius) / this.cellSize);
-                const minCy = Math.floor((y - radius) / this.cellSize);
-                const maxCy = Math.floor((y + radius) / this.cellSize);
-
-                for (let cx = minCx; cx <= maxCx; cx++) {
-                    for (let cy = minCy; cy <= maxCy; cy++) {
-                        const cell = this.grid.get(`${cx},${cy}`);
-                        if (cell) {
-                            for (let p of cell) {
-                                const dx = p.x - x;
-                                const dy = p.y - y;
-                                if (dx * dx + dy * dy <= radius * radius) results.push(p);
-                            }
-                        }
-                    }
+            // 1. Point Mutation (Single base swap)
+            for (let i = 0; i < dna.length; i++) {
+                if (Math.random() < pointMutationRate) {
+                    dna[i] = BASES[Math.floor(Math.random() * 4)];
                 }
-                return results;
             }
+
+            // 2. Chromosome Structural Mutations (Duplication, Deletion, Inversion)
+            if (Math.random() < structMutationRate) {
+                const mutType = Math.random();
+                const segLen = Math.floor(4 + Math.random() * 12);
+                const startIdx = Math.floor(Math.random() * Math.max(1, dna.length - segLen));
+
+                if (mutType < 0.35 && dna.length > 64) {
+                    // Deletion
+                    dna.splice(startIdx, segLen);
+                } else if (mutType < 0.70 && dna.length < 384) {
+                    // Duplication
+                    const seg = dna.slice(startIdx, startIdx + segLen);
+                    dna.splice(startIdx, 0, ...seg);
+                } else {
+                    // Inversion
+                    const seg = dna.slice(startIdx, startIdx + segLen).reverse();
+                    dna.splice(startIdx, segLen, ...seg);
+                }
+            }
+
+            return dna.join('');
         }
 
-        const spatialHash = new SpatialHash(SPATIAL_CELL_SIZE);
-
-        const GRN_GENES = [
-            'speed', 'size', 'photosynthesis', 'predation', 'defense',
-            'eyeSensors', 'flagellaPower', 'venomSpikes', 'immunity',
-            'heatTolerance', 'mutationRate', 'sexualDesire', 'aggression', 'symbiosis'
-        ];
-
-        const GRN_LABELS = {
-            speed: '移動速度', size: '体格成長', photosynthesis: '光合成葉', predation: '捕食攻撃', defense: '甲殻防御',
-            eyeSensors: '視覚感度', flagellaPower: '推進鞭毛', venomSpikes: '毒棘攻撃', immunity: '🛡 免疫抗体',
-            heatTolerance: '耐熱代謝', mutationRate: '変異感度', sexualDesire: '有性繁殖', aggression: '闘争攻撃性', symbiosis: '🤝 共生能力'
-        };
-
-        function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
-        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-        function distSq(x1, y1, x2, y2) { return (x2 - x1) ** 2 + (y2 - y1) ** 2; }
-
-        function hslToRgb(h, s, l) {
-            let r, g, b;
-            if (s === 0) { r = g = b = l; } else {
-                const hue2rgb = (p, q, t) => {
-                    if (t < 0) t += 1;
-                    if (t > 1) t -= 1;
-                    if (t < 1/6) return p + (q - p) * 6 * t;
-                    if (t < 1/2) return q;
-                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                    return p;
-                };
-                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                const p = 2 * l - q;
-                r = hue2rgb(p, q, h + 1/3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1/3);
-            }
-            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        // Meiotic Crossover
+        function crossoverDNA(dnaA, dnaB) {
+            const cut = Math.floor(Math.random() * Math.min(dnaA.length, dnaB.length));
+            let childDNA = dnaA.slice(0, cut) + dnaB.slice(cut);
+            return mutateDNA(childDNA);
         }
 
-        function initAudio() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
+        // Translate ATGC Sequence into Trait Codons & Neural Brain Weights
+        function translateDNA(dna) {
+            let traits = {
+                speed: 0.5,
+                size: 0.5,
+                heatTol: 0.5,
+                coldTol: 0.5,
+                photosynthesis: 0.5,
+                predation: 0.5,
+                defense: 0.5,
+                parasiteResist: 0.5,
+                brainWeights: []
+            };
+
+            let floatArray = [];
+            for (let i = 0; i < dna.length - 2; i += 3) {
+                const codon = dna.slice(i, i + 3);
+                let val = 0;
+                for (let c = 0; c < 3; c++) {
+                    val += BASES.indexOf(codon[c]);
+                }
+                floatArray.push((val / 9) * 2 - 1); // Normalized -1 to 1
             }
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            if (floatArray.length > 8) {
+                traits.speed = (floatArray[0] + 1) * 0.5;
+                traits.size = (floatArray[1] + 1) * 0.5;
+                traits.heatTol = (floatArray[2] + 1) * 0.5;
+                traits.coldTol = (floatArray[3] + 1) * 0.5;
+                traits.photosynthesis = (floatArray[4] + 1) * 0.5;
+                traits.predation = (floatArray[5] + 1) * 0.5;
+                traits.defense = (floatArray[6] + 1) * 0.5;
+                traits.parasiteResist = (floatArray[7] + 1) * 0.5;
+                traits.brainWeights = floatArray.slice(8);
+            }
+
+            return traits;
         }
 
-        function playSoundPulse(freq, duration = 0.08, type = 'sine') {
-            if (!soundEnabled || !audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(clamp(freq, 100, 3000), audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {}
+        class NeuralBrain {
+            constructor(numInputs, numHidden, numOutputs, weightsArray = null) {
+                this.numInputs = numInputs;
+                this.numHidden = numHidden;
+                this.numOutputs = numOutputs;
+
+                this.hiddenNodes = new Float32Array(numHidden);
+                this.outputNodes = new Float32Array(numOutputs);
+
+                this.w1 = new Float32Array(numInputs * numHidden);
+                this.w2 = new Float32Array(numHidden * numOutputs);
+
+                for (let i = 0; i < this.w1.length; i++) {
+                    this.w1[i] = (weightsArray && weightsArray[i] !== undefined) ? weightsArray[i] : (Math.random() * 2 - 1);
+                }
+                for (let i = 0; i < this.w2.length; i++) {
+                    const idx = this.w1.length + i;
+                    this.w2[i] = (weightsArray && weightsArray[idx] !== undefined) ? weightsArray[idx] : (Math.random() * 2 - 1);
+                }
+            }
+
+            forward(inputs) {
+                // Input -> Hidden (Tanh)
+                for (let h = 0; h < this.numHidden; h++) {
+                    let sum = 0;
+                    for (let i = 0; i < this.numInputs; i++) {
+                        sum += inputs[i] * this.w1[i * this.numHidden + h];
+                    }
+                    this.hiddenNodes[h] = Math.tanh(sum);
+                }
+
+                // Hidden -> Output (Sigmoid)
+                for (let o = 0; o < this.numOutputs; o++) {
+                    let sum = 0;
+                    for (let h = 0; h < this.numHidden; h++) {
+                        sum += this.hiddenNodes[h] * this.w2[h * this.numOutputs + o];
+                    }
+                    this.outputNodes[o] = 1 / (1 + Math.exp(-sum));
+                }
+
+                return this.outputNodes;
+            }
         }
 
         class Particle {
-            constructor(x, y, grnGenome = null, parentA = null, parentB = null) {
+            constructor(x, y, isMale = true, dna = null) {
                 this.id = nextParticleId++;
-                this.parentId = parentA ? parentA.id : null;
-                this.generation = parentA ? (parentA.generation + 1) : 1;
                 this.x = x;
                 this.y = y;
                 this.vx = (Math.random() - 0.5) * 1.5;
                 this.vy = (Math.random() - 0.5) * 1.5;
 
-                this.internalEnergy = 60;
-                this.infectionLevel = 0; // Virus Infection State (0 - 100)
-                this.heat = baseTemperature;
+                this.isMale = isMale; // Sex: Male (XY) vs Female (XX)
+                this.dna = dna || createRandomDNA(128);
+                this.traits = translateDNA(this.dna);
+
+                // Neural Brain (9 Inputs, 8 Hidden, 5 Action Outputs)
+                this.brain = new NeuralBrain(9, 8, 5, this.traits.brainWeights);
+
+                this.energy = 70;
                 this.age = 0;
                 this.alive = true;
                 this.isFrozen = false;
-                this.state = 'Gathering';
-                this.flagellaPhase = Math.random() * Math.PI * 2;
-                this.symbiosisPartner = null;
+                this.parasiteInfection = 0;
+                this.actionName = 'Gathering';
 
-                // GRN Genome Matrix Initialization
-                this.grn = { baselines: {}, weights: {} };
-                const geneCount = GRN_GENES.length;
-
-                if (grnGenome) {
-                    const mutRate = grnGenome.baselines.mutationRate || 0.05;
-                    for (let i = 0; i < geneCount; i++) {
-                        const gI = GRN_GENES[i];
-                        let baseVal = grnGenome.baselines[gI];
-                        if (Math.random() < mutRate) baseVal += (Math.random() - 0.5) * 0.25;
-                        this.grn.baselines[gI] = clamp(baseVal, -2, 2);
-
-                        this.grn.weights[gI] = {};
-                        for (let j = 0; j < geneCount; j++) {
-                            const gJ = GRN_GENES[j];
-                            let wVal = grnGenome.weights[gI][gJ];
-                            if (Math.random() < mutRate) wVal += (Math.random() - 0.5) * 0.35;
-                            this.grn.weights[gI][gJ] = clamp(wVal, -2, 2);
-                        }
-                    }
-                } else {
-                    for (let i = 0; i < geneCount; i++) {
-                        const gI = GRN_GENES[i];
-                        this.grn.baselines[gI] = (Math.random() - 0.5) * 1.5;
-                        this.grn.weights[gI] = {};
-                        for (let j = 0; j < geneCount; j++) {
-                            const gJ = GRN_GENES[j];
-                            this.grn.weights[gI][gJ] = (Math.random() - 0.5) * 1.5;
-                        }
-                    }
-                }
-
-                this.expressions = {};
-                for (let g of GRN_GENES) this.expressions[g] = 0.5;
-
-                this.evaluateGRN();
-                this.organs = [];
-                this.buildOrganMorphology();
-
-                this.speciesId = classifySpecies(this.expressions, parentA ? parentA.speciesId : null);
-            }
-
-            evaluateGRN() {
-                const nextExpr = {};
-                const envEnergySignal = (this.internalEnergy - 50) / 50;
-
-                for (let i = 0; i < GRN_GENES.length; i++) {
-                    const targetGene = GRN_GENES[i];
-                    let sumInput = this.grn.baselines[targetGene] + envEnergySignal * 0.3;
-
-                    for (let j = 0; j < GRN_GENES.length; j++) {
-                        const sourceGene = GRN_GENES[j];
-                        sumInput += this.grn.weights[targetGene][sourceGene] * this.expressions[sourceGene];
-                    }
-
-                    nextExpr[targetGene] = sigmoid(sumInput);
-                }
-
-                this.expressions = nextExpr;
-            }
-
-            buildOrganMorphology() {
-                this.organs = [];
-                if (this.expressions.eyeSensors > 0.55) {
-                    const eyeCount = this.expressions.eyeSensors > 0.8 ? 2 : 1;
-                    for (let i = 0; i < eyeCount; i++) {
-                        this.organs.push({ type: 'eye', angle: (i === 0 ? -0.4 : 0.4), size: 2.5 });
-                    }
-                }
-                if (this.expressions.predation > 0.5) {
-                    this.organs.push({ type: 'mouth', angle: 0, size: 4 + this.expressions.predation * 4 });
-                }
-                if (this.expressions.photosynthesis > 0.45) {
-                    const leafCount = Math.floor(1 + this.expressions.photosynthesis * 3);
-                    for (let i = 0; i < leafCount; i++) {
-                        this.organs.push({ type: 'leaf', angle: (Math.PI * 2 / leafCount) * i + 1.0, size: 4 });
-                    }
-                }
-                if (this.expressions.flagellaPower > 0.4) {
-                    this.organs.push({ type: 'flagellum', angle: Math.PI, size: 8 + this.expressions.flagellaPower * 10 });
-                }
-                if (this.expressions.venomSpikes > 0.6) {
-                    const spikeCount = Math.floor(this.expressions.venomSpikes * 4);
-                    for (let i = 0; i < spikeCount; i++) {
-                        this.organs.push({ type: 'spike', angle: (Math.PI * 2 / spikeCount) * i + 0.5, size: 5 });
-                    }
-                }
-            }
-
-            get radius() {
-                return 4 + this.expressions.size * 7;
-            }
-
-            get color() {
-                const sp = speciesMap.get(this.speciesId);
-                return sp ? sp.color : '#38bdf8';
+                this.radius = 4 + this.traits.size * 6;
+                this.color = this.isMale ? '#38bdf8' : '#f472b6';
             }
 
             update() {
                 if (this.isFrozen) return;
-
                 this.age++;
-                this.flagellaPhase += 0.2 + this.expressions.speed * 0.3;
 
-                if (this.age % 8 === 0) {
-                    this.evaluateGRN();
-                    if (this.age % 32 === 0) this.buildOrganMorphology();
-                }
-
-                const gx = clamp(Math.floor((this.x / width) * GRID_RES), 0, GRID_RES - 1);
-                const gy = clamp(Math.floor((this.y / height) * GRID_RES), 0, GRID_RES - 1);
+                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((this.x / width) * GRID_RES)));
+                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((this.y / height) * GRID_RES)));
                 const gIdx = gy * GRID_RES + gx;
 
-                // 1. Photosynthesis & Energy Harvest
-                const lightVal = lightGrid[gIdx] || 0;
-                const sunHarvest = lightVal * this.expressions.photosynthesis * 0.35;
-                this.internalEnergy += sunHarvest;
+                const biomeType = terrainGrid[gIdx];
+                const localTemp = tempGrid[gIdx];
+                const localFood = foodGrid[gIdx];
 
-                // 2. Overcrowding Density Stress & Basal Metabolism Cost
-                const neighbors = spatialHash.queryRadius(this.x, this.y, 50);
-                const localDensity = neighbors.length;
-                const densityStress = Math.max(0, localDensity - 3) * 0.08 * densityStressFactor;
+                let mateDist = 1.0;
+                let threatDist = 1.0;
 
-                const basalMetabolism = (0.06 + this.expressions.size * 0.04 + this.expressions.speed * 0.03 + densityStress) * metabolismCostFactor;
-                this.internalEnergy -= basalMetabolism;
-
-                // 3. Virus Infection & Immunity Resistance Engine
-                const envVirus = virusGrid[gIdx] || 0;
-                if (envVirus > 0.1) {
-                    const immunityBarrier = this.expressions.immunity * 0.8;
-                    if (Math.random() > immunityBarrier) {
-                        this.infectionLevel = Math.min(100, this.infectionLevel + envVirus * 2.5);
-                    }
-                }
-
-                if (this.infectionLevel > 0) {
-                    // Virus drains health and causes airborne shedding
-                    this.internalEnergy -= (this.infectionLevel / 100) * 0.35;
-                    virusGrid[gIdx] += (this.infectionLevel / 100) * 0.15; // Shed virus into environment
-                    
-                    // Body immune system attempting recovery
-                    if (this.expressions.immunity > 0.5) {
-                        this.infectionLevel = Math.max(0, this.infectionLevel - this.expressions.immunity * 0.5);
-                    }
-                }
-
-                // 4. Predation, Symbiosis & Steering Behavior
-                let steerX = 0, steerY = 0;
-
-                for (let other of neighbors) {
+                for (let other of particles) {
                     if (other === this || !other.alive) continue;
-                    const dx = other.x - this.x;
-                    const dy = other.y - this.y;
-                    const d = Math.sqrt(dx * dx + dy * dy) || 1;
-
-                    // Predation Attack (Lotka-Volterra)
-                    if (this.expressions.predation > 0.5 && other.radius < this.radius * 1.1 && d < (this.radius + other.radius)) {
-                        const dmg = (this.expressions.predation * 12) - (other.expressions.defense * 8);
-                        if (dmg > 0) {
-                            other.internalEnergy -= dmg;
-                            this.internalEnergy += dmg * 0.8;
-                            this.state = 'Hunting';
-                            playSoundPulse(900, 0.05, 'sawtooth');
-                        }
-                    }
-
-                    // Virus Spread between touching organisms
-                    if (this.infectionLevel > 20 && d < (this.radius + other.radius + 4)) {
-                        if (Math.random() < 0.25) {
-                            other.infectionLevel = Math.min(100, other.infectionLevel + 15);
-                        }
-                    }
-
-                    // Symbiosis Cooperation
-                    if (this.expressions.symbiosis > 0.6 && other.expressions.symbiosis > 0.6 && this.speciesId !== other.speciesId && d < 40) {
-                        // Mutual Energy Sharing
-                        const sharedEnergy = (this.internalEnergy + other.internalEnergy) * 0.5;
-                        this.internalEnergy += (sharedEnergy - this.internalEnergy) * 0.05;
-                        other.internalEnergy += (sharedEnergy - other.internalEnergy) * 0.05;
-                        this.state = 'Symbiosis';
-                    }
-
-                    // Steering AI
-                    if (this.expressions.aggression > 0.6 && other.radius < this.radius) {
-                        steerX += (dx / d) * 0.4;
-                        steerY += (dy / d) * 0.4;
-                    } else if (other.expressions.aggression > 0.6 && other.radius > this.radius) {
-                        steerX -= (dx / d) * 0.7;
-                        steerY -= (dy / d) * 0.7;
-                        this.state = 'Fleeing';
-                    }
+                    const d = Math.hypot(other.x - this.x, other.y - this.y) / 200;
+                    if (other.isMale !== this.isMale) mateDist = Math.min(mateDist, d);
+                    if (other.traits.predation > 0.6) threatDist = Math.min(threatDist, d);
                 }
 
-                // Nutrient Seeking
-                const pFood = pheroFood[gIdx] || 0;
-                if (pFood > 0.2 && this.state !== 'Fleeing') {
-                    this.internalEnergy += 0.12;
-                    pheroFood[gIdx] *= 0.95;
-                }
+                const inputs = [
+                    localFood / 10,
+                    (localTemp - 15) / 30,
+                    this.energy / 100,
+                    biomeType / 3,
+                    this.isMale ? 1 : 0,
+                    this.parasiteInfection / 100,
+                    seasonPhase / 3,
+                    threatDist,
+                    mateDist
+                ];
 
-                // Physics Velocity & Cap
-                const speedCap = 0.5 + this.expressions.speed * 2.0 + this.expressions.flagellaPower * 0.8;
-                this.vx = (this.vx + steerX * 0.1) * 0.94;
-                this.vy = (this.vy + steerY * 0.1) * 0.94;
+                const outputs = this.brain.forward(inputs);
+                const steerAngle = (outputs[0] - 0.5) * Math.PI * 0.5;
+                const thrust = outputs[1] * (0.5 + this.traits.speed * 1.5);
+                const doPhotosynthesis = outputs[2] > 0.5;
+                const doMate = outputs[4] > 0.5;
 
-                const currSpd = Math.sqrt(this.vx * this.vx + this.vy * this.vy) || 0.001;
-                if (currSpd > speedCap) {
-                    this.vx = (this.vx / currSpd) * speedCap;
-                    this.vy = (this.vy / currSpd) * speedCap;
-                }
+                const angle = Math.atan2(this.vy, this.vx) + steerAngle;
+                this.vx = Math.cos(angle) * thrust;
+                this.vy = Math.sin(angle) * thrust;
 
-                // Wall Collision Check
-                const nextX = this.x + this.vx;
-                const nextY = this.y + this.vy;
-                const nGx = clamp(Math.floor((nextX / width) * GRID_RES), 0, GRID_RES - 1);
-                const nGy = clamp(Math.floor((nextY / height) * GRID_RES), 0, GRID_RES - 1);
-                
-                if (wallGrid[nGy * GRID_RES + nGx] === 1) {
-                    this.vx *= -0.8;
-                    this.vy *= -0.8;
-                } else {
-                    this.x = nextX;
-                    this.y = nextY;
-                }
+                this.x += this.vx;
+                this.y += this.vy;
 
-                // Screen Boundary
                 if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
                 if (this.x > width - this.radius) { this.x = width - this.radius; this.vx *= -1; }
                 if (this.y < this.radius) { this.y = this.radius; this.vy *= -1; }
                 if (this.y > height - this.radius) { this.y = height - this.radius; this.vy *= -1; }
 
-                // Death & Reproduction
-                if (this.internalEnergy <= 0 || this.age > 2000 || this.infectionLevel >= 100) {
-                    this.die();
-                } else if (this.internalEnergy > 88) {
-                    if (allowSexualReproduction && this.expressions.sexualDesire > 0.4) {
-                        this.trySexualMating(neighbors);
-                    } else if (!allowSexualReproduction) {
-                        this.reproduceAsexual();
-                    }
+                let tempStress = 0;
+                if (localTemp > 30) tempStress = (1 - this.traits.heatTol) * 0.15;
+                if (localTemp < 10) tempStress = (1 - this.traits.coldTol) * 0.15;
+
+                const basalCost = 0.05 + this.traits.size * 0.03 + thrust * 0.04 + tempStress;
+                this.energy -= basalCost;
+
+                if (doPhotosynthesis && biomeType === BIOME_FOREST) {
+                    this.energy += this.traits.photosynthesis * 0.25;
+                    this.actionName = 'Photosynthesizing';
+                } else if (localFood > 0.5) {
+                    const eaten = Math.min(localFood, 1.5);
+                    foodGrid[gIdx] -= eaten;
+                    this.energy += eaten * 8;
+                    this.actionName = 'Gathering Food';
                 }
-            }
 
-            reproduceAsexual() {
-                this.internalEnergy *= 0.5;
-                const child = new Particle(
-                    this.x + (Math.random() - 0.5) * 16,
-                    this.y + (Math.random() - 0.5) * 16,
-                    this.grn,
-                    this
-                );
-                particles.push(child);
-            }
+                if (this.parasiteInfection > 0) {
+                    this.energy -= (this.parasiteInfection / 100) * 0.3;
+                    this.actionName = 'Parasitized';
+                }
 
-            trySexualMating(neighbors) {
-                for (let partner of neighbors) {
-                    if (partner === this || !partner.alive || partner.internalEnergy < 60) continue;
-                    if (partner.expressions.sexualDesire > 0.4 && partner.speciesId === this.speciesId) {
-                        const childGRN = { baselines: {}, weights: {} };
-                        for (let i = 0; i < GRN_GENES.length; i++) {
-                            const gI = GRN_GENES[i];
-                            childGRN.baselines[gI] = Math.random() < 0.5 ? this.grn.baselines[gI] : partner.grn.baselines[gI];
-                            childGRN.weights[gI] = {};
+                if (doMate && this.energy > 60) {
+                    this.actionName = 'Seeking Mate';
+                    for (let partner of particles) {
+                        if (partner === this || !partner.alive || (strictSex && partner.isMale === this.isMale)) continue;
+                        if (partner.energy > 50 && Math.hypot(partner.x - this.x, partner.y - this.y) < (this.radius + partner.radius + 6)) {
+                            const childDNA = crossoverDNA(this.dna, partner.dna);
+                            const childSex = Math.random() < 0.5;
+                            
+                            particles.push(new Particle(
+                                (this.x + partner.x) * 0.5,
+                                (this.y + partner.y) * 0.5,
+                                childSex,
+                                childDNA
+                            ));
 
-                            for (let j = 0; j < GRN_GENES.length; j++) {
-                                const gJ = GRN_GENES[j];
-                                childGRN.weights[gI][gJ] = Math.random() < 0.5 ? this.grn.weights[gI][gJ] : partner.grn.weights[gI][gJ];
-                            }
+                            this.energy *= 0.5;
+                            partner.energy *= 0.5;
+                            logEvent(`👶 新たな個体が誕生しました (${childSex ? '♂ XY' : '♀ XX'})`);
+                            break;
                         }
-
-                        this.internalEnergy *= 0.55;
-                        partner.internalEnergy *= 0.55;
-
-                        const child = new Particle(
-                            (this.x + partner.x) * 0.5,
-                            (this.y + partner.y) * 0.5,
-                            childGRN,
-                            this,
-                            partner
-                        );
-                        particles.push(child);
-                        playSoundPulse(1100, 0.12, 'triangle');
-                        break;
                     }
                 }
-            }
 
-            die() {
-                this.alive = false;
-                const gx = clamp(Math.floor((this.x / width) * GRID_RES), 0, GRID_RES - 1);
-                const gy = clamp(Math.floor((this.y / height) * GRID_RES), 0, GRID_RES - 1);
-                pheroFood[gy * GRID_RES + gx] += 3.5 + this.expressions.size * 3.0;
-                
-                // Infectious corpses release a virus cloud
-                if (this.infectionLevel > 30) {
-                    virusGrid[gy * GRID_RES + gx] += 15.0;
+                if (this.energy <= 0 || this.age > 1800) {
+                    this.alive = false;
+                    foodGrid[gIdx] += 5.0;
                 }
             }
 
@@ -802,84 +631,38 @@
                 ctx.save();
                 ctx.translate(this.x, this.y);
 
-                if (mode === 'normal' || mode === 'species') {
-                    const moveAngle = Math.atan2(this.vy, this.vx);
-                    ctx.rotate(moveAngle);
-
-                    // Organs
-                    for (let organ of this.organs) {
-                        ctx.save();
-                        ctx.rotate(organ.angle);
-
-                        if (organ.type === 'flagellum') {
-                            ctx.beginPath();
-                            ctx.moveTo(-this.radius, 0);
-                            const wave = Math.sin(this.flagellaPhase) * 5;
-                            ctx.quadraticCurveTo(-this.radius - organ.size * 0.5, wave, -this.radius - organ.size, wave * 0.5);
-                            ctx.strokeStyle = '#38bdf8';
-                            ctx.lineWidth = 1.8;
-                            ctx.stroke();
-                        } else if (organ.type === 'eye') {
-                            ctx.beginPath();
-                            ctx.arc(this.radius * 0.7, organ.angle * 4, organ.size, 0, Math.PI * 2);
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fill();
-                            ctx.beginPath();
-                            ctx.arc(this.radius * 0.7 + 1, organ.angle * 4, organ.size * 0.5, 0, Math.PI * 2);
-                            ctx.fillStyle = '#0f172a';
-                            ctx.fill();
-                        } else if (organ.type === 'mouth') {
-                            ctx.beginPath();
-                            ctx.arc(this.radius * 0.8, 0, organ.size, -Math.PI * 0.3, Math.PI * 0.3);
-                            ctx.strokeStyle = '#f43f5e';
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                        } else if (organ.type === 'leaf') {
-                            ctx.beginPath();
-                            ctx.ellipse(this.radius, 0, organ.size * 1.2, organ.size * 0.6, 0, 0, Math.PI * 2);
-                            ctx.fillStyle = '#10b981';
-                            ctx.fill();
-                        } else if (organ.type === 'spike') {
-                            ctx.beginPath();
-                            ctx.moveTo(this.radius, -2);
-                            ctx.lineTo(this.radius + organ.size, 0);
-                            ctx.lineTo(this.radius, 2);
-                            ctx.fillStyle = '#e11d48';
-                            ctx.fill();
-                        }
-                        ctx.restore();
-                    }
-
-                    // Body Core
+                if (mode === 'normal' || mode === 'biome') {
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                     ctx.fillStyle = this.color;
-                    ctx.globalAlpha = 0.88;
                     ctx.fill();
 
-                    // Infection Glow Aura
-                    if (this.infectionLevel > 10) {
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.radius + 3, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(168, 85, 247, ${this.infectionLevel / 100})`;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                    }
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius + 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = this.isMale ? '#0284c7' : '#db2777';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
 
-                    // Defense Shell
-                    if (this.expressions.defense > 0.5) {
-                        ctx.lineWidth = 2.0;
-                        ctx.strokeStyle = '#94a3b8';
+                    if (this.parasiteInfection > 10) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2);
+                        ctx.strokeStyle = '#a855f7';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([2, 2]);
                         ctx.stroke();
                     }
+                } else if (mode === 'dna') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsl(${this.dna.length * 2 % 360}, 80%, 50%)`;
+                    ctx.fill();
                 }
 
                 if (selectedParticle === this) {
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius + 6, 0, Math.PI * 2);
-                    ctx.strokeStyle = this.isFrozen ? '#38bdf8' : '#22d3ee';
+                    ctx.strokeStyle = '#06b6d4';
                     ctx.lineWidth = 2;
-                    ctx.setLineDash([3, 3]);
                     ctx.stroke();
                 }
 
@@ -887,217 +670,248 @@
             }
         }
 
-        function classifySpecies(expressions, parentSpeciesId) {
-            let bestId = null;
-            let minDist = Infinity;
+        class Parasite {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.targetHost = null;
+                this.energy = 40;
+                this.alive = true;
+            }
 
-            speciesMap.forEach((sp, id) => {
-                let dist = 0;
-                for (let key of GRN_GENES) dist += (expressions[key] - sp.avgExpr[key]) ** 2;
-                dist = Math.sqrt(dist);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestId = id;
+            update() {
+                if (this.targetHost && this.targetHost.alive) {
+                    this.x = this.targetHost.x + 3;
+                    this.y = this.targetHost.y + 3;
+                    this.targetHost.parasiteInfection = Math.min(100, this.targetHost.parasiteInfection + 0.4);
+                    this.energy += 0.2;
+
+                    if (this.energy > 80) {
+                        this.energy = 40;
+                        parasites.push(new Parasite(this.x + (Math.random() - 0.5) * 10, this.y + (Math.random() - 0.5) * 10));
+                    }
+                } else {
+                    let closest = null;
+                    let minDist = 80;
+
+                    for (let p of particles) {
+                        if (!p.alive) continue;
+                        const d = Math.hypot(p.x - this.x, p.y - this.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            closest = p;
+                        }
+                    }
+
+                    if (closest) {
+                        const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+                        this.x += Math.cos(angle) * 1.8;
+                        this.y += Math.sin(angle) * 1.8;
+
+                        if (minDist < closest.radius + 4) {
+                            this.targetHost = closest;
+                        }
+                    } else {
+                        this.energy -= 0.1;
+                    }
+
+                    if (this.energy <= 0) this.alive = false;
                 }
-            });
+            }
 
-            if (minDist < 0.45 && bestId !== null) {
-                return bestId;
-            } else {
-                const newId = nextSpeciesId++;
-                const hue = (newId * 137.5) % 360;
-                const [r, g, b] = hslToRgb(hue / 360, 0.85, 0.6);
-                const colorHex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-
-                speciesMap.set(newId, {
-                    id: newId,
-                    name: `Species ${String.fromCharCode(65 + (newId - 1) % 26)}-${newId}`,
-                    color: colorHex,
-                    count: 0,
-                    avgExpr: Object.assign({}, expressions),
-                    ancestorId: parentSpeciesId
-                });
-                return newId;
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#a855f7';
+                ctx.fill();
             }
         }
 
-        function updateEnvironmentAndFields() {
-            const timeVal = stepCounter * 0.005;
-            const dayNightFactor = (Math.sin(timeVal) + 1) * 0.5;
-
-            const hour = Math.floor(dayNightFactor * 24);
-            const isDay = hour >= 6 && hour <= 18;
-            document.getElementById('badgeDayNight').innerHTML = isDay ? 
-                `<i class="fa-solid fa-sun text-amber-400"></i> 昼 ${hour}:00` : 
-                `<i class="fa-solid fa-moon text-indigo-300"></i> 夜 ${hour}:00`;
-
-            // Light Grid
-            const currentSunlight = sunlightBaseIntensity * dayNightFactor;
-            for (let i = 0; i < GRID_COUNT; i++) lightGrid[i] = currentSunlight;
-
-            // Virus Field Diffusion & Spontaneous Sprouting
-            let totalVirusLoad = 0;
+        function generateProceduralTerrain() {
             for (let y = 0; y < GRID_RES; y++) {
                 for (let x = 0; x < GRID_RES; x++) {
                     const idx = y * GRID_RES + x;
-                    let sum = virusGrid[idx] * 4;
-                    let count = 4;
-                    if (x > 0) { sum += virusGrid[idx - 1]; count++; }
-                    if (x < GRID_RES - 1) { sum += virusGrid[idx + 1]; count++; }
-                    if (y > 0) { sum += virusGrid[idx - GRID_RES]; count++; }
-                    if (y < GRID_RES - 1) { sum += virusGrid[idx + GRID_RES]; count++; }
-                    
-                    // Diffusion + Natural Decay
-                    virusGridNext[idx] = (sum / count) * 0.94;
-                    totalVirusLoad += virusGridNext[idx];
-                }
-            }
-            virusGrid.set(virusGridNext);
+                    const nx = x / GRID_RES;
+                    const ny = y / GRID_RES;
 
-            // Spontaneous virus outbreak if population density explodes
-            if (virusSproutSetting > 0 && particles.length > 35 && stepCounter % 180 === 0) {
-                if (Math.random() < 0.3 * virusSproutSetting) {
-                    const rx = Math.floor(Math.random() * GRID_RES);
-                    const ry = Math.floor(Math.random() * GRID_RES);
-                    virusGrid[ry * GRID_RES + rx] += 40.0;
-                    logEvent('🦠 密集体帯で未知のウイルスが発生しました！');
-                }
-            }
+                    const val = Math.sin(nx * 6) + Math.cos(ny * 6) + Math.sin(nx * 12 + ny * 12) * 0.5;
 
-            // Update HUD Pandemic Status Badge
-            const avgVirus = totalVirusLoad / GRID_COUNT;
-            const badgeEl = document.getElementById('badgePandemic');
-            if (avgVirus > 1.5) {
-                badgeEl.className = 'text-purple-400 font-bold animate-pulse flex items-center gap-1';
-                badgeEl.innerHTML = '<i class="fa-solid fa-virus"></i> ⚠️ パンデミック発令中';
-            } else {
-                badgeEl.className = 'text-emerald-400 font-semibold flex items-center gap-1';
-                badgeEl.innerHTML = '<i class="fa-solid fa-shield-virus"></i> 生態系正常';
-            }
-
-            // Pheromones Decay
-            for (let i = 0; i < GRID_COUNT; i++) pheroFood[i] *= 0.98;
-
-            // Safety Re-seed if extinct
-            if (particles.length === 0 && stepCounter % 60 === 0) {
-                logEvent('🌱 個体数がゼロのため生命を再播種しました');
-                for (let i = 0; i < 15; i++) particles.push(new Particle(Math.random() * width, Math.random() * height));
-            }
-        }
-
-        function handleBrushInteraction(e) {
-            const rect = simCanvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-
-            const gx = clamp(Math.floor((mouseX / width) * GRID_RES), 0, GRID_RES - 1);
-            const gy = clamp(Math.floor((mouseY / height) * GRID_RES), 0, GRID_RES - 1);
-            const gIdx = gy * GRID_RES + gx;
-
-            if (currentBrushMode === 'select') {
-                let clicked = null;
-                for (let p of particles) {
-                    if (distSq(mouseX, mouseY, p.x, p.y) < (p.radius + 12) ** 2) {
-                        clicked = p;
-                        break;
+                    if (val < -0.4) {
+                        terrainGrid[idx] = BIOME_OCEAN;
+                    } else if (val < 0.2) {
+                        terrainGrid[idx] = BIOME_FOREST;
+                    } else if (val < 0.7) {
+                        terrainGrid[idx] = BIOME_DESERT;
+                    } else {
+                        terrainGrid[idx] = BIOME_MOUNTAIN;
                     }
-                }
-                if (clicked !== selectedParticle) {
-                    if (selectedParticle) selectedParticle.isFrozen = false;
-                    selectedParticle = clicked;
-                }
-            } else if (currentBrushMode === 'virus') {
-                virusGrid[gIdx] += 35.0;
-            } else if (currentBrushMode === 'food') {
-                pheroFood[gIdx] += 15.0;
-            } else if (currentBrushMode === 'predator') {
-                const predGRN = { baselines: { predation: 1.5, size: 1.2, speed: 1.0, aggression: 1.5 }, weights: {} };
-                particles.push(new Particle(mouseX, mouseY, predGRN));
-                logEvent('🦖 巨大捕食体をキャンバスに解き放ちました');
-            } else if (currentBrushMode === 'wall') {
-                wallGrid[gIdx] = 1;
-            } else if (currentBrushMode === 'radiation') {
-                for (let p of particles) {
-                    if (distSq(mouseX, mouseY, p.x, p.y) < 60 ** 2) {
-                        for (let key of GRN_GENES) p.grn.baselines[key] += (Math.random() - 0.5) * 1.0;
-                    }
+                    tempGrid[idx] = 20 + Math.sin(ny * Math.PI) * 10;
+                    foodGrid[idx] = terrainGrid[idx] === BIOME_FOREST ? 10 : 2;
                 }
             }
         }
 
-        function triggerDisaster(type) {
-            logEvent(`⚠️ 環境変異災害: ${type.toUpperCase()}`);
-            playSoundPulse(90, 0.5, 'sawtooth');
+        function updateClimateAndSeasons() {
+            seasonPhase += 0.0005 * seasonSpeed;
+            if (seasonPhase >= 4) seasonPhase = 0;
 
-            if (type === 'pandemic') {
-                for (let i = 0; i < GRID_COUNT; i++) virusGrid[i] += 25.0;
-            } else if (type === 'meteor') {
-                for (let p of particles) p.internalEnergy -= 50;
-            } else if (type === 'famine') {
-                pheroFood.fill(0);
-            } else if (type === 'radiation') {
-                for (let p of particles) {
-                    for (let key of GRN_GENES) p.grn.baselines[key] += (Math.random() - 0.5) * 1.5;
+            const seasonNames = ["🌸 春", "☀️ 夏", "🍁 秋", "❄️ 冬"];
+            const seasonIdx = Math.floor(seasonPhase);
+            const dayCount = Math.floor(stepCounter / 20) % 365 + 1;
+            
+            const seasonBadge = document.getElementById('badgeSeason');
+            if (seasonBadge) {
+                seasonBadge.innerHTML = `<i class="fa-solid fa-sun"></i> ${seasonNames[seasonIdx]} (Day ${dayCount})`;
+            }
+
+            const tempDelta = (seasonIdx === 1 ? 8 : (seasonIdx === 3 ? -10 : 0));
+            for (let i = 0; i < GRID_COUNT; i++) {
+                tempGrid[i] = Math.max(-20, Math.min(45, tempGrid[i] + (Math.random() - 0.5) * 0.1 + tempDelta * 0.001));
+                if (terrainGrid[i] === BIOME_FOREST && foodGrid[i] < 20) {
+                    foodGrid[i] += 0.02;
                 }
             }
         }
 
-        function renderCanvas(mode) {
+        function renderSimulationCanvas(mode) {
+            if (!ctx) return;
             ctx.clearRect(0, 0, width, height);
+
             const cellW = width / GRID_RES;
             const cellH = height / GRID_RES;
 
-            if (mode === 'virus') {
-                for (let y = 0; y < GRID_RES; y++) {
-                    for (let x = 0; x < GRID_RES; x++) {
-                        const v = virusGrid[y * GRID_RES + x];
-                        if (v > 0.1) {
-                            ctx.fillStyle = `rgba(168, 85, 247, ${clamp(v / 25, 0, 0.75)})`;
-                            ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
-                        }
-                    }
-                }
-            } else if (mode === 'light') {
-                for (let y = 0; y < GRID_RES; y++) {
-                    for (let x = 0; x < GRID_RES; x++) {
-                        const val = lightGrid[y * GRID_RES + x];
-                        ctx.fillStyle = `rgba(245, 158, 11, ${clamp(val / 3.0, 0, 0.5)})`;
-                        ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
-                    }
-                }
-            } else if (mode === 'phero') {
-                for (let y = 0; y < GRID_RES; y++) {
-                    for (let x = 0; x < GRID_RES; x++) {
-                        const f = pheroFood[y * GRID_RES + x];
-                        if (f > 0.05) {
-                            ctx.fillStyle = `rgba(16, 185, 129, ${clamp(f / 6, 0, 0.7)})`;
-                            ctx.fillRect(x * cellW, y * cellH, cellW + 1, cellH + 1);
-                        }
-                    }
-                }
-            } else if (mode === 'spatial') {
-                ctx.strokeStyle = 'rgba(99, 102, 241, 0.2)';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < width; x += SPATIAL_CELL_SIZE) {
-                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-                }
-                for (let y = 0; y < height; y += SPATIAL_CELL_SIZE) {
-                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-                }
-            }
-
-            // Walls
             for (let y = 0; y < GRID_RES; y++) {
                 for (let x = 0; x < GRID_RES; x++) {
-                    if (wallGrid[y * GRID_RES + x] === 1) {
-                        ctx.fillStyle = '#334155';
-                        ctx.fillRect(x * cellW, y * cellH, cellW, cellH);
+                    const idx = y * GRID_RES + x;
+                    const px = x * cellW;
+                    const py = y * cellH;
+
+                    if (mode === 'biome') {
+                        const b = terrainGrid[idx];
+                        ctx.fillStyle = b === BIOME_OCEAN ? '#1e3a8a' :
+                                        b === BIOME_FOREST ? '#065f46' :
+                                        b === BIOME_DESERT ? '#78350f' : '#334155';
+                    } else if (mode === 'temp') {
+                        const t = tempGrid[idx];
+                        const norm = Math.max(0, Math.min(1, (t + 10) / 50));
+                        ctx.fillStyle = `hsl(${240 - norm * 240}, 70%, 30%)`;
+                    } else {
+                        const b = terrainGrid[idx];
+                        ctx.fillStyle = b === BIOME_OCEAN ? '#0f172a' :
+                                        b === BIOME_FOREST ? '#022c22' :
+                                        b === BIOME_DESERT ? '#1c1917' : '#0f172a';
+                    }
+                    ctx.fillRect(px, py, cellW, cellH);
+
+                    if (foodGrid[idx] > 1 && mode === 'normal') {
+                        ctx.fillStyle = `rgba(52, 211, 153, ${Math.min(0.6, foodGrid[idx] / 20)})`;
+                        ctx.fillRect(px + cellW*0.25, py + cellH*0.25, cellW*0.5, cellH*0.5);
                     }
                 }
             }
 
-            // Organisms
             for (let p of particles) p.draw(ctx, mode);
+            for (let para of parasites) para.draw(ctx);
+
+            if (mode === 'parasite') {
+                ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+                for (let para of parasites) {
+                    ctx.beginPath();
+                    ctx.arc(para.x, para.y, 24, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function renderNeuralBrainDiagram(particle) {
+            if (!brainCtx || !particle || !particle.brain) return;
+            const bw = brainCanvas.width;
+            const bh = brainCanvas.height;
+            brainCtx.clearRect(0, 0, bw, bh);
+
+            const inputs = particle.brain.numInputs;
+            const hiddens = particle.brain.numHidden;
+            const outputs = particle.brain.numOutputs;
+
+            const layerX = [bw * 0.15, bw * 0.5, bw * 0.85];
+
+            for (let i = 0; i < inputs; i++) {
+                const iy = (bh / (inputs + 1)) * (i + 1);
+                for (let h = 0; h < hiddens; h++) {
+                    const hy = (bh / (hiddens + 1)) * (h + 1);
+                    const w = particle.brain.w1[i * hiddens + h];
+                    brainCtx.beginPath();
+                    brainCtx.moveTo(layerX[0], iy);
+                    brainCtx.lineTo(layerX[1], hy);
+                    brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.abs(w)})` : `rgba(244, 63, 94, ${Math.abs(w)})`;
+                    brainCtx.lineWidth = Math.abs(w) * 1.5;
+                    brainCtx.stroke();
+                }
+            }
+
+            for (let h = 0; h < hiddens; h++) {
+                const hy = (bh / (hiddens + 1)) * (h + 1);
+                for (let o = 0; o < outputs; o++) {
+                    const oy = (bh / (outputs + 1)) * (o + 1);
+                    const w = particle.brain.w2[h * outputs + o];
+                    brainCtx.beginPath();
+                    brainCtx.moveTo(layerX[1], hy);
+                    brainCtx.lineTo(layerX[2], oy);
+                    brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.abs(w)})` : `rgba(244, 63, 94, ${Math.abs(w)})`;
+                    brainCtx.lineWidth = Math.abs(w) * 1.5;
+                    brainCtx.stroke();
+                }
+            }
+
+            const drawNodes = (count, xPos, color) => {
+                for (let k = 0; k < count; k++) {
+                    const yPos = (bh / (count + 1)) * (k + 1);
+                    brainCtx.beginPath();
+                    brainCtx.arc(xPos, yPos, 4, 0, Math.PI * 2);
+                    brainCtx.fillStyle = color;
+                    brainCtx.fill();
+                }
+            };
+
+            drawNodes(inputs, layerX[0], '#06b6d4');
+            drawNodes(hiddens, layerX[1], '#a855f7');
+            drawNodes(outputs, layerX[2], '#10b981');
+        }
+
+        function playBioSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'spawn') {
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'parasite') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'radiation') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(700, now);
+                    osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {}
         }
 
         function renderPhylogeneticTree() {
@@ -1106,95 +920,116 @@
             const th = treeCanvas.height;
             treeCtx.clearRect(0, 0, tw, th);
 
-            const activeSpecies = Array.from(speciesMap.values()).filter(s => s.count > 0);
-            if (activeSpecies.length === 0) return;
+            if (particles.length === 0) {
+                treeCtx.fillStyle = '#64748b';
+                treeCtx.font = '11px sans-serif';
+                treeCtx.textAlign = 'center';
+                treeCtx.fillText('生存個体が存在しません', tw / 2, th / 2);
+                return;
+            }
 
-            const nodeYStep = th / (activeSpecies.length + 1);
+            const speciesClusters = [];
+            for (let p of particles) {
+                let found = false;
+                for (let cluster of speciesClusters) {
+                    let diff = 0;
+                    const len = Math.min(cluster.repDna.length, p.dna.length);
+                    for (let i = 0; i < len; i++) {
+                        if (cluster.repDna[i] !== p.dna[i]) diff++;
+                    }
+                    if ((diff / len) < 0.18) {
+                        cluster.members.push(p);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    speciesClusters.push({ repDna: p.dna, members: [p] });
+                }
+            }
 
-            activeSpecies.forEach((sp, idx) => {
-                const ny = (idx + 1) * nodeYStep;
-                const nx = tw - 25;
+            const lblSpecies = document.getElementById('lblSpeciesCount');
+            if (lblSpecies) lblSpecies.innerText = `${speciesClusters.length} 種`;
 
+            const total = particles.length;
+            let yOffset = 25;
+            const rowHeight = Math.min(38, Math.max(16, (th - 40) / Math.max(1, speciesClusters.length)));
+
+            speciesClusters.forEach((c, idx) => {
+                const ratio = c.members.length / total;
+                const barWidth = Math.max(8, (tw - 100) * ratio);
+
+                treeCtx.fillStyle = c.members[0].color;
                 treeCtx.beginPath();
-                treeCtx.arc(nx, ny, 4.5, 0, Math.PI * 2);
-                treeCtx.fillStyle = sp.color;
+                treeCtx.arc(18, yOffset, 5, 0, Math.PI * 2);
                 treeCtx.fill();
 
                 treeCtx.fillStyle = '#cbd5e1';
-                treeCtx.font = '9px JetBrains Mono, monospace';
-                treeCtx.fillText(sp.name, nx - 85, ny - 6);
+                treeCtx.font = '10px monospace';
+                treeCtx.textAlign = 'left';
+                treeCtx.fillText(`種 #${idx + 1} (${c.members.length}体)`, 32, yOffset + 3);
+
+                treeCtx.fillStyle = c.members[0].isMale ? '#0284c7' : '#db2777';
+                treeCtx.fillRect(115, yOffset - 4, barWidth, 7);
+
+                yOffset += rowHeight;
             });
         }
 
-        function renderRealtimeGraph() {
-            if (!graphCtx) return;
-            const gw = graphCanvas.width;
-            const gh = graphCanvas.height;
-            graphCtx.clearRect(0, 0, gw, gh);
+        function triggerEvent(type) {
+            logEvent(`⚠️ 天地創造イベント発動: ${type.toUpperCase()}`);
+            if (type === 'iceage') {
+                for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] = -15;
+            } else if (type === 'drought') {
+                foodGrid.fill(0);
+            } else if (type === 'radiation') {
+                for (let p of particles) p.dna = mutateDNA(p.dna);
+            } else if (type === 'parasiteOutbreak') {
+                for (let i = 0; i < 12; i++) parasites.push(new Parasite(Math.random() * width, Math.random() * height));
+            } else if (type === 'reseedTerrain') {
+                generateProceduralTerrain();
+            }
+        }
 
-            if (historyPop.length < 2) return;
-
-            // Population Line
-            graphCtx.beginPath();
-            const popMax = Math.max(...historyPop, 30);
-            historyPop.forEach((val, idx) => {
-                const x = (idx / (MAX_HISTORY - 1)) * gw;
-                const y = gh - (val / popMax) * (gh - 6) - 3;
-                if (idx === 0) graphCtx.moveTo(x, y); else graphCtx.lineTo(x, y);
-            });
-            graphCtx.strokeStyle = '#22d3ee';
-            graphCtx.lineWidth = 1.5;
-            graphCtx.stroke();
-
-            // Virus Line
-            graphCtx.beginPath();
-            const virusMax = Math.max(...historyVirus, 10);
-            historyVirus.forEach((val, idx) => {
-                const x = (idx / (MAX_HISTORY - 1)) * gw;
-                const y = gh - (val / virusMax) * (gh - 6) - 3;
-                if (idx === 0) graphCtx.moveTo(x, y); else graphCtx.lineTo(x, y);
-            });
-            graphCtx.strokeStyle = '#c084fc';
-            graphCtx.lineWidth = 1.2;
-            graphCtx.stroke();
+        function logEvent(msg) {
+            const logEl = document.getElementById('eventLog');
+            if (!logEl) return;
+            const div = document.createElement('div');
+            div.className = 'bg-slate-900/95 text-cyan-300 px-3 py-1.5 rounded-lg border border-cyan-500/40 backdrop-blur-md shadow-lg transition-all';
+            div.innerText = msg;
+            logEl.appendChild(div);
+            setTimeout(() => { div.remove(); }, 3500);
         }
 
         function updateUI() {
             document.getElementById('txtStepCount').innerText = stepCounter;
             document.getElementById('hudPopulation').innerText = particles.length;
 
-            speciesMap.forEach(sp => sp.count = 0);
-            let totalImmunity = 0;
-            let totalPredators = 0;
-            let totalSymbiosis = 0;
+            let males = 0, females = 0;
+            let cOcean = 0, cForest = 0, cDesert = 0, cMountain = 0;
 
             for (let p of particles) {
-                const sp = speciesMap.get(p.speciesId);
-                if (sp) sp.count++;
-                totalImmunity += p.expressions.immunity || 0;
-                if (p.expressions.predation > 0.6) totalPredators++;
-                if (p.state === 'Symbiosis') totalSymbiosis++;
+                if (p.isMale) males++; else females++;
+
+                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((p.x / width) * GRID_RES)));
+                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((p.y / height) * GRID_RES)));
+                const b = terrainGrid[gy * GRID_RES + gx];
+
+                if (b === BIOME_OCEAN) cOcean++;
+                else if (b === BIOME_FOREST) cForest++;
+                else if (b === BIOME_DESERT) cDesert++;
+                else cMountain++;
             }
 
-            const avgImmunity = particles.length > 0 ? (totalImmunity / particles.length) * 100 : 0;
-            let sumVirusField = 0;
-            for (let i = 0; i < GRID_COUNT; i++) sumVirusField += virusGrid[i];
-            const virusLoadPct = Math.min(100, (sumVirusField / GRID_COUNT) * 10);
+            document.getElementById('hudMale').innerText = males;
+            document.getElementById('hudFemale').innerText = females;
+            document.getElementById('hudParasites').innerText = parasites.length;
 
-            document.getElementById('hudVirusLoad').innerText = `${virusLoadPct.toFixed(1)}%`;
-            document.getElementById('hudImmunity').innerText = `${avgImmunity.toFixed(0)}%`;
-            document.getElementById('hudPredators').innerText = totalPredators;
-            document.getElementById('hudSymbiosis').innerText = Math.floor(totalSymbiosis / 2);
+            document.getElementById('cntOcean').innerText = cOcean;
+            document.getElementById('cntForest').innerText = cForest;
+            document.getElementById('cntDesert').innerText = cDesert;
+            document.getElementById('cntMountain').innerText = cMountain;
 
-            // History Chart Update
-            if (stepCounter % 15 === 0) {
-                if (historyPop.length >= MAX_HISTORY) { historyPop.shift(); historyVirus.shift(); }
-                historyPop.push(particles.length);
-                historyVirus.push(virusLoadPct);
-                renderRealtimeGraph();
-            }
-
-            // Inspector Detail Panel
             if (selectedParticle) {
                 if (!selectedParticle.alive) {
                     selectedParticle = null;
@@ -1205,201 +1040,134 @@
                     document.getElementById('inspectorDetail').classList.remove('hidden');
 
                     document.getElementById('inspId').innerText = `#${selectedParticle.id}`;
-                    document.getElementById('inspGeneration').innerText = `Gen ${selectedParticle.generation}`;
-                    document.getElementById('inspColor').style.backgroundColor = selectedParticle.color;
-                    document.getElementById('inspState').innerText = selectedParticle.state;
+                    document.getElementById('inspSex').innerText = selectedParticle.isMale ? '♂ Male (XY)' : '♀ Female (XX)';
+                    document.getElementById('inspAction').innerText = selectedParticle.actionName;
 
-                    document.getElementById('valIntEnergy').innerText = `${Math.round(selectedParticle.internalEnergy)}/100`;
-                    document.getElementById('barIntEnergy').style.width = `${clamp(selectedParticle.internalEnergy, 0, 100)}%`;
+                    document.getElementById('valEnergy').innerText = `${Math.round(selectedParticle.energy)}/100`;
+                    document.getElementById('barEnergy').style.width = `${Math.min(100, Math.max(0, selectedParticle.energy))}%`;
 
-                    const immVal = (selectedParticle.expressions.immunity || 0) * 100;
-                    document.getElementById('valImmunity').innerText = `${immVal.toFixed(0)}%`;
-                    document.getElementById('barImmunity').style.width = `${clamp(immVal, 0, 100)}%`;
+                    document.getElementById('valParasite').innerText = `${selectedParticle.parasiteInfection.toFixed(0)}%`;
+                    document.getElementById('barParasite').style.width = `${selectedParticle.parasiteInfection}%`;
 
-                    document.getElementById('valInfection').innerText = `${selectedParticle.infectionLevel.toFixed(0)}%`;
-                    document.getElementById('barInfection').style.width = `${clamp(selectedParticle.infectionLevel, 0, 100)}%`;
+                    document.getElementById('dnaSeqBox').innerText = selectedParticle.dna;
+                    document.getElementById('lblGenomeLen').innerText = `${selectedParticle.dna.length} bp`;
 
-                    document.getElementById('inspInfected').innerText = selectedParticle.infectionLevel > 20 ? 'Infected' : 'Healthy';
-                    document.getElementById('lblFreezeText').innerText = selectedParticle.isFrozen ? '固定解除' : '個体を固定';
-
-                    // Organs Breakdown
-                    const organListEl = document.getElementById('organList');
-                    organListEl.innerHTML = '';
-                    document.getElementById('lblOrganCount').innerText = `${selectedParticle.organs.length} 器官`;
-
-                    for (let organ of selectedParticle.organs) {
-                        const div = document.createElement('div');
-                        div.className = 'px-1.5 py-0.5 rounded bg-slate-800/80 text-cyan-300 border border-slate-700 text-[9px] flex items-center gap-1';
-                        div.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> ${organ.type.toUpperCase()}`;
-                        organListEl.appendChild(div);
-                    }
-
-                    // GRN Matrix
-                    const grnGrid = document.getElementById('grnGrid');
-                    grnGrid.innerHTML = '';
-                    for (let geneKey of GRN_GENES) {
-                        const exprVal = selectedParticle.expressions[geneKey] || 0;
-                        const labelJp = GRN_LABELS[geneKey] || geneKey;
-                        const row = document.createElement('div');
-                        row.className = 'space-y-0.5 border-b border-slate-800/60 pb-1';
-                        row.innerHTML = `
-                            <div class="flex justify-between text-slate-300 text-[9px]">
-                                <span>${labelJp}</span>
-                                <span class="text-cyan-300 font-mono font-bold">${exprVal.toFixed(2)}</span>
-                            </div>
-                            <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-                                <div class="h-full bg-cyan-400" style="width:${exprVal * 100}%"></div>
-                            </div>
-                        `;
-                        grnGrid.appendChild(row);
-                    }
+                    renderNeuralBrainDiagram(selectedParticle);
                 }
             } else {
                 document.getElementById('inspectorEmpty').classList.remove('hidden');
                 document.getElementById('inspectorDetail').classList.add('hidden');
             }
 
-            // Species Ranking
-            const activeSpeciesCount = Array.from(speciesMap.values()).filter(s => s.count > 0).length;
-            document.getElementById('lblTotalSpecies').innerText = `${activeSpeciesCount} 種アクティブ`;
-            const speciesListEl = document.getElementById('speciesList');
-            speciesListEl.innerHTML = '';
-
-            const sortedSpecies = Array.from(speciesMap.values()).sort((a, b) => b.count - a.count);
-            for (let sp of sortedSpecies) {
-                if (sp.count === 0) continue;
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800/80';
-                item.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 rounded-full" style="background-color:${sp.color}"></div>
-                        <span class="text-slate-200">${sp.name}</span>
-                    </div>
-                    <span class="text-cyan-400 font-bold">${sp.count}体</span>
-                `;
-                speciesListEl.appendChild(item);
+            if (!document.getElementById('panelTree').classList.contains('hidden')) {
+                renderPhylogeneticTree();
             }
-        }
-
-        function logEvent(msg) {
-            const logEl = document.getElementById('eventLog');
-            const div = document.createElement('div');
-            div.className = 'bg-slate-900/95 text-purple-300 px-3 py-1.5 rounded-lg border border-purple-500/40 backdrop-blur-md shadow-lg transition-all';
-            div.innerText = msg;
-            logEl.appendChild(div);
-            setTimeout(() => { div.remove(); }, 4000);
         }
 
         function simLoop() {
             if (isRunning) {
                 stepCounter++;
-
-                spatialHash.clear();
-                for (let p of particles) {
-                    if (p.alive) spatialHash.insert(p);
-                }
-
-                updateEnvironmentAndFields();
+                updateClimateAndSeasons();
 
                 for (let i = particles.length - 1; i >= 0; i--) {
                     particles[i].update();
                     if (!particles[i].alive) particles.splice(i, 1);
                 }
+
+                for (let i = parasites.length - 1; i >= 0; i--) {
+                    parasites[i].update();
+                    if (!parasites[i].alive) parasites.splice(i, 1);
+                }
             }
 
-            renderCanvas(currentOverlayMode);
-            renderPhylogeneticTree();
+            renderSimulationCanvas(currentOverlayMode);
             updateUI();
 
             requestAnimationFrame(simLoop);
         }
 
+        function handleCanvasBrush(mx, my) {
+            if (currentBrushMode === 'select') {
+                let clicked = null;
+                for (let p of particles) {
+                    if (Math.hypot(p.x - mx, p.y - my) < p.radius + 10) {
+                        clicked = p;
+                        break;
+                    }
+                }
+                selectedParticle = clicked;
+            } else if (currentBrushMode === 'food') {
+                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((mx / width) * GRID_RES)));
+                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((my / height) * GRID_RES)));
+                foodGrid[gy * GRID_RES + gx] = Math.min(25, foodGrid[gy * GRID_RES + gx] + 6.0);
+            } else if (currentBrushMode === 'parasite') {
+                parasites.push(new Parasite(mx, my));
+                playBioSound('parasite');
+            } else if (currentBrushMode === 'male') {
+                particles.push(new Particle(mx, my, true));
+                playBioSound('spawn');
+            } else if (currentBrushMode === 'female') {
+                particles.push(new Particle(mx, my, false));
+                playBioSound('spawn');
+            } else if (currentBrushMode === 'radiation') {
+                for (let p of particles) {
+                    if (Math.hypot(p.x - mx, p.y - my) < 55) {
+                        p.dna = mutateDNA(p.dna);
+                        p.traits = translateDNA(p.dna);
+                        p.brain = new NeuralBrain(9, 8, 5, p.traits.brainWeights);
+                    }
+                }
+                playBioSound('radiation');
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             simCanvas = document.getElementById('simCanvas');
             ctx = simCanvas.getContext('2d');
+            brainCanvas = document.getElementById('brainCanvas');
+            brainCtx = brainCanvas.getContext('2d');
             treeCanvas = document.getElementById('treeCanvas');
             treeCtx = treeCanvas.getContext('2d');
-            graphCanvas = document.getElementById('graphCanvas');
-            graphCtx = graphCanvas.getContext('2d');
 
             function resize() {
                 const parent = simCanvas.parentElement;
                 width = simCanvas.width = Math.max(1, parent.clientWidth);
                 height = simCanvas.height = Math.max(1, parent.clientHeight);
 
-                const treeParent = treeCanvas.parentElement;
-                treeCanvas.width = Math.max(1, treeParent.clientWidth);
-                treeCanvas.height = Math.max(1, treeParent.clientHeight);
+                const bParent = brainCanvas.parentElement;
+                brainCanvas.width = Math.max(1, bParent.clientWidth);
+                brainCanvas.height = Math.max(1, bParent.clientHeight);
 
-                const graphParent = graphCanvas.parentElement;
-                graphCanvas.width = Math.max(1, graphParent.clientWidth);
-                graphCanvas.height = Math.max(1, graphParent.clientHeight);
+                const tParent = treeCanvas.parentElement;
+                treeCanvas.width = Math.max(1, tParent.clientWidth);
+                treeCanvas.height = Math.max(1, tParent.clientHeight);
             }
             window.addEventListener('resize', resize);
             resize();
 
-            // Initial Spawning
-            for (let i = 0; i < 20; i++) particles.push(new Particle(Math.random() * width, Math.random() * height));
+            generateProceduralTerrain();
 
-            // Canvas Pointer Events
+            for (let i = 0; i < 10; i++) {
+                particles.push(new Particle(Math.random() * width, Math.random() * height, true));
+                particles.push(new Particle(Math.random() * width, Math.random() * height, false));
+            }
+
             simCanvas.addEventListener('pointerdown', (e) => {
                 isMouseDown = true;
-                initAudio();
-                handleBrushInteraction(e);
+                const rect = simCanvas.getBoundingClientRect();
+                handleCanvasBrush(e.clientX - rect.left, e.clientY - rect.top);
             });
+
             simCanvas.addEventListener('pointermove', (e) => {
-                if (isMouseDown && currentBrushMode !== 'select') handleBrushInteraction(e);
+                if (!isMouseDown) return;
+                if (currentBrushMode !== 'select') {
+                    const rect = simCanvas.getBoundingClientRect();
+                    handleCanvasBrush(e.clientX - rect.left, e.clientY - rect.top);
+                }
             });
+
             window.addEventListener('pointerup', () => { isMouseDown = false; });
 
-            // Controls
-            document.getElementById('btnPlay').addEventListener('click', function() {
-                isRunning = !isRunning;
-                document.getElementById('iconPlay').className = isRunning ? 'fa-solid fa-pause text-xs' : 'fa-solid fa-play text-xs';
-            });
-            document.getElementById('btnStep').addEventListener('click', () => {
-                isRunning = false;
-                document.getElementById('iconPlay').className = 'fa-solid fa-play text-xs';
-                stepCounter++;
-                updateEnvironmentAndFields();
-                for (let p of particles) p.update();
-            });
-            document.getElementById('btnReset').addEventListener('click', () => {
-                particles = [];
-                speciesMap.clear();
-                stepCounter = 0;
-                nextParticleId = 1;
-                nextSpeciesId = 1;
-                selectedParticle = null;
-                pheroFood.fill(0); virusGrid.fill(0); wallGrid.fill(0);
-                historyPop = []; historyVirus = [];
-                for (let i = 0; i < 20; i++) particles.push(new Particle(Math.random() * width, Math.random() * height));
-            });
-
-            // Freeze toggle
-            document.getElementById('btnFreezeParticle').addEventListener('click', () => {
-                if (selectedParticle) {
-                    selectedParticle.isFrozen = !selectedParticle.isFrozen;
-                    logEvent(selectedParticle.isFrozen ? '❄️ 個体を一時固定しました' : '▶️ 個体の固定を解除しました');
-                }
-            });
-
-            // Virus Infect Button
-            document.getElementById('btnInfectParticle').addEventListener('click', () => {
-                if (selectedParticle) {
-                    selectedParticle.infectionLevel = 100;
-                    logEvent('🦠 対象個体に高濃度ウイルスを直接注入しました');
-                }
-            });
-
-            // Audio Toggle
-            document.getElementById('btnAudio').addEventListener('click', function() {
-                soundEnabled = !soundEnabled;
-                if (soundEnabled) initAudio();
-                document.getElementById('iconAudio').className = soundEnabled ? 'fa-solid fa-volume-high text-xs text-cyan-400' : 'fa-solid fa-volume-xmark text-xs text-slate-400';
-            });
-
-            // Brush Selector
             document.querySelectorAll('.brush-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.brush-btn').forEach(b => {
@@ -1408,23 +1176,133 @@
                     });
                     this.classList.add('active', 'bg-slate-800', 'text-cyan-300', 'border', 'border-cyan-500/40');
                     currentBrushMode = this.dataset.brush;
-                    document.getElementById('lblBrushMode').innerText = this.innerText.split(' ')[1] || this.innerText;
+
+                    const labels = {
+                        select: '🔍 選択',
+                        food: '🍏 栄養',
+                        parasite: '👾 寄生体',
+                        male: '♂ オス',
+                        female: '♀ メス',
+                        radiation: '☢️ 変異線'
+                    };
+                    document.getElementById('lblBrushMode').innerText = labels[currentBrushMode] || currentBrushMode;
                 });
             });
 
-            // Clear Walls
-            document.getElementById('btnClearWalls').addEventListener('click', () => { wallGrid.fill(0); });
+            const tabInspect = document.getElementById('tabInspect');
+            const tabTree = document.getElementById('tabTree');
+            const panelInspect = document.getElementById('panelInspect');
+            const panelTree = document.getElementById('panelTree');
 
-            // Disaster Menu
+            tabInspect.addEventListener('click', () => {
+                tabInspect.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                tabInspect.classList.remove('border-transparent', 'text-slate-400');
+                tabTree.classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                tabTree.classList.add('border-transparent', 'text-slate-400');
+                panelInspect.classList.remove('hidden');
+                panelTree.classList.add('hidden');
+            });
+
+            tabTree.addEventListener('click', () => {
+                tabTree.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                tabTree.classList.remove('border-transparent', 'text-slate-400');
+                tabInspect.classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
+                tabInspect.classList.add('border-transparent', 'text-slate-400');
+                panelTree.classList.remove('hidden');
+                panelInspect.classList.add('hidden');
+                renderPhylogeneticTree();
+            });
+
+            document.getElementById('btnAudio').addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                const icon = document.getElementById('iconAudio');
+                if (soundEnabled) {
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    icon.className = 'fa-solid fa-volume-high text-xs text-cyan-400';
+                    logEvent('🔊 バイオサウンドを有効化しました');
+                } else {
+                    icon.className = 'fa-solid fa-volume-xmark text-xs';
+                    logEvent('🔇 バイオサウンドを消音しました');
+                }
+            });
+
+            document.getElementById('btnFreeze').addEventListener('click', () => {
+                if (selectedParticle) {
+                    selectedParticle.isFrozen = !selectedParticle.isFrozen;
+                    document.getElementById('lblFreezeText').innerText = selectedParticle.isFrozen ? '解除' : '固定';
+                    logEvent(selectedParticle.isFrozen ? `❄️ 個体 #${selectedParticle.id} を固定しました` : `▶️ 個体 #${selectedParticle.id} の固定を解除しました`);
+                }
+            });
+
+            document.getElementById('btnMutateNow').addEventListener('click', () => {
+                if (selectedParticle) {
+                    selectedParticle.dna = mutateDNA(selectedParticle.dna);
+                    selectedParticle.traits = translateDNA(selectedParticle.dna);
+                    selectedParticle.brain = new NeuralBrain(9, 8, 5, selectedParticle.traits.brainWeights);
+                    logEvent(`⚡ 個体 #${selectedParticle.id} のDNAを強制的変異させました`);
+                    playBioSound('radiation');
+                }
+            });
+
+            document.getElementById('chkStrictSex').addEventListener('change', (e) => {
+                strictSex = e.target.checked;
+                logEvent(strictSex ? '⚤ 厳格有性生殖 (XX/XY) 有効化' : '♾️ 自由交配 モード');
+            });
+
+            document.getElementById('btnPlay').addEventListener('click', () => {
+                isRunning = !isRunning;
+                document.getElementById('iconPlay').className = isRunning ? 'fa-solid fa-pause text-xs' : 'fa-solid fa-play text-xs';
+            });
+            document.getElementById('btnStep').addEventListener('click', () => {
+                isRunning = false;
+                stepCounter++;
+                for (let p of particles) p.update();
+            });
+            document.getElementById('btnReset').addEventListener('click', () => {
+                particles = [];
+                parasites = [];
+                stepCounter = 0;
+                generateProceduralTerrain();
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(Math.random() * width, Math.random() * height, true));
+                    particles.push(new Particle(Math.random() * width, Math.random() * height, false));
+                }
+            });
+
+            document.getElementById('sliderPointMut').addEventListener('input', (e) => {
+                pointMutationRate = parseFloat(e.target.value) / 100;
+                document.getElementById('lblPointMut').innerText = `${e.target.value}%`;
+            });
+            document.getElementById('sliderStructMut').addEventListener('input', (e) => {
+                structMutationRate = parseFloat(e.target.value) / 100;
+                document.getElementById('lblStructMut').innerText = `${e.target.value}%`;
+            });
+            document.getElementById('sliderSeasonSpeed').addEventListener('input', (e) => {
+                seasonSpeed = parseFloat(e.target.value);
+                document.getElementById('lblSeasonSpeed').innerText = `${seasonSpeed.toFixed(1)}x`;
+            });
+
+            document.getElementById('btnSpawnAdamuEva').addEventListener('click', () => {
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(Math.random() * width, Math.random() * height, true));
+                    particles.push(new Particle(Math.random() * width, Math.random() * height, false));
+                }
+                playBioSound('spawn');
+            });
+            document.getElementById('btnSpawnParasite').addEventListener('click', () => {
+                for (let i = 0; i < 5; i++) parasites.push(new Parasite(Math.random() * width, Math.random() * height));
+                playBioSound('parasite');
+            });
+
             const disasterMenuBtn = document.getElementById('btnDisasterMenu');
             const disasterDropdown = document.getElementById('disasterDropdown');
             disasterMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 disasterDropdown.classList.toggle('hidden');
             });
-            document.addEventListener('click', () => { disasterDropdown.classList.add('hidden'); });
+            document.addEventListener('click', () => disasterDropdown.classList.add('hidden'));
 
-            // Overlay Switches
             document.querySelectorAll('.overlay-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.overlay-btn').forEach(b => {
@@ -1436,46 +1314,6 @@
                 });
             });
 
-            // Physics & Dynamic Eco Sliders
-            document.getElementById('sliderDensityStress').addEventListener('input', (e) => {
-                densityStressFactor = parseFloat(e.target.value);
-                document.getElementById('lblDensityStress').innerText = `${densityStressFactor.toFixed(1)}x`;
-            });
-            document.getElementById('sliderVirusSprout').addEventListener('input', (e) => {
-                virusSproutSetting = parseInt(e.target.value);
-                const labels = ['OFF', '低 (Low)', '中 (Mid)', '高 (High)'];
-                document.getElementById('lblVirusSprout').innerText = labels[virusSproutSetting];
-            });
-            document.getElementById('sliderMetabolism').addEventListener('input', (e) => {
-                metabolismCostFactor = parseFloat(e.target.value);
-                document.getElementById('lblMetabolism').innerText = `${metabolismCostFactor.toFixed(1)}x`;
-            });
-            document.getElementById('chkSexualRepro').addEventListener('change', (e) => {
-                allowSexualReproduction = e.target.checked;
-            });
-
-            // Sidebar Tabs
-            document.getElementById('tabInspect').addEventListener('click', function() {
-                this.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                document.getElementById('tabSpecies').classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                document.getElementById('tabSpecies').classList.add('border-transparent');
-                document.getElementById('panelInspect').classList.remove('hidden');
-                document.getElementById('panelSpecies').classList.add('hidden');
-            });
-            document.getElementById('tabSpecies').addEventListener('click', function() {
-                this.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                document.getElementById('tabInspect').classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                document.getElementById('tabInspect').classList.add('border-transparent');
-                document.getElementById('panelSpecies').classList.remove('hidden');
-                document.getElementById('panelInspect').classList.add('hidden');
-            });
-
-            // Manual Spawner
-            document.getElementById('btnSpawn15').addEventListener('click', () => {
-                for (let i = 0; i < 15; i++) particles.push(new Particle(Math.random() * width, Math.random() * height));
-            });
-
-            // Start Main Simulation Loop
             simLoop();
         });
     </script>

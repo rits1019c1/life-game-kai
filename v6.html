@@ -1,825 +1,798 @@
 <!DOCTYPE html>
-<html lang="ja" class="h-full bg-slate-950 text-slate-100 select-none">
+<html lang="ja" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GENESIS v8.0 - Full Genomic DNA, Neural Brain & Biome Eco-Engine</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        slate: { 850: '#111827', 950: '#030712' }
-                    },
-                    fontFamily: {
-                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
-                        sans: ['Inter', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome icons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #080d1a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        canvas { touch-action: none; }
-        .glass-panel {
-            background: rgba(11, 17, 32, 0.90);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains+Mono', monospace; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        canvas { display: block; touch-action: none; }
         .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
             appearance: none;
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #06b6d4;
+            background: #38bdf8;
             cursor: pointer;
         }
     </style>
 </head>
-<body class="h-full w-full overflow-hidden flex flex-col font-sans antialiased text-slate-200 bg-slate-950">
+<body class="bg-slate-950 text-slate-100 h-screen overflow-hidden flex flex-col select-none">
 
-    <!-- Top Bar Navigation & Controls -->
-    <header class="h-14 glass-panel z-30 px-4 flex items-center justify-between shrink-0 border-b border-slate-800">
-        <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 via-cyan-600 to-purple-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-cyan-500/20">
-                G8
-            </div>
-            <div>
-                <h1 class="text-sm font-bold tracking-wider text-slate-100 flex items-center gap-2">
-                    GENESIS <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30">v8.0 Full DNA, Brain & Biomes Engine</span>
+    <!-- Navigation Header Bar -->
+    <header class="h-12 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between px-3 shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🧬</span>
+                <h1 class="font-bold text-sm bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    GENESIS <span class="text-xs font-mono text-cyan-300 px-1 py-0.5 bg-cyan-950/80 rounded border border-cyan-800/50">v8.0 RL</span>
                 </h1>
-                <p class="text-[10px] text-slate-400">ATGC DNA • Neural Brain • XX/XY Sex • Parasites • Biome Terrain • Season Engine</p>
+            </div>
+            
+            <div class="h-4 w-px bg-slate-800"></div>
+
+            <!-- Global Simulation Controls -->
+            <div class="flex items-center gap-1">
+                <button id="btnPause" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded text-xs transition-colors flex items-center gap-1 text-slate-200">
+                    <i class="fa-solid fa-pause text-amber-400" id="iconPause"></i>
+                    <span id="lblPause">一時停止</span>
+                </button>
+                <button id="btnStep" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs transition-colors text-slate-300" title="1ステップ進む">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                
+                <div class="flex items-center gap-1.5 ml-2 bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80 text-xs">
+                    <span class="text-slate-400 text-[10px]">速度:</span>
+                    <input type="range" id="sliderSpeed" min="0.2" max="3.0" step="0.2" value="1.0" class="w-16 accent-cyan-500 h-1 bg-slate-800 rounded custom-range">
+                    <span id="valSpeed" class="text-cyan-400 text-[11px] font-mono min-w-[28px]">1.0x</span>
+                </div>
             </div>
         </div>
 
-        <!-- Master Controls -->
-        <div class="flex items-center space-x-2 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-            <button id="btnPlay" class="w-8 h-8 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition-all shadow-md shadow-cyan-600/30" title="再生/一時停止">
-                <i class="fa-solid fa-pause text-xs" id="iconPlay"></i>
-            </button>
-            <button id="btnStep" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-all" title="1ステップ進める">
-                <i class="fa-solid fa-forward-step text-xs"></i>
-            </button>
-            <button id="btnReset" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-slate-300 flex items-center justify-center transition-all" title="世界のリセット">
-                <i class="fa-solid fa-rotate-right text-xs"></i>
-            </button>
-            <button id="btnAudio" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition-all" title="バイオサウンド">
+        <!-- Center Status / Climate HUD -->
+        <div class="hidden lg:flex items-center gap-4 text-xs font-mono bg-slate-950/80 px-3 py-1 rounded-full border border-slate-800">
+            <div class="flex items-center gap-1.5" title="季節 & 時間">
+                <span id="seasonIcon" class="text-amber-400">☀️</span>
+                <span id="seasonName" class="text-slate-200 font-semibold">夏</span>
+                <span id="timeOfDay" class="text-slate-400 text-[10px]">(昼)</span>
+            </div>
+            <div class="h-3 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1 text-slate-300" title="総個体数">
+                <i class="fa-solid fa-bug text-cyan-400 text-[10px]"></i>
+                <span id="hudPopulation" class="font-bold text-cyan-300">0</span>
+            </div>
+            <div class="h-3 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1 text-slate-300" title="生存種数">
+                <i class="fa-solid fa-dna text-purple-400 text-[10px]"></i>
+                <span id="hudSpecies" class="font-bold text-purple-300">0</span>
+            </div>
+            <div class="h-3 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1 text-slate-300" title="平均世代">
+                <i class="fa-solid fa-code-branch text-emerald-400 text-[10px]"></i>
+                <span id="hudGen" class="font-bold text-emerald-300">Gen 1</span>
+            </div>
+        </div>
+
+        <!-- Right Controls & View Modes -->
+        <div class="flex items-center gap-2">
+            <!-- Overlay Selector -->
+            <select id="selectOverlay" class="bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs px-2 py-1 rounded border border-slate-700 outline-none cursor-pointer">
+                <option value="none">🗺️ 通常バイオーム視界</option>
+                <option value="light">☀️ 光束・日影グリッド</option>
+                <option value="temp">🌡️ 温度・熱伝導</option>
+                <option value="electric">⚡ 電位差・電荷場</option>
+                <option value="sound">🔊 音圧2D波動</option>
+                <option value="phero">🧪 フェロモントレイル</option>
+            </select>
+
+            <!-- Disaster Dropdown Trigger -->
+            <div class="relative group">
+                <button class="px-2.5 py-1 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 text-rose-300 rounded text-xs transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-volcano text-rose-400"></i>
+                    <span>大災害</span>
+                    <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                </button>
+                <div class="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-slate-800 rounded-lg shadow-xl p-1 hidden group-hover:block z-50 text-xs space-y-0.5">
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="meteor">
+                        <span>☄️ 隕石衝突</span>
+                    </button>
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="volcano">
+                        <span>🌋 火山噴火</span>
+                    </button>
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="lightning">
+                        <span>⚡ 集中雷雨</span>
+                    </button>
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="heatwave">
+                        <span>☀ 殺人的猛暑</span>
+                    </button>
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="iceage">
+                        <span>❄️ 氷河期到来</span>
+                    </button>
+                    <button class="btnDisaster w-full text-left px-2 py-1.5 hover:bg-slate-800 rounded text-slate-200 transition-colors flex items-center gap-2" data-type="pandemic">
+                        <span>🦠 大感染アウトブレイク</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Audio Synthesizer Toggle -->
+            <button id="btnAudio" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors" title="効果音・WebAudio ON/OFF">
                 <i class="fa-solid fa-volume-xmark text-xs" id="iconAudio"></i>
             </button>
-            <div class="h-4 w-px bg-slate-800 my-auto"></div>
-            <!-- Climate & Season HUD Badge -->
-            <div class="flex items-center space-x-2 px-2 py-0.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs font-mono">
-                <span id="badgeSeason" class="text-amber-400 flex items-center gap-1"><i class="fa-solid fa-sun"></i> 🌸 春 (Day 1)</span>
-                <span class="text-slate-600">|</span>
-                <span id="badgeWeather" class="text-cyan-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-cloud-rain"></i> 恵みの雨</span>
-            </div>
-            <div class="h-4 w-px bg-slate-800 my-auto"></div>
-            <span class="text-xs font-mono text-slate-400 px-1 flex items-center gap-1.5">
-                <i class="fa-regular fa-clock text-slate-500"></i>
-                <span id="txtStepCount" class="text-cyan-400 font-semibold">0</span>
-            </span>
-        </div>
-
-        <!-- Visual Map Overlay Mode Selectors -->
-        <div class="hidden xl:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs font-mono">
-            <button data-overlay="normal" class="overlay-btn active px-2.5 py-1 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/30 transition-all">🌿 生態系・個体</button>
-            <button data-overlay="biome" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-300 transition-all">🗺 地形・バイオーム</button>
-            <button data-overlay="temp" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-rose-300 transition-all">🌡 気温・季節</button>
-            <button data-overlay="parasite" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-purple-300 transition-all">👾 寄生・感染</button>
-            <button data-overlay="dna" class="overlay-btn px-2 py-1 rounded-lg text-slate-400 hover:text-amber-300 transition-all">🧬 DNA多様性</button>
-        </div>
-
-        <!-- Disasters / God Events Menu -->
-        <div class="relative">
-            <button id="btnDisasterMenu" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600/30 to-emerald-600/30 hover:from-purple-600/50 hover:to-emerald-600/50 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-md">
-                <i class="fa-solid fa-meteor text-amber-400"></i>
-                気候変異・天地創造
-            </button>
-            <div id="disasterDropdown" class="hidden absolute right-0 mt-2 w-60 glass-panel rounded-xl shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 border border-slate-700">
-                <button onclick="triggerEvent('iceage')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-cyan-300 text-xs flex items-center gap-2">🧊 大氷河期到来（極冷＆海氷化）</button>
-                <button onclick="triggerEvent('drought')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 text-xs flex items-center gap-2">☀️ 猛暑・超干ばつ（水干渇＆荒野化）</button>
-                <button onclick="triggerEvent('radiation')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-yellow-300 text-xs flex items-center gap-2">☢️ 宇宙線バースト（全DNA突然変異）</button>
-                <button onclick="triggerEvent('parasiteOutbreak')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-purple-300 text-xs flex items-center gap-2">👾 寄生生物の大発生（パラスーム）</button>
-                <button onclick="triggerEvent('reseedTerrain')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-emerald-300 text-xs flex items-center gap-2">🌍 地形再生成（バイオームリセット）</button>
-            </div>
         </div>
     </header>
 
-    <!-- Main Content Grid Layout -->
+    <!-- Main Simulation Workspace -->
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- Left Sidebar: Ecosystem God Tools & Evolutionary Control -->
-        <aside class="w-64 glass-panel border-r border-slate-800 flex flex-col z-10 shrink-0 text-xs">
-            <div class="p-3 border-b border-slate-800 font-semibold text-slate-300 flex items-center justify-between">
-                <span><i class="fa-solid fa-dna text-cyan-400 mr-1.5"></i>遺伝・進化パラメータ</span>
+        
+        <!-- Left Sidebar: God Tools & Environmental Control Panel -->
+        <aside class="w-64 bg-slate-900/80 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto z-20 text-xs">
+            <div class="p-3 border-b border-slate-800 space-y-2">
+                <div class="font-semibold text-slate-300 flex items-center justify-between">
+                    <span>🛠️ 介入ブラシ (神のツール)</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1" id="brushGrid">
+                    <button class="btnBrush p-1.5 bg-cyan-950 border border-cyan-700/60 text-cyan-300 rounded flex items-center gap-1.5 transition-all" data-brush="inspect">
+                        <span>🔍 選択/観察</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="food">
+                        <span>🍏 栄養投下</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="male">
+                        <span>♂ オス個体</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="female">
+                        <span>♀ メス個体</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="parasite">
+                        <span>👾 寄生生物</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="wall">
+                        <span>🧱 障害物壁</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="virus">
+                        <span>🦠 ウイルス</span>
+                    </button>
+                    <button class="btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all" data-brush="lightning">
+                        <span>⚡ 局所放電</span>
+                    </button>
+                </div>
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-3 space-y-4">
-                <!-- Interactive Brush Tools -->
-                <div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
-                    <div class="text-[11px] font-semibold text-slate-300 flex justify-between">
-                        <span>キャンバス介入ブラシ</span>
-                        <span id="lblBrushMode" class="text-cyan-400 font-mono text-[10px]">🔍 選択</span>
+
+            <!-- Evolutionary & RL Parameters -->
+            <div class="p-3 border-b border-slate-800 space-y-3">
+                <div class="font-semibold text-slate-300 flex items-center justify-between">
+                    <span>🧠 生涯強化学習 & 進化</span>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-slate-400">
+                        <span>生前学習速度 (RL Rate)</span>
+                        <span id="lblRlRate" class="text-cyan-400 font-mono">0.05</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1 text-[10px]">
-                        <button data-brush="select" class="brush-btn active py-1 rounded bg-slate-800 text-cyan-300 border border-cyan-500/40 text-center" title="個体・脳解析">🔍 選択</button>
-                        <button data-brush="food" class="brush-btn py-1 rounded text-slate-400 hover:text-emerald-300 text-center" title="有機物投下">🍏 栄養</button>
-                        <button data-brush="parasite" class="brush-btn py-1 rounded text-slate-400 hover:text-purple-300 text-center" title="寄生生物投入">👾 寄生体</button>
-                        <button data-brush="male" class="brush-btn py-1 rounded text-slate-400 hover:text-blue-300 text-center" title="オス創生">♂ オス</button>
-                        <button data-brush="female" class="brush-btn py-1 rounded text-slate-400 hover:text-pink-300 text-center" title="メス創生">♀ メス</button>
-                        <button data-brush="radiation" class="brush-btn py-1 rounded text-slate-400 hover:text-yellow-300 text-center" title="変異線照射">☢️ 変異線</button>
-                    </div>
+                    <input type="range" id="sliderRlRate" min="0" max="0.2" step="0.01" value="0.05" class="w-full accent-cyan-500 h-1 bg-slate-800 rounded custom-range">
                 </div>
 
-                <!-- Genome Mutation & Structural Alteration Sliders -->
-                <div class="space-y-3 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-                    <div class="text-[11px] font-semibold text-cyan-300 flex justify-between items-center">
-                        <span>🧬 DNA変異強度 (Mutations)</span>
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-slate-400">
+                        <span>突然変異率 (Mutation)</span>
+                        <span id="lblMutRate" class="text-purple-400 font-mono">2.5%</span>
                     </div>
-
-                    <!-- Point Mutation Rate -->
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>塩基置換率 (ATGC Point Mut)</span>
-                            <span id="lblPointMut" class="font-mono text-cyan-400">1.2%</span>
-                        </div>
-                        <input type="range" id="sliderPointMut" min="0.1" max="5.0" step="0.1" value="1.2" class="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded custom-range">
-                    </div>
-
-                    <!-- Chromosome Structural Mutation -->
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>染色体構造異常 (重複・欠失・逆位)</span>
-                            <span id="lblStructMut" class="font-mono text-amber-400">0.8%</span>
-                        </div>
-                        <input type="range" id="sliderStructMut" min="0.0" max="3.0" step="0.1" value="0.8" class="w-full accent-amber-500 h-1.5 bg-slate-800 rounded custom-range">
-                    </div>
-
-                    <!-- Season Speed Slider -->
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-slate-400 text-[10px]">
-                            <span>季節周期速度</span>
-                            <span id="lblSeasonSpeed" class="font-mono text-emerald-400">1.0x</span>
-                        </div>
-                        <input type="range" id="sliderSeasonSpeed" min="0.2" max="3.0" step="0.2" value="1.0" class="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded custom-range">
-                    </div>
+                    <input type="range" id="sliderMutRate" min="0.1" max="10" step="0.1" value="2.5" class="w-full accent-purple-500 h-1 bg-slate-800 rounded custom-range">
                 </div>
 
-                <!-- Reproduction & Sex Ratio Rules -->
-                <div class="space-y-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                    <div class="flex items-center justify-between text-[10px] text-slate-300">
-                        <span>性染色体(XX/XY) 厳格有性生殖</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="chkStrictSex" checked class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-600"></div>
-                        </label>
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-slate-400">
+                        <span>過密ストレス感度</span>
+                        <span id="lblStress" class="text-amber-400 font-mono">1.0x</span>
                     </div>
-                    <p class="text-[9px] text-slate-400">オス(XY)とメス(XX)が遭遇した時のみ減数分裂交配が行われます。</p>
+                    <input type="range" id="sliderStress" min="0" max="3.0" step="0.1" value="1.0" class="w-full accent-amber-500 h-1 bg-slate-800 rounded custom-range">
                 </div>
+            </div>
 
-                <!-- Quick Action Buttons -->
-                <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
-                    <button id="btnSpawnAdamuEva" class="w-full py-1.5 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 font-mono text-xs transition-all flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-venus-mars"></i> アダム＆イヴ 10つがい創生
-                    </button>
-                    <button id="btnSpawnParasite" class="w-full py-1 rounded bg-purple-950 hover:bg-purple-900 border border-purple-800/50 text-purple-300 font-mono text-[11px] transition-all flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-bug"></i> 寄生生物 5体放流
-                    </button>
-                </div>
-
-                <!-- Niche Differentiation Breakdown Panel -->
-                <div class="pt-2 border-t border-slate-800/80 space-y-1">
-                    <div class="text-[10px] font-semibold text-slate-400 flex justify-between">
-                        <span>バイオーム別適応個体数</span>
-                        <span class="text-emerald-400 font-mono text-[9px]">Niche Distribution</span>
-                    </div>
-                    <div id="nicheDistribution" class="space-y-1 text-[10px] font-mono">
-                        <div class="flex justify-between items-center"><span class="text-cyan-400">🌊 海洋・水域:</span><span id="cntOcean" class="text-slate-200">0</span></div>
-                        <div class="flex justify-between items-center"><span class="text-emerald-400">🌲 森林・密林:</span><span id="cntForest" class="text-slate-200">0</span></div>
-                        <div class="flex justify-between items-center"><span class="text-amber-400">🏜 砂漠・荒野:</span><span id="cntDesert" class="text-slate-200">0</span></div>
-                        <div class="flex justify-between items-center"><span class="text-slate-400">🏔 高山・冷原:</span><span id="cntMountain" class="text-slate-200">0</span></div>
-                    </div>
-                </div>
+            <!-- Global Action Buttons -->
+            <div class="p-3 space-y-1.5 mt-auto">
+                <button id="btnReseed" class="w-full py-1.5 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 rounded font-semibold transition-colors flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-seedling"></i>
+                    <span>新アダム&イブ放流</span>
+                </button>
+                <button id="btnClearAll" class="w-full py-1.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/50 text-rose-300 rounded transition-colors flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>全消去・世界リセット</span>
+                </button>
             </div>
         </aside>
 
-        <!-- Center Main Canvas & Simulation Environment -->
-        <main class="flex-1 relative bg-slate-950 overflow-hidden flex flex-col">
-            <canvas id="simCanvas" class="w-full h-full block cursor-crosshair"></canvas>
-
-            <!-- Realtime Metrics HUD -->
-            <div class="absolute top-3 left-3 pointer-events-none space-y-1 font-mono text-[11px] text-slate-300 bg-slate-950/85 p-3 rounded-xl border border-slate-800/80 backdrop-blur-md shadow-2xl">
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>総生命体数: <span id="hudPopulation" class="text-cyan-400 font-bold">0</span> (♂ <span id="hudMale">0</span> / ♀ <span id="hudFemale">0</span>)</div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span>寄生体 (Parasites): <span id="hudParasites" class="text-purple-400 font-bold">0</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span>平均ゲノム長: <span id="hudDnaLength" class="text-amber-400 font-bold">128 bp</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>脳ニューロン活性: <span id="hudBrainAct" class="text-emerald-400 font-bold">0%</span></div>
+        <!-- Center Viewport Canvas -->
+        <main class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center">
+            <canvas id="simCanvas" class="w-full h-full cursor-crosshair"></canvas>
+            
+            <!-- Floating Mini Event Console Log -->
+            <div class="absolute bottom-3 left-3 max-w-sm bg-slate-950/80 border border-slate-800/80 rounded-lg p-2 backdrop-blur-md pointer-events-none space-y-1 font-mono text-[10px] text-slate-400" id="eventConsole">
+                <div class="text-cyan-400 font-semibold border-b border-slate-800 pb-0.5">📡 生態系リアルタイムログ</div>
+                <div id="logContent" class="space-y-0.5 max-h-20 overflow-hidden flex flex-col-reverse">
+                    <div>システム初期化完了 - 環境物理場稼働中</div>
+                </div>
             </div>
-
-            <!-- Event Log Toast Notification -->
-            <div id="eventLog" class="absolute bottom-4 left-4 pointer-events-none space-y-1.5 font-mono text-xs max-w-sm z-20"></div>
         </main>
 
-        <!-- Right Sidebar: DNA Inspector, Neural Brain Diagram & Speciation Tree -->
-        <aside class="w-80 glass-panel border-l border-slate-800 flex flex-col z-10 shrink-0 text-xs">
-            <div class="flex border-b border-slate-800 text-slate-400 font-mono">
-                <button id="tabInspect" class="flex-1 py-2.5 text-center border-b-2 border-cyan-400 text-cyan-300 font-semibold transition-all">🧠 脳＆DNA解析</button>
-                <button id="tabTree" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-slate-200 transition-all">🌳 系統樹・進化</button>
+        <!-- Right Sidebar: Interactive Neural Brain Editor & DNA Inspector -->
+        <aside class="w-80 bg-slate-900/80 border-l border-slate-800 flex flex-col shrink-0 overflow-y-auto z-20 text-xs">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-slate-800 bg-slate-950/50">
+                <button id="tabBrain" class="flex-1 py-2 font-semibold border-b-2 border-cyan-400 text-cyan-300 bg-slate-900 flex items-center justify-center gap-1">
+                    <span>🧠 脳 & DNA解析</span>
+                </button>
+                <button id="tabTree" class="flex-1 py-2 font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center justify-center gap-1">
+                    <span>🌳 系統樹 & 統計</span>
+                </button>
             </div>
 
-            <!-- Tab 1: DNA & Neural Brain Inspector -->
-            <div id="panelInspect" class="flex-1 overflow-y-auto p-3 space-y-3">
-                <div id="inspectorEmpty" class="text-slate-500 text-center py-16 italic space-y-2">
-                    <i class="fa-solid fa-brain text-4xl text-cyan-600 block"></i>
-                    <span>キャンバス上の個体をクリックして<br>ニューラルネット脳とATGC DNA配列を解析</span>
-                </div>
-                
-                <div id="inspectorDetail" class="hidden space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                        <div class="flex items-center space-x-2">
-                            <div id="inspColor" class="w-4 h-4 rounded-full border border-white/20 shadow"></div>
-                            <span id="inspId" class="font-mono font-bold text-slate-100 text-sm">#0000</span>
+            <!-- Tab 1: Neural Brain Inspector & Live Interactive Editor -->
+            <div id="contentBrain" class="p-3 space-y-3 flex-1 flex flex-col">
+                <!-- Selected Organism Bio Card -->
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span id="pSexIcon" class="text-base">♂</span>
+                            <div>
+                                <div class="font-bold text-slate-200 text-xs" id="pName">個体 #---</div>
+                                <div class="text-[10px] font-mono text-slate-400" id="pSpecies">種: 未選択</div>
+                            </div>
                         </div>
-                        <div class="flex items-center space-x-1">
-                            <span id="inspSex" class="px-1.5 py-0.5 rounded bg-blue-950 font-mono text-[10px] text-blue-300 border border-blue-700/50">♂ Male (XY)</span>
-                            <span id="inspRole" class="px-1.5 py-0.5 rounded bg-emerald-950 font-mono text-[10px] text-emerald-300 border border-emerald-800/50">自立個体</span>
+                        <span id="pAgeState" class="px-2 py-0.5 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-full text-[10px] font-semibold">成体</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono border-t border-slate-800/80 pt-2">
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">エネルギー:</span>
+                                <span class="text-amber-400 font-bold" id="valEnergy">0 / 100</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="barEnergy" class="bg-amber-400 h-full w-0 transition-all"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">蓄電量:</span>
+                                <span class="text-cyan-400 font-bold" id="valCharge">0V</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="barCharge" class="bg-cyan-400 h-full w-0 transition-all"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Organism Vitals & Energy -->
-                    <div class="space-y-2 font-mono text-[10px]">
-                        <div class="flex justify-between items-center text-slate-300 bg-slate-900/90 p-1.5 rounded-lg border border-slate-800">
-                            <span>脳の行動判断:</span>
-                            <span id="inspAction" class="font-bold text-cyan-400">採餌探索 (Gathering)</span>
+                    <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
+                        <span>生涯報酬 (Score): <strong class="text-emerald-400" id="valReward">0.0</strong></span>
+                        <span>寄生感染: <strong class="text-rose-400" id="valInfection">0%</strong></span>
+                    </div>
+                </div>
+
+                <!-- Visual Neural Network Brain Diagram -->
+                <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800 space-y-1.5">
+                    <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
+                        <span>🧠 ニューラルネットワーク脳回路 (直感タップ/ドラッグ編集)</span>
+                        <span class="text-cyan-400 font-mono text-[9px]">MLP (9-8-5)</span>
+                    </div>
+                    <div class="h-44 bg-slate-950 rounded border border-slate-800 relative overflow-hidden">
+                        <canvas id="brainCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                    </div>
+                    
+                    <!-- Interactive Neural Weight & Node Editor Panel -->
+                    <div id="neuralEditorPanel" class="bg-slate-950/90 p-2 rounded border border-slate-800/80 space-y-2 text-[10px] font-mono">
+                        <div class="flex items-center justify-between text-slate-300 border-b border-slate-800 pb-1">
+                            <span class="font-semibold text-cyan-300 truncate max-w-[170px]" id="lblSelectedSynapse">シナプスまたはノードを選択</span>
+                            <span id="valSelectedWeight" class="text-amber-400 font-bold shrink-0">---</span>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-slate-400">
+                                <span>結合荷重 (Synaptic Weight) / ドラッグで調整</span>
+                                <span id="lblWeightRange" class="text-cyan-400">-3.0 〜 +3.0</span>
+                            </div>
+                            <input type="range" id="sliderWeightValue" min="-3.0" max="3.0" step="0.05" value="0" disabled class="w-full accent-cyan-500 h-1.5 bg-slate-800 rounded custom-range">
                         </div>
 
-                        <div>
-                            <div class="flex justify-between text-slate-400 mb-0.5"><span>蓄積エネルギー</span><span id="valEnergy" class="text-cyan-300">0/100</span></div>
-                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="barEnergy" class="h-full bg-cyan-400 transition-all duration-300 w-0"></div>
+                        <div class="grid grid-cols-4 gap-1 text-[9px]">
+                            <button id="btnWeightZero" disabled class="py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-slate-300 transition-all">0.0 (消去)</button>
+                            <button id="btnWeightInvert" disabled class="py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-amber-300 transition-all">符号反転</button>
+                            <button id="btnWeightExcite" disabled class="py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-cyan-300 transition-all">+3.0 (励起)</button>
+                            <button id="btnWeightInhibit" disabled class="py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-rose-300 transition-all">-3.0 (抑制)</button>
+                        </div>
+
+                        <div class="pt-1 border-t border-slate-800/80 space-y-1">
+                            <div class="text-slate-400 text-[9px] flex justify-between">
+                                <span>🧠 本能回路ワンタップ配線プリセット:</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1 text-[9px]">
+                                <button id="btnPresetPredator" class="py-1 bg-rose-950/70 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded transition-all" title="食料・脅威に猛攻撃する脳">⚡ 捕食本能</button>
+                                <button id="btnPresetHerbivore" class="py-1 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-800/60 text-emerald-300 rounded transition-all" title="光合成・効率採餌を行う脳">🌿 草食本能</button>
+                                <button id="btnPresetEvasion" class="py-1 bg-sky-950/70 hover:bg-sky-900 border border-sky-800/60 text-sky-300 rounded transition-all" title="危険を即座に感知し逃走する脳">🛡️ 逃走反射</button>
                             </div>
                         </div>
 
-                        <div>
-                            <div class="flex justify-between text-slate-400 mb-0.5"><span>寄生被害 / 感染度</span><span id="valParasite" class="text-purple-300">0%</span></div>
-                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="barParasite" class="h-full bg-purple-500 transition-all duration-300 w-0"></div>
+                        <div class="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1">
+                            <button id="btnLockPlasticity" class="py-1 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded transition-all text-[9px] flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-amber-400" id="iconLockPlasticity"></i> <span id="lblLockPlasticity">学習継続中</span>
+                            </button>
+                            <div class="flex gap-1">
+                                <button id="btnRandomizeBrain" class="py-1 px-1.5 bg-purple-950/80 hover:bg-purple-900 border border-purple-700/50 text-purple-300 rounded transition-all text-[9px]" title="全シナプス重みをランダム化">
+                                    <i class="fa-solid fa-dice mr-0.5"></i>ランダム化
+                                </button>
+                                <button id="btnZeroBrain" class="py-1 px-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-700/50 text-rose-300 rounded transition-all text-[9px]" title="全シナプス重みを0クリア">
+                                    <i class="fa-solid fa-eraser mr-0.5"></i>ゼロ化
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Visual Neural Network Brain Diagram -->
-                    <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800 space-y-1.5">
-                        <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
-                            <span>🧠 ニューラルネットワーク脳回路 (Brain)</span>
-                            <span class="text-cyan-400 font-mono text-[9px]">MLP (9-8-5)</span>
-                        </div>
-                        <div class="h-32 bg-slate-950 rounded border border-slate-800 relative overflow-hidden">
-                            <canvas id="brainCanvas" class="w-full h-full block"></canvas>
-                        </div>
+                <!-- ATGC Genome Sequence & Chromosome Viewer -->
+                <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 space-y-2">
+                    <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
+                        <span>🧬 ATGCゲノム塩基配列</span>
+                        <span class="text-purple-400 font-mono text-[10px]" id="lblGenomeLength">72 bp</span>
                     </div>
-
-                    <!-- ATGC Genome Sequence & Chromosome Viewer -->
-                    <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800 space-y-1.5">
-                        <div class="font-semibold text-slate-200 flex justify-between items-center text-[11px]">
-                            <span>🧬 DNA塩基配列 (ATGC Sequence)</span>
-                            <span id="lblGenomeLen" class="text-amber-400 font-mono text-[9px]">128 bp</span>
-                        </div>
-                        <div id="dnaSeqBox" class="p-2 bg-slate-950 rounded border border-slate-800 font-mono text-[9px] text-emerald-400 break-all h-20 overflow-y-auto leading-relaxed"></div>
+                    <div class="p-2 bg-slate-950 rounded border border-slate-800 font-mono text-[10px] break-all tracking-widest text-emerald-400 leading-relaxed overflow-y-auto max-h-20 select-all" id="dnaSequenceBox">
+                        ATGC...
                     </div>
-
-                    <!-- Controls for Selected Organism -->
-                    <div class="flex gap-1.5 pt-1">
-                        <button id="btnFreeze" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-snowflake text-cyan-400"></i> <span id="lblFreezeText">固定</span>
+                    
+                    <div class="flex items-center gap-1 pt-1">
+                        <button id="btnFreezeParticle" class="flex-1 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded text-[10px] transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-snowflake text-sky-400"></i>
+                            <span id="lblFreeze">❄️ 個体を一時固定</span>
                         </button>
-                        <button id="btnMutateNow" class="flex-1 py-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-700 font-mono text-[10px] transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-bolt text-yellow-400"></i> 変異誘発
+                        <button id="btnForceMutate" class="py-1 px-2.5 bg-purple-950 hover:bg-purple-900 border border-purple-800 text-purple-300 rounded text-[10px] transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>変異</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Phylogeny Tree & Species Matrix -->
-            <div id="panelTree" class="hidden flex-1 flex flex-col overflow-hidden p-3 space-y-3">
-                <div class="text-slate-300 font-semibold flex justify-between items-center">
-                    <span>系統樹 (Phylogenetic Tree)</span>
-                    <span id="lblSpeciesCount" class="text-cyan-400 font-mono">0 種</span>
-                </div>
-                <div class="flex-1 bg-slate-900/90 rounded-lg border border-slate-800 relative overflow-hidden">
+            <!-- Tab 2: Phylogenetic Tree & Analytics -->
+            <div id="contentTree" class="p-3 space-y-3 flex-1 flex-col hidden">
+                <div class="font-semibold text-slate-300">🌳 生物系統樹 & リアルタイム種分岐</div>
+                <div class="h-64 bg-slate-950 rounded border border-slate-800 overflow-hidden relative">
                     <canvas id="treeCanvas" class="w-full h-full block"></canvas>
+                </div>
+
+                <div class="font-semibold text-slate-300 pt-2">📈 個体数 & 多様性ダイナミクス</div>
+                <div class="h-32 bg-slate-950 rounded border border-slate-800 overflow-hidden relative">
+                    <canvas id="graphCanvas" class="w-full h-full block"></canvas>
                 </div>
             </div>
         </aside>
     </div>
 
-    <!-- Main JavaScript Simulation Architecture -->
+    <!-- JavaScript Simulation Engine -->
     <script>
-        // Grid & Biome Dimensions
-        const GRID_RES = 64;
+        // Canvas & World Dimensions
+        const GRID_RES = 32;
         const GRID_COUNT = GRID_RES * GRID_RES;
-
-        // Biome Terrain Identifiers
-        const BIOME_OCEAN = 0;    // 🌊 Ocean / Deep Water
-        const BIOME_FOREST = 1;   // 🌲 Forest / Jungle
-        const BIOME_DESERT = 2;   // 🏜 Arid / Desert
-        const BIOME_MOUNTAIN = 3; // 🏔 Mountain / Cold Alpine
-
-        // Physical Spatial Grids
-        const terrainGrid = new Uint8Array(GRID_COUNT);
+        
+        // Typed Arrays for 5 Physical Fields
+        const lightGrid = new Float32Array(GRID_COUNT);
         const tempGrid = new Float32Array(GRID_COUNT);
-        const foodGrid = new Float32Array(GRID_COUNT);
+        const electricPotential = new Float32Array(GRID_COUNT);
+        const soundPressure = new Float32Array(GRID_COUNT);
+        const pheroFood = new Float32Array(GRID_COUNT);
+        const pheroDanger = new Float32Array(GRID_COUNT);
+        const pheroTrail = new Float32Array(GRID_COUNT);
 
-        // Simulation State
-        let particles = [];
-        let parasites = [];
-        let selectedParticle = null;
+        // Global Simulation Engine State
         let isRunning = true;
-        let soundEnabled = false;
-        let audioCtx = null;
-        let currentOverlayMode = 'normal';
-        let currentBrushMode = 'select';
+        let simSpeed = 1.0;
         let stepCounter = 0;
-        let nextParticleId = 1;
+        let particles = [];
+        let foods = [];
+        let parasites = [];
+        let obstacles = [];
+        let speciesMap = new Map();
+        let selectedParticle = null;
+        let currentBrush = 'inspect';
+        let isAudioEnabled = false;
 
-        // Climate & Season Engine Parameters
-        let seasonPhase = 0; // 0: Spring, 1: Summer, 2: Autumn, 3: Winter
-        let pointMutationRate = 0.012;
-        let structMutationRate = 0.008;
-        let seasonSpeed = 1.0;
-        let strictSex = true;
-        let isMouseDown = false;
+        // Evolutionary & RL Parameters
+        let globalLearnRate = 0.05;
+        let globalMutRate = 0.025;
+        let globalStressMult = 1.0;
 
-        // Render Canvases
-        let simCanvas, ctx;
-        let brainCanvas, brainCtx;
-        let treeCanvas, treeCtx;
-        let width = 800, height = 600;
+        // Seasons Engine
+        const SEASONS = [
+            { name: "春", tempOffset: 0, lightMult: 1.0, icon: "🌸" },
+            { name: "夏", tempOffset: 8, lightMult: 1.3, icon: "☀️" },
+            { name: "秋", tempOffset: -2, lightMult: 0.9, icon: "🍁" },
+            { name: "冬", tempOffset: -12, lightMult: 0.6, icon: "❄️" }
+        ];
+        let currentSeasonIdx = 1;
 
-        // DNA Bases
-        const BASES = ['A', 'T', 'G', 'C'];
-
-        // Generate random ATGC DNA String
-        function createRandomDNA(length = 128) {
-            let dna = '';
-            for (let i = 0; i < length; i++) {
-                dna += BASES[Math.floor(Math.random() * 4)];
+        class SpatialHash {
+            constructor(cellSize) {
+                this.cellSize = cellSize;
+                this.grid = new Map();
             }
-            return dna;
-        }
-
-        // Advanced Mutations: Point Mutation, Duplication, Deletion, Inversion
-        function mutateDNA(dnaString) {
-            let dna = dnaString.split('');
-
-            // 1. Point Mutation (Single base swap)
-            for (let i = 0; i < dna.length; i++) {
-                if (Math.random() < pointMutationRate) {
-                    dna[i] = BASES[Math.floor(Math.random() * 4)];
+            clear() {
+                this.grid.clear();
+            }
+            getKey(x, y) {
+                const cx = Math.floor(x / this.cellSize);
+                const cy = Math.floor(y / this.cellSize);
+                return `${cx},${cy}`;
+            }
+            insert(particle) {
+                const key = this.getKey(particle.x, particle.y);
+                if (!this.grid.has(key)) this.grid.set(key, []);
+                this.grid.get(key).push(particle);
+            }
+            getNearby(x, y, radius) {
+                const minCx = Math.floor((x - radius) / this.cellSize);
+                const maxCx = Math.floor((x + radius) / this.cellSize);
+                const minCy = Math.floor((y - radius) / this.cellSize);
+                const maxCy = Math.floor((y + radius) / this.cellSize);
+                const results = [];
+                for (let cx = minCx; cx <= maxCx; cx++) {
+                    for (let cy = minCy; cy <= maxCy; cy++) {
+                        const cell = this.grid.get(`${cx},${cy}`);
+                        if (cell) {
+                            for (let i = 0; i < cell.length; i++) {
+                                results.push(cell[i]);
+                            }
+                        }
+                    }
                 }
+                return results;
             }
-
-            // 2. Chromosome Structural Mutations (Duplication, Deletion, Inversion)
-            if (Math.random() < structMutationRate) {
-                const mutType = Math.random();
-                const segLen = Math.floor(4 + Math.random() * 12);
-                const startIdx = Math.floor(Math.random() * Math.max(1, dna.length - segLen));
-
-                if (mutType < 0.35 && dna.length > 64) {
-                    // Deletion
-                    dna.splice(startIdx, segLen);
-                } else if (mutType < 0.70 && dna.length < 384) {
-                    // Duplication
-                    const seg = dna.slice(startIdx, startIdx + segLen);
-                    dna.splice(startIdx, 0, ...seg);
-                } else {
-                    // Inversion
-                    const seg = dna.slice(startIdx, startIdx + segLen).reverse();
-                    dna.splice(startIdx, segLen, ...seg);
-                }
-            }
-
-            return dna.join('');
         }
-
-        // Meiotic Crossover
-        function crossoverDNA(dnaA, dnaB) {
-            const cut = Math.floor(Math.random() * Math.min(dnaA.length, dnaB.length));
-            let childDNA = dnaA.slice(0, cut) + dnaB.slice(cut);
-            return mutateDNA(childDNA);
-        }
-
-        // Translate ATGC Sequence into Trait Codons & Neural Brain Weights
-        function translateDNA(dna) {
-            let traits = {
-                speed: 0.5,
-                size: 0.5,
-                heatTol: 0.5,
-                coldTol: 0.5,
-                photosynthesis: 0.5,
-                predation: 0.5,
-                defense: 0.5,
-                parasiteResist: 0.5,
-                brainWeights: []
-            };
-
-            let floatArray = [];
-            for (let i = 0; i < dna.length - 2; i += 3) {
-                const codon = dna.slice(i, i + 3);
-                let val = 0;
-                for (let c = 0; c < 3; c++) {
-                    val += BASES.indexOf(codon[c]);
-                }
-                floatArray.push((val / 9) * 2 - 1); // Normalized -1 to 1
-            }
-
-            if (floatArray.length > 8) {
-                traits.speed = (floatArray[0] + 1) * 0.5;
-                traits.size = (floatArray[1] + 1) * 0.5;
-                traits.heatTol = (floatArray[2] + 1) * 0.5;
-                traits.coldTol = (floatArray[3] + 1) * 0.5;
-                traits.photosynthesis = (floatArray[4] + 1) * 0.5;
-                traits.predation = (floatArray[5] + 1) * 0.5;
-                traits.defense = (floatArray[6] + 1) * 0.5;
-                traits.parasiteResist = (floatArray[7] + 1) * 0.5;
-                traits.brainWeights = floatArray.slice(8);
-            }
-
-            return traits;
-        }
+        const spatialHash = new SpatialHash(40);
 
         class NeuralBrain {
-            constructor(numInputs, numHidden, numOutputs, weightsArray = null) {
+            constructor(numInputs = 9, numHidden = 8, numOutputs = 5) {
                 this.numInputs = numInputs;
                 this.numHidden = numHidden;
                 this.numOutputs = numOutputs;
 
+                this.w1 = new Float32Array(numInputs * numHidden);
+                this.w2 = new Float32Array(numHidden * numOutputs);
+                
+                // Track node activations for visualization
                 this.hiddenNodes = new Float32Array(numHidden);
                 this.outputNodes = new Float32Array(numOutputs);
 
-                this.w1 = new Float32Array(numInputs * numHidden);
-                this.w2 = new Float32Array(numHidden * numOutputs);
-
-                for (let i = 0; i < this.w1.length; i++) {
-                    this.w1[i] = (weightsArray && weightsArray[i] !== undefined) ? weightsArray[i] : (Math.random() * 2 - 1);
-                }
-                for (let i = 0; i < this.w2.length; i++) {
-                    const idx = this.w1.length + i;
-                    this.w2[i] = (weightsArray && weightsArray[idx] !== undefined) ? weightsArray[idx] : (Math.random() * 2 - 1);
-                }
+                // Initialize with small random synaptic weights
+                for (let i = 0; i < this.w1.length; i++) this.w1[i] = (Math.random() * 2 - 1) * 1.5;
+                for (let i = 0; i < this.w2.length; i++) this.w2[i] = (Math.random() * 2 - 1) * 1.5;
             }
 
             forward(inputs) {
-                // Input -> Hidden (Tanh)
+                // Layer 1: Input -> Hidden
                 for (let h = 0; h < this.numHidden; h++) {
                     let sum = 0;
                     for (let i = 0; i < this.numInputs; i++) {
-                        sum += inputs[i] * this.w1[i * this.numHidden + h];
+                        sum += (inputs[i] || 0) * this.w1[i * this.numHidden + h];
                     }
                     this.hiddenNodes[h] = Math.tanh(sum);
                 }
 
-                // Hidden -> Output (Sigmoid)
+                // Layer 2: Hidden -> Output
                 for (let o = 0; o < this.numOutputs; o++) {
                     let sum = 0;
                     for (let h = 0; h < this.numHidden; h++) {
                         sum += this.hiddenNodes[h] * this.w2[h * this.numOutputs + o];
                     }
-                    this.outputNodes[o] = 1 / (1 + Math.exp(-sum));
+                    this.outputNodes[o] = Math.tanh(sum);
                 }
-
                 return this.outputNodes;
+            }
+
+            // Real-time Reinforcement Learning (Synaptic Plasticity)
+            learn(inputs, outputs, reward, lr) {
+                if (Math.abs(reward) < 0.001 || lr <= 0) return;
+                
+                // Backprop-like synaptic update based on instant reward
+                for (let h = 0; h < this.numHidden; h++) {
+                    for (let o = 0; o < this.numOutputs; o++) {
+                        const idx = h * this.numOutputs + o;
+                        this.w2[idx] += lr * reward * this.hiddenNodes[h] * outputs[o];
+                        this.w2[idx] = Math.max(-3.0, Math.min(3.0, this.w2[idx]));
+                    }
+                }
+                for (let i = 0; i < this.numInputs; i++) {
+                    for (let h = 0; h < this.numHidden; h++) {
+                        const idx = i * this.numHidden + h;
+                        this.w1[idx] += lr * reward * inputs[i] * this.hiddenNodes[h];
+                        this.w1[idx] = Math.max(-3.0, Math.min(3.0, this.w1[idx]));
+                    }
+                }
+            }
+
+            clone() {
+                const copy = new NeuralBrain(this.numInputs, this.numHidden, this.numOutputs);
+                copy.w1.set(this.w1);
+                copy.w2.set(this.w2);
+                return copy;
+            }
+
+            mutate(rate) {
+                for (let i = 0; i < this.w1.length; i++) {
+                    if (Math.random() < rate) this.w1[i] += (Math.random() * 2 - 1) * 0.4;
+                }
+                for (let i = 0; i < this.w2.length; i++) {
+                    if (Math.random() < rate) this.w2[i] += (Math.random() * 2 - 1) * 0.4;
+                }
             }
         }
 
+        let particleIdCounter = 1;
+
         class Particle {
             constructor(x, y, isMale = true, dna = null) {
-                this.id = nextParticleId++;
+                this.id = particleIdCounter++;
                 this.x = x;
                 this.y = y;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-
-                this.isMale = isMale; // Sex: Male (XY) vs Female (XX)
-                this.dna = dna || createRandomDNA(128);
-                this.traits = translateDNA(this.dna);
-
-                // Neural Brain (9 Inputs, 8 Hidden, 5 Action Outputs)
-                this.brain = new NeuralBrain(9, 8, 5, this.traits.brainWeights);
-
-                this.energy = 70;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.isMale = isMale;
+                
+                // Metabolic State
+                this.energy = 60;
+                this.maxEnergy = 120;
+                this.electricCharge = 0;
                 this.age = 0;
-                this.alive = true;
-                this.isFrozen = false;
-                this.parasiteInfection = 0;
-                this.actionName = 'Gathering';
+                this.maxAge = 1200 + Math.random() * 600;
+                this.generation = 1;
 
-                this.radius = 4 + this.traits.size * 6;
-                this.color = this.isMale ? '#38bdf8' : '#f472b6';
+                this.isFrozen = false;
+                this.isBrainLocked = false; // Disable RL synaptic updates when manually locked
+                this.parasiteInfection = 0;
+                this.cumulativeReward = 0;
+
+                // Neural Brain Controller
+                this.brain = new NeuralBrain(9, 8, 5);
+                this.lastInputs = null;
+
+                // Genome DNA (ATGC Sequence)
+                this.dnaSequence = dna || this.generateRandomDNA();
+                this.expressGenes();
+
+                // Physical Bonds for Multicellular Organisms
+                this.bonds = [];
+            }
+
+            generateRandomDNA() {
+                const bases = ['A', 'T', 'G', 'C'];
+                let seq = "";
+                for (let i = 0; i < 72; i++) seq += bases[Math.floor(Math.random() * 4)];
+                return seq;
+            }
+
+            expressGenes() {
+                // Decode ATGC triplet codons into genetic traits
+                let hash = 0;
+                for (let i = 0; i < this.dnaSequence.length; i++) {
+                    hash += this.dnaSequence.charCodeAt(i) * (i + 1);
+                }
+
+                this.maxSpeed = 1.2 + (hash % 10) * 0.15;
+                this.photosynthesisEfficiency = ((hash >> 2) % 10) * 0.12;
+                this.attackPower = ((hash >> 4) % 10) * 1.5;
+                this.defensePower = ((hash >> 6) % 10) * 1.2;
+                this.bioElectricCapacity = ((hash >> 8) % 10) * 10;
+                this.cellAdhesion = ((hash >> 10) % 10) * 0.1;
+
+                // Color derived from genes
+                const r = (hash & 0xFF);
+                const g = ((hash >> 8) & 0xFF);
+                const b = ((hash >> 16) & 0xFF);
+                this.color = `rgb(${Math.max(60, r)}, ${Math.max(60, g)}, ${Math.max(60, b)})`;
+                this.speciesId = `Spec-${(hash % 900) + 100}`;
             }
 
             update() {
                 if (this.isFrozen) return;
-                this.age++;
 
-                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((this.x / width) * GRID_RES)));
-                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((this.y / height) * GRID_RES)));
+                this.age++;
+                const prevEnergy = this.energy;
+
+                // Base Metabolic Cost
+                this.energy -= 0.04 + (this.maxSpeed * 0.01);
+
+                // Grid Coordinates for Environmental Sensing
+                const gx = Math.max(0, Math.min(GRID_RES - 1, Math.floor((this.x / width) * GRID_RES)));
+                const gy = Math.max(0, Math.min(GRID_RES - 1, Math.floor((this.y / height) * GRID_RES)));
                 const gIdx = gy * GRID_RES + gx;
 
-                const biomeType = terrainGrid[gIdx];
-                const localTemp = tempGrid[gIdx];
-                const localFood = foodGrid[gIdx];
+                // Photosynthesis
+                const localLight = lightGrid[gIdx] || 0.5;
+                this.energy += localLight * this.photosynthesisEfficiency * 0.15;
 
-                let mateDist = 1.0;
-                let threatDist = 1.0;
-
-                for (let other of particles) {
-                    if (other === this || !other.alive) continue;
-                    const d = Math.hypot(other.x - this.x, other.y - this.y) / 200;
-                    if (other.isMale !== this.isMale) mateDist = Math.min(mateDist, d);
-                    if (other.traits.predation > 0.6) threatDist = Math.min(threatDist, d);
-                }
-
+                // Read Environmental Sensors for Neural Network Inputs
+                const foodDensity = pheroFood[gIdx] || 0;
+                const localTemp = tempGrid[gIdx] || 20;
+                const threatDist = pheroDanger[gIdx] || 0;
+                
                 const inputs = [
-                    localFood / 10,
-                    (localTemp - 15) / 30,
-                    this.energy / 100,
-                    biomeType / 3,
-                    this.isMale ? 1 : 0,
-                    this.parasiteInfection / 100,
-                    seasonPhase / 3,
+                    foodDensity,
+                    localTemp / 40,
+                    this.energy / this.maxEnergy,
+                    this.electricCharge / 50,
+                    this.isMale ? 1.0 : 0.0,
+                    this.parasiteInfection,
+                    currentSeasonIdx / 3,
                     threatDist,
-                    mateDist
+                    this.age / this.maxAge
                 ];
 
+                // Execute Brain Neural Forward Pass
                 const outputs = this.brain.forward(inputs);
-                const steerAngle = (outputs[0] - 0.5) * Math.PI * 0.5;
-                const thrust = outputs[1] * (0.5 + this.traits.speed * 1.5);
-                const doPhotosynthesis = outputs[2] > 0.5;
-                const doMate = outputs[4] > 0.5;
 
-                const angle = Math.atan2(this.vy, this.vx) + steerAngle;
-                this.vx = Math.cos(angle) * thrust;
-                this.vy = Math.sin(angle) * thrust;
+                // Interpret Outputs: Steering, Speed, Photosynthetic Focus, Attack, Mating Search
+                const steerAngle = outputs[0] * Math.PI;
+                const speedMult = Math.max(0.1, (outputs[1] + 1) * 0.5) * this.maxSpeed;
+                const isAttacking = outputs[3] > 0.3;
+                const isSearchingMate = outputs[4] > 0.3;
+
+                // Apply Steering Physics
+                this.vx += Math.cos(steerAngle) * 0.2;
+                this.vy += Math.sin(steerAngle) * 0.2;
+
+                const currentSpeed = Math.hypot(this.vx, this.vy);
+                if (currentSpeed > speedMult) {
+                    this.vx = (this.vx / currentSpeed) * speedMult;
+                    this.vy = (this.vy / currentSpeed) * speedMult;
+                }
 
                 this.x += this.vx;
                 this.y += this.vy;
 
-                if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
-                if (this.x > width - this.radius) { this.x = width - this.radius; this.vx *= -1; }
-                if (this.y < this.radius) { this.y = this.radius; this.vy *= -1; }
-                if (this.y > height - this.radius) { this.y = height - this.radius; this.vy *= -1; }
+                // Screen Boundaries Bounce
+                if (this.x < 10) { this.x = 10; this.vx *= -1; }
+                if (this.x > width - 10) { this.x = width - 10; this.vx *= -1; }
+                if (this.y < 10) { this.y = 10; this.vy *= -1; }
+                if (this.y > height - 10) { this.y = height - 10; this.vy *= -1; }
 
-                let tempStress = 0;
-                if (localTemp > 30) tempStress = (1 - this.traits.heatTol) * 0.15;
-                if (localTemp < 10) tempStress = (1 - this.traits.coldTol) * 0.15;
-
-                const basalCost = 0.05 + this.traits.size * 0.03 + thrust * 0.04 + tempStress;
-                this.energy -= basalCost;
-
-                if (doPhotosynthesis && biomeType === BIOME_FOREST) {
-                    this.energy += this.traits.photosynthesis * 0.25;
-                    this.actionName = 'Photosynthesizing';
-                } else if (localFood > 0.5) {
-                    const eaten = Math.min(localFood, 1.5);
-                    foodGrid[gIdx] -= eaten;
-                    this.energy += eaten * 8;
-                    this.actionName = 'Gathering Food';
+                // Interactive Bio-Electric Organ Discharge
+                if (this.electricCharge >= 20 && isAttacking) {
+                    electricPotential[gIdx] += 15;
+                    this.electricCharge = 0;
+                    if (isAudioEnabled) playSynthSound(440, 'square', 0.1);
                 }
 
+                // Reinforcement Learning reward evaluation & synapse weight update
+                const deltaEnergy = this.energy - prevEnergy;
+                let actionBonus = 0;
+                if (this.energy > 80) actionBonus += 0.2;
+
+                const instantReward = deltaEnergy * 0.1 + actionBonus;
+
+                if (this.lastInputs && globalLearnRate > 0 && !this.isBrainLocked) {
+                    this.brain.learn(this.lastInputs, outputs, instantReward, globalLearnRate);
+                }
+                this.cumulativeReward += instantReward;
+                this.lastInputs = inputs;
+
+                // Parasite Infection Drain
                 if (this.parasiteInfection > 0) {
-                    this.energy -= (this.parasiteInfection / 100) * 0.3;
-                    this.actionName = 'Parasitized';
-                }
-
-                if (doMate && this.energy > 60) {
-                    this.actionName = 'Seeking Mate';
-                    for (let partner of particles) {
-                        if (partner === this || !partner.alive || (strictSex && partner.isMale === this.isMale)) continue;
-                        if (partner.energy > 50 && Math.hypot(partner.x - this.x, partner.y - this.y) < (this.radius + partner.radius + 6)) {
-                            const childDNA = crossoverDNA(this.dna, partner.dna);
-                            const childSex = Math.random() < 0.5;
-                            
-                            particles.push(new Particle(
-                                (this.x + partner.x) * 0.5,
-                                (this.y + partner.y) * 0.5,
-                                childSex,
-                                childDNA
-                            ));
-
-                            this.energy *= 0.5;
-                            partner.energy *= 0.5;
-                            logEvent(`👶 新たな個体が誕生しました (${childSex ? '♂ XY' : '♀ XX'})`);
-                            break;
-                        }
-                    }
-                }
-
-                if (this.energy <= 0 || this.age > 1800) {
-                    this.alive = false;
-                    foodGrid[gIdx] += 5.0;
+                    this.energy -= 0.1 * this.parasiteInfection;
                 }
             }
 
-            draw(ctx, mode) {
+            draw(ctx) {
                 ctx.save();
                 ctx.translate(this.x, this.y);
+                const angle = Math.atan2(this.vy, this.vx);
+                ctx.rotate(angle);
 
-                if (mode === 'normal' || mode === 'biome') {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = this.color;
-                    ctx.fill();
+                // Body Outer Shell
+                ctx.beginPath();
+                ctx.arc(0, 0, 7, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.lineWidth = this.isMale ? 2 : 3;
+                ctx.strokeStyle = this.isMale ? '#38bdf8' : '#f43f5e';
+                ctx.stroke();
 
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius + 2, 0, Math.PI * 2);
-                    ctx.strokeStyle = this.isMale ? '#0284c7' : '#db2777';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
+                // Flagella Tail Motion
+                const wave = Math.sin(Date.now() * 0.01 + this.id) * 4;
+                ctx.beginPath();
+                ctx.moveTo(-7, 0);
+                ctx.quadraticCurveTo(-12, wave, -17, -wave);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
 
-                    if (this.parasiteInfection > 10) {
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2);
-                        ctx.strokeStyle = '#a855f7';
-                        ctx.lineWidth = 2;
-                        ctx.setLineDash([2, 2]);
-                        ctx.stroke();
-                    }
-                } else if (mode === 'dna') {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = `hsl(${this.dna.length * 2 % 360}, 80%, 50%)`;
-                    ctx.fill();
-                }
-
-                if (selectedParticle === this) {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius + 6, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#06b6d4';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
+                // Eye Pupil Direction
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(3, -2, 2, 0, Math.PI * 2);
+                ctx.arc(3, 2, 2, 0, Math.PI * 2);
+                ctx.fill();
 
                 ctx.restore();
             }
         }
 
-        class Parasite {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.targetHost = null;
-                this.energy = 40;
-                this.alive = true;
-            }
+        let simCanvas, ctx;
+        let brainCanvas, brainCtx;
+        let treeCanvas, treeCtx;
+        let graphCanvas, graphCtx;
+        let width = 800, height = 600;
 
-            update() {
-                if (this.targetHost && this.targetHost.alive) {
-                    this.x = this.targetHost.x + 3;
-                    this.y = this.targetHost.y + 3;
-                    this.targetHost.parasiteInfection = Math.min(100, this.targetHost.parasiteInfection + 0.4);
-                    this.energy += 0.2;
+        // Neural Network Labels for Inspector UI
+        const INPUT_LABELS = [
+            "周囲の食料密度",
+            "ローカル気温",
+            "個体エネルギー",
+            "蓄電電圧",
+            "性別 (1:♂ / 0:♀)",
+            "寄生生物感染度",
+            "現在の季節フェーズ",
+            "天敵・脅威距離",
+            "個体年齢比率"
+        ];
 
-                    if (this.energy > 80) {
-                        this.energy = 40;
-                        parasites.push(new Parasite(this.x + (Math.random() - 0.5) * 10, this.y + (Math.random() - 0.5) * 10));
-                    }
-                } else {
-                    let closest = null;
-                    let minDist = 80;
+        const OUTPUT_LABELS = [
+            "ステアリング旋回角",
+            "移動推進力 (スピード)",
+            "光合成行動フラグ",
+            "採餌・捕食アクティブ",
+            "交配検索アクティブ"
+        ];
 
-                    for (let p of particles) {
-                        if (!p.alive) continue;
-                        const d = Math.hypot(p.x - this.x, p.y - this.y);
-                        if (d < minDist) {
-                            minDist = d;
-                            closest = p;
-                        }
-                    }
+        // Currently Selected Neural Synapse or Node State
+        let selectedSynapse = null; // { layer: 1|2, from: int, to: int }
+        let hoveredSynapse = null;
+        let hoveredNode = null; // { layer: 0|1|2, index: int }
 
-                    if (closest) {
-                        const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
-                        this.x += Math.cos(angle) * 1.8;
-                        this.y += Math.sin(angle) * 1.8;
+        function initCanvases() {
+            simCanvas = document.getElementById('simCanvas');
+            ctx = simCanvas.getContext('2d');
 
-                        if (minDist < closest.radius + 4) {
-                            this.targetHost = closest;
-                        }
-                    } else {
-                        this.energy -= 0.1;
-                    }
+            brainCanvas = document.getElementById('brainCanvas');
+            brainCtx = brainCanvas.getContext('2d');
 
-                    if (this.energy <= 0) this.alive = false;
-                }
-            }
+            treeCanvas = document.getElementById('treeCanvas');
+            treeCtx = treeCanvas.getContext('2d');
 
-            draw(ctx) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#a855f7';
-                ctx.fill();
-            }
+            graphCanvas = document.getElementById('graphCanvas');
+            graphCtx = graphCanvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
         }
 
-        function generateProceduralTerrain() {
-            for (let y = 0; y < GRID_RES; y++) {
-                for (let x = 0; x < GRID_RES; x++) {
-                    const idx = y * GRID_RES + x;
-                    const nx = x / GRID_RES;
-                    const ny = y / GRID_RES;
+        function resizeCanvas() {
+            const container = simCanvas.parentElement;
+            width = container.clientWidth || 800;
+            height = container.clientHeight || 600;
+            simCanvas.width = width;
+            simCanvas.height = height;
 
-                    const val = Math.sin(nx * 6) + Math.cos(ny * 6) + Math.sin(nx * 12 + ny * 12) * 0.5;
-
-                    if (val < -0.4) {
-                        terrainGrid[idx] = BIOME_OCEAN;
-                    } else if (val < 0.2) {
-                        terrainGrid[idx] = BIOME_FOREST;
-                    } else if (val < 0.7) {
-                        terrainGrid[idx] = BIOME_DESERT;
-                    } else {
-                        terrainGrid[idx] = BIOME_MOUNTAIN;
-                    }
-                    tempGrid[idx] = 20 + Math.sin(ny * Math.PI) * 10;
-                    foodGrid[idx] = terrainGrid[idx] === BIOME_FOREST ? 10 : 2;
-                }
+            if (brainCanvas) {
+                brainCanvas.width = brainCanvas.parentElement.clientWidth || 280;
+                brainCanvas.height = brainCanvas.parentElement.clientHeight || 176;
             }
-        }
-
-        function updateClimateAndSeasons() {
-            seasonPhase += 0.0005 * seasonSpeed;
-            if (seasonPhase >= 4) seasonPhase = 0;
-
-            const seasonNames = ["🌸 春", "☀️ 夏", "🍁 秋", "❄️ 冬"];
-            const seasonIdx = Math.floor(seasonPhase);
-            const dayCount = Math.floor(stepCounter / 20) % 365 + 1;
-            
-            const seasonBadge = document.getElementById('badgeSeason');
-            if (seasonBadge) {
-                seasonBadge.innerHTML = `<i class="fa-solid fa-sun"></i> ${seasonNames[seasonIdx]} (Day ${dayCount})`;
+            if (treeCanvas) {
+                treeCanvas.width = treeCanvas.parentElement.clientWidth || 280;
+                treeCanvas.height = treeCanvas.parentElement.clientHeight || 250;
             }
-
-            const tempDelta = (seasonIdx === 1 ? 8 : (seasonIdx === 3 ? -10 : 0));
-            for (let i = 0; i < GRID_COUNT; i++) {
-                tempGrid[i] = Math.max(-20, Math.min(45, tempGrid[i] + (Math.random() - 0.5) * 0.1 + tempDelta * 0.001));
-                if (terrainGrid[i] === BIOME_FOREST && foodGrid[i] < 20) {
-                    foodGrid[i] += 0.02;
-                }
-            }
-        }
-
-        function renderSimulationCanvas(mode) {
-            if (!ctx) return;
-            ctx.clearRect(0, 0, width, height);
-
-            const cellW = width / GRID_RES;
-            const cellH = height / GRID_RES;
-
-            for (let y = 0; y < GRID_RES; y++) {
-                for (let x = 0; x < GRID_RES; x++) {
-                    const idx = y * GRID_RES + x;
-                    const px = x * cellW;
-                    const py = y * cellH;
-
-                    if (mode === 'biome') {
-                        const b = terrainGrid[idx];
-                        ctx.fillStyle = b === BIOME_OCEAN ? '#1e3a8a' :
-                                        b === BIOME_FOREST ? '#065f46' :
-                                        b === BIOME_DESERT ? '#78350f' : '#334155';
-                    } else if (mode === 'temp') {
-                        const t = tempGrid[idx];
-                        const norm = Math.max(0, Math.min(1, (t + 10) / 50));
-                        ctx.fillStyle = `hsl(${240 - norm * 240}, 70%, 30%)`;
-                    } else {
-                        const b = terrainGrid[idx];
-                        ctx.fillStyle = b === BIOME_OCEAN ? '#0f172a' :
-                                        b === BIOME_FOREST ? '#022c22' :
-                                        b === BIOME_DESERT ? '#1c1917' : '#0f172a';
-                    }
-                    ctx.fillRect(px, py, cellW, cellH);
-
-                    if (foodGrid[idx] > 1 && mode === 'normal') {
-                        ctx.fillStyle = `rgba(52, 211, 153, ${Math.min(0.6, foodGrid[idx] / 20)})`;
-                        ctx.fillRect(px + cellW*0.25, py + cellH*0.25, cellW*0.5, cellH*0.5);
-                    }
-                }
-            }
-
-            for (let p of particles) p.draw(ctx, mode);
-            for (let para of parasites) para.draw(ctx);
-
-            if (mode === 'parasite') {
-                ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
-                for (let para of parasites) {
-                    ctx.beginPath();
-                    ctx.arc(para.x, para.y, 24, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+            if (graphCanvas) {
+                graphCanvas.width = graphCanvas.parentElement.clientWidth || 280;
+                graphCanvas.height = graphCanvas.parentElement.clientHeight || 120;
             }
         }
 
@@ -834,487 +807,672 @@
             const outputs = particle.brain.numOutputs;
 
             const layerX = [bw * 0.15, bw * 0.5, bw * 0.85];
+            const getNodeY = (count, idx) => (bh / (count + 1)) * (idx + 1);
 
+            const timeSec = Date.now() * 0.003;
+
+            // 1. Draw W1 Synapses (Input -> Hidden)
             for (let i = 0; i < inputs; i++) {
-                const iy = (bh / (inputs + 1)) * (i + 1);
+                const iy = getNodeY(inputs, i);
+                const inAct = particle.lastInputs ? particle.lastInputs[i] || 0.5 : 0.5;
+
                 for (let h = 0; h < hiddens; h++) {
-                    const hy = (bh / (hiddens + 1)) * (h + 1);
+                    const hy = getNodeY(hiddens, h);
                     const w = particle.brain.w1[i * hiddens + h];
+                    const isSelected = selectedSynapse && selectedSynapse.layer === 1 && selectedSynapse.from === i && selectedSynapse.to === h;
+                    const isHovered = hoveredSynapse && hoveredSynapse.layer === 1 && hoveredSynapse.from === i && hoveredSynapse.to === h;
+
                     brainCtx.beginPath();
                     brainCtx.moveTo(layerX[0], iy);
                     brainCtx.lineTo(layerX[1], hy);
-                    brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.abs(w)})` : `rgba(244, 63, 94, ${Math.abs(w)})`;
-                    brainCtx.lineWidth = Math.abs(w) * 1.5;
+
+                    if (isSelected) {
+                        brainCtx.strokeStyle = '#f59e0b'; // Amber for selected
+                        brainCtx.lineWidth = 4.0;
+                    } else if (isHovered) {
+                        brainCtx.strokeStyle = '#38bdf8'; // Cyan highlight
+                        brainCtx.lineWidth = 3.0;
+                    } else {
+                        brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.min(1, Math.abs(w) / 2 + 0.15)})` : `rgba(244, 63, 94, ${Math.min(1, Math.abs(w) / 2 + 0.15)})`;
+                        brainCtx.lineWidth = Math.min(4, Math.max(0.5, Math.abs(w) * 1.2));
+                    }
                     brainCtx.stroke();
+
+                    // Animated Signal Pulse Traveling along synapse line
+                    if (Math.abs(w) > 0.2 && Math.abs(inAct) > 0.1) {
+                        const pulseT = (timeSec * (0.8 + Math.abs(w) * 0.5)) % 1.0;
+                        const px = layerX[0] + (layerX[1] - layerX[0]) * pulseT;
+                        const py = iy + (hy - iy) * pulseT;
+                        brainCtx.beginPath();
+                        brainCtx.arc(px, py, 2, 0, Math.PI * 2);
+                        brainCtx.fillStyle = w > 0 ? '#22d3ee' : '#fb7185';
+                        brainCtx.fill();
+                    }
                 }
             }
 
+            // 2. Draw W2 Synapses (Hidden -> Output)
             for (let h = 0; h < hiddens; h++) {
-                const hy = (bh / (hiddens + 1)) * (h + 1);
+                const hy = getNodeY(hiddens, h);
+                const hidAct = particle.brain.hiddenNodes ? particle.brain.hiddenNodes[h] || 0.5 : 0.5;
+
                 for (let o = 0; o < outputs; o++) {
-                    const oy = (bh / (outputs + 1)) * (o + 1);
+                    const oy = getNodeY(outputs, o);
                     const w = particle.brain.w2[h * outputs + o];
+                    const isSelected = selectedSynapse && selectedSynapse.layer === 2 && selectedSynapse.from === h && selectedSynapse.to === o;
+                    const isHovered = hoveredSynapse && hoveredSynapse.layer === 2 && hoveredSynapse.from === h && hoveredSynapse.to === o;
+
                     brainCtx.beginPath();
                     brainCtx.moveTo(layerX[1], hy);
                     brainCtx.lineTo(layerX[2], oy);
-                    brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.abs(w)})` : `rgba(244, 63, 94, ${Math.abs(w)})`;
-                    brainCtx.lineWidth = Math.abs(w) * 1.5;
+
+                    if (isSelected) {
+                        brainCtx.strokeStyle = '#f59e0b';
+                        brainCtx.lineWidth = 4.0;
+                    } else if (isHovered) {
+                        brainCtx.strokeStyle = '#38bdf8';
+                        brainCtx.lineWidth = 3.0;
+                    } else {
+                        brainCtx.strokeStyle = w > 0 ? `rgba(6, 182, 212, ${Math.min(1, Math.abs(w) / 2 + 0.15)})` : `rgba(244, 63, 94, ${Math.min(1, Math.abs(w) / 2 + 0.15)})`;
+                        brainCtx.lineWidth = Math.min(4, Math.max(0.5, Math.abs(w) * 1.2));
+                    }
                     brainCtx.stroke();
+
+                    // Animated Signal Pulse Traveling along W2 synapse line
+                    if (Math.abs(w) > 0.2 && Math.abs(hidAct) > 0.1) {
+                        const pulseT = (timeSec * (0.8 + Math.abs(w) * 0.5) + 0.3) % 1.0;
+                        const px = layerX[1] + (layerX[2] - layerX[1]) * pulseT;
+                        const py = hy + (oy - hy) * pulseT;
+                        brainCtx.beginPath();
+                        brainCtx.arc(px, py, 2, 0, Math.PI * 2);
+                        brainCtx.fillStyle = w > 0 ? '#22d3ee' : '#fb7185';
+                        brainCtx.fill();
+                    }
                 }
             }
 
-            const drawNodes = (count, xPos, color) => {
+            // 3. Draw Nodes with Activation Levels & Pulsing Halos
+            const drawNodes = (count, xPos, color, layerIdx, activations = null) => {
                 for (let k = 0; k < count; k++) {
-                    const yPos = (bh / (count + 1)) * (k + 1);
+                    const yPos = getNodeY(count, k);
+                    const isHovered = hoveredNode && hoveredNode.layer === layerIdx && hoveredNode.index === k;
+                    const actVal = activations ? activations[k] : 0.5;
+
                     brainCtx.beginPath();
-                    brainCtx.arc(xPos, yPos, 4, 0, Math.PI * 2);
-                    brainCtx.fillStyle = color;
+                    brainCtx.arc(xPos, yPos, isHovered ? 7 : 5, 0, Math.PI * 2);
+                    brainCtx.fillStyle = isHovered ? '#ffffff' : color;
                     brainCtx.fill();
+
+                    // Glowing Halo indicating real-time activation level
+                    if (activations) {
+                        brainCtx.beginPath();
+                        brainCtx.arc(xPos, yPos, 5 + Math.abs(actVal) * 5, 0, Math.PI * 2);
+                        brainCtx.strokeStyle = color;
+                        brainCtx.lineWidth = 1.5;
+                        brainCtx.globalAlpha = Math.min(0.8, Math.max(0.2, Math.abs(actVal)));
+                        brainCtx.stroke();
+                        brainCtx.globalAlpha = 1.0;
+                    }
                 }
             };
 
-            drawNodes(inputs, layerX[0], '#06b6d4');
-            drawNodes(hiddens, layerX[1], '#a855f7');
-            drawNodes(outputs, layerX[2], '#10b981');
+            drawNodes(inputs, layerX[0], '#06b6d4', 0, particle.lastInputs);
+            drawNodes(hiddens, layerX[1], '#a855f7', 1, particle.brain.hiddenNodes);
+            drawNodes(outputs, layerX[2], '#10b981', 2, particle.brain.outputNodes);
+
+            // Draw Tooltip for Hovered/Selected Node or Synapse
+            if (hoveredNode) {
+                brainCtx.fillStyle = '#0f172a';
+                brainCtx.strokeStyle = '#38bdf8';
+                brainCtx.lineWidth = 1;
+                let labelText = "";
+                if (hoveredNode.layer === 0) labelText = `入力[${hoveredNode.index}]: ${INPUT_LABELS[hoveredNode.index] || 'Sensor'}`;
+                else if (hoveredNode.layer === 1) labelText = `中間ニューロン #${hoveredNode.index + 1}`;
+                else if (hoveredNode.layer === 2) labelText = `出力[${hoveredNode.index}]: ${OUTPUT_LABELS[hoveredNode.index] || 'Motor'}`;
+
+                const nx = layerX[hoveredNode.layer];
+                const ny = getNodeY(hoveredNode.layer === 0 ? inputs : (hoveredNode.layer === 1 ? hiddens : outputs), hoveredNode.index);
+
+                brainCtx.font = '9px monospace';
+                const textWidth = brainCtx.measureText(labelText).width;
+                const boxX = Math.min(bw - textWidth - 10, Math.max(5, nx - textWidth / 2));
+                const boxY = Math.max(5, ny - 16);
+
+                brainCtx.fillRect(boxX - 3, boxY - 9, textWidth + 6, 13);
+                brainCtx.strokeRect(boxX - 3, boxY - 9, textWidth + 6, 13);
+                brainCtx.fillStyle = '#f8fafc';
+                brainCtx.fillText(labelText, boxX, boxY);
+            }
         }
 
-        function playBioSound(type) {
-            if (!soundEnabled || !audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
+        function getBrainHitTest(mx, my) {
+            if (!selectedParticle || !selectedParticle.brain) return { node: null, synapse: null };
+            const bw = brainCanvas.width;
+            const bh = brainCanvas.height;
+            const inputs = selectedParticle.brain.numInputs;
+            const hiddens = selectedParticle.brain.numHidden;
+            const outputs = selectedParticle.brain.numOutputs;
 
-                if (type === 'spawn') {
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-                    gain.gain.setValueAtTime(0.08, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'parasite') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.linearRampToValueAtTime(110, now + 0.2);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                    osc.start(now);
-                    osc.stop(now + 0.2);
-                } else if (type === 'radiation') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(700, now);
-                    osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
-                    gain.gain.setValueAtTime(0.08, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
+            const layerX = [bw * 0.15, bw * 0.5, bw * 0.85];
+            const getNodeY = (count, idx) => (bh / (count + 1)) * (idx + 1);
+
+            // Test Node Hits
+            const testLayerNodes = (count, xPos, layerIdx) => {
+                for (let k = 0; k < count; k++) {
+                    const yPos = getNodeY(count, k);
+                    if (Math.hypot(mx - xPos, my - yPos) < 10) {
+                        return { layer: layerIdx, index: k };
+                    }
                 }
-            } catch (e) {}
+                return null;
+            };
+
+            let hitNode = testLayerNodes(inputs, layerX[0], 0) || testLayerNodes(hiddens, layerX[1], 1) || testLayerNodes(outputs, layerX[2], 2);
+            if (hitNode) return { node: hitNode, synapse: null };
+
+            // Distance from point (mx,my) to line segment (x1,y1)-(x2,y2)
+            const distToSegment = (px, py, x1, y1, x2, y2) => {
+                const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+                if (l2 === 0) return Math.hypot(px - x1, py - y1);
+                let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+                t = Math.max(0, Math.min(1, t));
+                return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+            };
+
+            // Test Synapses Layer 1
+            for (let i = 0; i < inputs; i++) {
+                const iy = getNodeY(inputs, i);
+                for (let h = 0; h < hiddens; h++) {
+                    const hy = getNodeY(hiddens, h);
+                    if (distToSegment(mx, my, layerX[0], iy, layerX[1], hy) < 5) {
+                        return { node: null, synapse: { layer: 1, from: i, to: h } };
+                    }
+                }
+            }
+
+            // Test Synapses Layer 2
+            for (let h = 0; h < hiddens; h++) {
+                const hy = getNodeY(hiddens, h);
+                for (let o = 0; o < outputs; o++) {
+                    const oy = getNodeY(outputs, o);
+                    if (distToSegment(mx, my, layerX[1], hy, layerX[2], oy) < 5) {
+                        return { node: null, synapse: { layer: 2, from: h, to: o } };
+                    }
+                }
+            }
+
+            return { node: null, synapse: null };
         }
 
-        function renderPhylogeneticTree() {
-            if (!treeCtx) return;
-            const tw = treeCanvas.width;
-            const th = treeCanvas.height;
-            treeCtx.clearRect(0, 0, tw, th);
+        function updateNeuralEditorUI() {
+            const slider = document.getElementById('sliderWeightValue');
+            const lblSynapse = document.getElementById('lblSelectedSynapse');
+            const valWeight = document.getElementById('valSelectedWeight');
 
-            if (particles.length === 0) {
-                treeCtx.fillStyle = '#64748b';
-                treeCtx.font = '11px sans-serif';
-                treeCtx.textAlign = 'center';
-                treeCtx.fillText('生存個体が存在しません', tw / 2, th / 2);
+            const btnZero = document.getElementById('btnWeightZero');
+            const btnInvert = document.getElementById('btnWeightInvert');
+            const btnExcite = document.getElementById('btnWeightExcite');
+            const btnInhibit = document.getElementById('btnWeightInhibit');
+
+            if (!selectedParticle || !selectedSynapse) {
+                lblSynapse.innerText = "シナプス線またはノードを選択";
+                valWeight.innerText = "---";
+                slider.disabled = true;
+                btnZero.disabled = true;
+                btnInvert.disabled = true;
+                btnExcite.disabled = true;
+                btnInhibit.disabled = true;
                 return;
             }
 
-            const speciesClusters = [];
-            for (let p of particles) {
-                let found = false;
-                for (let cluster of speciesClusters) {
-                    let diff = 0;
-                    const len = Math.min(cluster.repDna.length, p.dna.length);
-                    for (let i = 0; i < len; i++) {
-                        if (cluster.repDna[i] !== p.dna[i]) diff++;
-                    }
-                    if ((diff / len) < 0.18) {
-                        cluster.members.push(p);
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    speciesClusters.push({ repDna: p.dna, members: [p] });
-                }
-            }
+            slider.disabled = false;
+            btnZero.disabled = false;
+            btnInvert.disabled = false;
+            btnExcite.disabled = false;
+            btnInhibit.disabled = false;
 
-            const lblSpecies = document.getElementById('lblSpeciesCount');
-            if (lblSpecies) lblSpecies.innerText = `${speciesClusters.length} 種`;
-
-            const total = particles.length;
-            let yOffset = 25;
-            const rowHeight = Math.min(38, Math.max(16, (th - 40) / Math.max(1, speciesClusters.length)));
-
-            speciesClusters.forEach((c, idx) => {
-                const ratio = c.members.length / total;
-                const barWidth = Math.max(8, (tw - 100) * ratio);
-
-                treeCtx.fillStyle = c.members[0].color;
-                treeCtx.beginPath();
-                treeCtx.arc(18, yOffset, 5, 0, Math.PI * 2);
-                treeCtx.fill();
-
-                treeCtx.fillStyle = '#cbd5e1';
-                treeCtx.font = '10px monospace';
-                treeCtx.textAlign = 'left';
-                treeCtx.fillText(`種 #${idx + 1} (${c.members.length}体)`, 32, yOffset + 3);
-
-                treeCtx.fillStyle = c.members[0].isMale ? '#0284c7' : '#db2777';
-                treeCtx.fillRect(115, yOffset - 4, barWidth, 7);
-
-                yOffset += rowHeight;
-            });
-        }
-
-        function triggerEvent(type) {
-            logEvent(`⚠️ 天地創造イベント発動: ${type.toUpperCase()}`);
-            if (type === 'iceage') {
-                for (let i = 0; i < GRID_COUNT; i++) tempGrid[i] = -15;
-            } else if (type === 'drought') {
-                foodGrid.fill(0);
-            } else if (type === 'radiation') {
-                for (let p of particles) p.dna = mutateDNA(p.dna);
-            } else if (type === 'parasiteOutbreak') {
-                for (let i = 0; i < 12; i++) parasites.push(new Parasite(Math.random() * width, Math.random() * height));
-            } else if (type === 'reseedTerrain') {
-                generateProceduralTerrain();
-            }
-        }
-
-        function logEvent(msg) {
-            const logEl = document.getElementById('eventLog');
-            if (!logEl) return;
-            const div = document.createElement('div');
-            div.className = 'bg-slate-900/95 text-cyan-300 px-3 py-1.5 rounded-lg border border-cyan-500/40 backdrop-blur-md shadow-lg transition-all';
-            div.innerText = msg;
-            logEl.appendChild(div);
-            setTimeout(() => { div.remove(); }, 3500);
-        }
-
-        function updateUI() {
-            document.getElementById('txtStepCount').innerText = stepCounter;
-            document.getElementById('hudPopulation').innerText = particles.length;
-
-            let males = 0, females = 0;
-            let cOcean = 0, cForest = 0, cDesert = 0, cMountain = 0;
-
-            for (let p of particles) {
-                if (p.isMale) males++; else females++;
-
-                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((p.x / width) * GRID_RES)));
-                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((p.y / height) * GRID_RES)));
-                const b = terrainGrid[gy * GRID_RES + gx];
-
-                if (b === BIOME_OCEAN) cOcean++;
-                else if (b === BIOME_FOREST) cForest++;
-                else if (b === BIOME_DESERT) cDesert++;
-                else cMountain++;
-            }
-
-            document.getElementById('hudMale').innerText = males;
-            document.getElementById('hudFemale').innerText = females;
-            document.getElementById('hudParasites').innerText = parasites.length;
-
-            document.getElementById('cntOcean').innerText = cOcean;
-            document.getElementById('cntForest').innerText = cForest;
-            document.getElementById('cntDesert').innerText = cDesert;
-            document.getElementById('cntMountain').innerText = cMountain;
-
-            if (selectedParticle) {
-                if (!selectedParticle.alive) {
-                    selectedParticle = null;
-                    document.getElementById('inspectorEmpty').classList.remove('hidden');
-                    document.getElementById('inspectorDetail').classList.add('hidden');
-                } else {
-                    document.getElementById('inspectorEmpty').classList.add('hidden');
-                    document.getElementById('inspectorDetail').classList.remove('hidden');
-
-                    document.getElementById('inspId').innerText = `#${selectedParticle.id}`;
-                    document.getElementById('inspSex').innerText = selectedParticle.isMale ? '♂ Male (XY)' : '♀ Female (XX)';
-                    document.getElementById('inspAction').innerText = selectedParticle.actionName;
-
-                    document.getElementById('valEnergy').innerText = `${Math.round(selectedParticle.energy)}/100`;
-                    document.getElementById('barEnergy').style.width = `${Math.min(100, Math.max(0, selectedParticle.energy))}%`;
-
-                    document.getElementById('valParasite').innerText = `${selectedParticle.parasiteInfection.toFixed(0)}%`;
-                    document.getElementById('barParasite').style.width = `${selectedParticle.parasiteInfection}%`;
-
-                    document.getElementById('dnaSeqBox').innerText = selectedParticle.dna;
-                    document.getElementById('lblGenomeLen').innerText = `${selectedParticle.dna.length} bp`;
-
-                    renderNeuralBrainDiagram(selectedParticle);
-                }
+            let wVal = 0;
+            if (selectedSynapse.layer === 1) {
+                const idx = selectedSynapse.from * selectedParticle.brain.numHidden + selectedSynapse.to;
+                wVal = selectedParticle.brain.w1[idx];
+                lblSynapse.innerText = `結合: 入力[${selectedSynapse.from}] → 中間[${selectedSynapse.to + 1}]`;
             } else {
-                document.getElementById('inspectorEmpty').classList.remove('hidden');
-                document.getElementById('inspectorDetail').classList.add('hidden');
+                const idx = selectedSynapse.from * selectedParticle.brain.numOutputs + selectedSynapse.to;
+                wVal = selectedParticle.brain.w2[idx];
+                lblSynapse.innerText = `結合: 中間[${selectedSynapse.from + 1}] → 出力[${selectedSynapse.to}]`;
             }
 
-            if (!document.getElementById('panelTree').classList.contains('hidden')) {
-                renderPhylogeneticTree();
+            slider.value = wVal.toFixed(2);
+            valWeight.innerText = (wVal >= 0 ? "+" : "") + wVal.toFixed(2);
+        }
+
+        function setSelectedSynapseWeight(newVal) {
+            if (!selectedParticle || !selectedSynapse) return;
+            newVal = Math.max(-3.0, Math.min(3.0, newVal));
+
+            if (selectedSynapse.layer === 1) {
+                const idx = selectedSynapse.from * selectedParticle.brain.numHidden + selectedSynapse.to;
+                selectedParticle.brain.w1[idx] = newVal;
+            } else {
+                const idx = selectedSynapse.from * selectedParticle.brain.numOutputs + selectedSynapse.to;
+                selectedParticle.brain.w2[idx] = newVal;
+            }
+            updateNeuralEditorUI();
+        }
+
+        function initSimulation() {
+            initCanvases();
+
+            // Populate Initial Population
+            for (let i = 0; i < 30; i++) {
+                const rx = Math.random() * (width - 100) + 50;
+                const ry = Math.random() * (height - 100) + 50;
+                particles.push(new Particle(rx, ry, Math.random() > 0.5));
+            }
+            selectedParticle = particles[0] || null;
+
+            // Environmental Grids Base Setup
+            for (let i = 0; i < GRID_COUNT; i++) {
+                lightGrid[i] = 0.8;
+                tempGrid[i] = 22.0;
+            }
+
+            logEvent("🌍 GENESIS v8.0 生態系ワールド創世完了");
+            startApp();
+            requestAnimationFrame(simLoop);
+        }
+
+        let isDraggingSynapse = false;
+        let dragStartY = 0;
+        let dragStartWeight = 0;
+
+        function startApp() {
+            // Brain Canvas Mouse & Pointer Drag Interaction
+            brainCanvas.addEventListener('pointerdown', (e) => {
+                const rect = brainCanvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const hit = getBrainHitTest(mx, my);
+
+                if (hit.synapse) {
+                    selectedSynapse = hit.synapse;
+                    isDraggingSynapse = true;
+                    dragStartY = my;
+                    
+                    if (selectedParticle) {
+                        if (selectedSynapse.layer === 1) {
+                            const idx = selectedSynapse.from * selectedParticle.brain.numHidden + selectedSynapse.to;
+                            dragStartWeight = selectedParticle.brain.w1[idx];
+                        } else {
+                            const idx = selectedSynapse.from * selectedParticle.brain.numOutputs + selectedSynapse.to;
+                            dragStartWeight = selectedParticle.brain.w2[idx];
+                        }
+                    }
+                    updateNeuralEditorUI();
+                    brainCanvas.setPointerCapture(e.pointerId);
+                    logEvent(`🧠 シナプス結合選択: Layer ${hit.synapse.layer} (${hit.synapse.from} → ${hit.synapse.to})`);
+                } else if (hit.node) {
+                    const n = hit.node;
+                    let desc = n.layer === 0 ? INPUT_LABELS[n.index] : (n.layer === 2 ? OUTPUT_LABELS[n.index] : `Hidden #${n.index + 1}`);
+                    logEvent(`💡 ニューロン刺激発火: ${desc}`);
+                    
+                    // Force pulse excitation on clicked node
+                    if (selectedParticle && selectedParticle.brain) {
+                        if (n.layer === 1 && selectedParticle.brain.hiddenNodes) {
+                            selectedParticle.brain.hiddenNodes[n.index] = 1.0;
+                        } else if (n.layer === 2 && selectedParticle.brain.outputNodes) {
+                            selectedParticle.brain.outputNodes[n.index] = 1.0;
+                        }
+                    }
+                }
+            });
+
+            brainCanvas.addEventListener('pointermove', (e) => {
+                const rect = brainCanvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                if (isDraggingSynapse && selectedParticle && selectedSynapse) {
+                    const dy = dragStartY - my; // Upwards drag increases weight
+                    const newW = Math.max(-3.0, Math.min(3.0, dragStartWeight + dy * 0.03));
+                    setSelectedSynapseWeight(newW);
+                } else {
+                    const hit = getBrainHitTest(mx, my);
+                    hoveredNode = hit.node;
+                    hoveredSynapse = hit.synapse;
+                    brainCanvas.style.cursor = hit.synapse || hit.node ? 'pointer' : 'default';
+                }
+            });
+
+            const releasePointer = (e) => {
+                if (isDraggingSynapse) {
+                    isDraggingSynapse = false;
+                    try { brainCanvas.releasePointerCapture(e.pointerId); } catch(err) {}
+                }
+            };
+
+            brainCanvas.addEventListener('pointerup', releasePointer);
+            brainCanvas.addEventListener('pointercancel', releasePointer);
+
+            brainCanvas.addEventListener('pointerleave', () => {
+                if (!isDraggingSynapse) {
+                    hoveredNode = null;
+                    hoveredSynapse = null;
+                }
+            });
+
+            // Neural Instinct Presets (Predator, Herbivore, Evasion)
+            document.getElementById('btnPresetPredator').addEventListener('click', () => {
+                if (!selectedParticle || !selectedParticle.brain) return;
+                const b = selectedParticle.brain;
+                b.w1.fill(0); b.w2.fill(0);
+                // Threat/Food -> Max Speed & Attack
+                b.w1[7 * b.numHidden + 0] = 2.5; // Threat -> Hidden 0
+                b.w1[0 * b.numHidden + 1] = 2.0; // Food -> Hidden 1
+                b.w2[0 * b.numOutputs + 1] = 3.0; // Hidden 0 -> Max Speed
+                b.w2[0 * b.numOutputs + 3] = 3.0; // Hidden 0 -> Attack Active
+                b.w2[1 * b.numOutputs + 3] = 2.5; // Hidden 1 -> Attack Active
+                selectedParticle.isBrainLocked = true;
+                updateNeuralEditorUI();
+                logEvent(`⚡ 個体 #${selectedParticle.id} に「捕食本能」脳回路を移植固定しました`);
+            });
+
+            document.getElementById('btnPresetHerbivore').addEventListener('click', () => {
+                if (!selectedParticle || !selectedParticle.brain) return;
+                const b = selectedParticle.brain;
+                b.w1.fill(0); b.w2.fill(0);
+                // Food/Energy -> Photosynthesis & Gentle Steer
+                b.w1[0 * b.numHidden + 0] = 3.0; // Food -> Hidden 0
+                b.w1[2 * b.numHidden + 1] = -2.0; // Energy -> Hidden 1
+                b.w2[0 * b.numOutputs + 2] = 3.0; // Hidden 0 -> Photosynthesis Active
+                b.w2[1 * b.numOutputs + 0] = 1.5; // Hidden 1 -> Turn Search
+                selectedParticle.isBrainLocked = true;
+                updateNeuralEditorUI();
+                logEvent(`🌿 個体 #${selectedParticle.id} に「草食・光合成本能」脳回路を移植固定しました`);
+            });
+
+            document.getElementById('btnPresetEvasion').addEventListener('click', () => {
+                if (!selectedParticle || !selectedParticle.brain) return;
+                const b = selectedParticle.brain;
+                b.w1.fill(0); b.w2.fill(0);
+                // Threat -> Sharp Turn & Speed Boost
+                b.w1[7 * b.numHidden + 0] = 3.0; // Threat -> Hidden 0
+                b.w2[0 * b.numOutputs + 0] = 3.0; // Hidden 0 -> Steering Turn
+                b.w2[0 * b.numOutputs + 1] = 3.0; // Hidden 0 -> Max Speed
+                selectedParticle.isBrainLocked = true;
+                updateNeuralEditorUI();
+                logEvent(`🛡️ 個体 #${selectedParticle.id} に「逃走反射」脳回路を移植固定しました`);
+            });
+
+            // Canvas Click / Tap Interaction for God Tools
+            simCanvas.addEventListener('pointerdown', (e) => {
+                const rect = simCanvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                if (currentBrush === 'inspect') {
+                    // Find Nearest Particle
+                    let nearest = null;
+                    let minDist = 30;
+                    for (let p of particles) {
+                        const d = Math.hypot(p.x - mx, p.y - my);
+                        if (d < minDist) {
+                            minDist = d;
+                            nearest = p;
+                        }
+                    }
+                    if (nearest) {
+                        selectedParticle = nearest;
+                        selectedSynapse = null;
+                        updateNeuralEditorUI();
+                        logEvent(`🔍 個体 #${selectedParticle.id} (${selectedParticle.speciesId}) を選択解析`);
+                    }
+                } else if (currentBrush === 'male' || currentBrush === 'female') {
+                    const p = new Particle(mx, my, currentBrush === 'male');
+                    particles.push(p);
+                    selectedParticle = p;
+                    logEvent(`✨ 神の手により新個体 #${p.id} を生成投下`);
+                } else if (currentBrush === 'food') {
+                    foods.push({ x: mx, y: my, energy: 30 });
+                    logEvent("🍏 栄養素を水中投下");
+                }
+            });
+
+            // UI Buttons & Sliders Event Wiring
+            document.getElementById('btnPause').addEventListener('click', () => {
+                isRunning = !isRunning;
+                document.getElementById('iconPause').className = isRunning ? 'fa-solid fa-pause text-amber-400' : 'fa-solid fa-play text-emerald-400';
+                document.getElementById('lblPause').innerText = isRunning ? '一時停止' : '再開';
+            });
+
+            document.getElementById('btnStep').addEventListener('click', () => {
+                if (!isRunning) updateSimulationStep();
+            });
+
+            document.getElementById('sliderSpeed').addEventListener('input', (e) => {
+                simSpeed = parseFloat(e.target.value);
+                document.getElementById('valSpeed').innerText = simSpeed.toFixed(1) + 'x';
+            });
+
+            document.getElementById('sliderRlRate').addEventListener('input', (e) => {
+                globalLearnRate = parseFloat(e.target.value);
+                document.getElementById('lblRlRate').innerText = globalLearnRate.toFixed(2);
+            });
+
+            // Brush Selector Buttons
+            document.querySelectorAll('.btnBrush').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.btnBrush').forEach(b => b.className = 'btnBrush p-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded flex items-center gap-1.5 transition-all');
+                    btn.className = 'btnBrush p-1.5 bg-cyan-950 border border-cyan-700/60 text-cyan-300 rounded flex items-center gap-1.5 transition-all';
+                    currentBrush = btn.dataset.brush;
+                });
+            });
+
+            // Weight Editor Controls Binding
+            document.getElementById('sliderWeightValue').addEventListener('input', (e) => {
+                setSelectedSynapseWeight(parseFloat(e.target.value));
+            });
+
+            document.getElementById('btnWeightZero').addEventListener('click', () => setSelectedSynapseWeight(0.0));
+            document.getElementById('btnWeightInvert').addEventListener('click', () => {
+                if (!selectedParticle || !selectedSynapse) return;
+                const currentVal = selectedSynapse.layer === 1 ?
+                    selectedParticle.brain.w1[selectedSynapse.from * selectedParticle.brain.numHidden + selectedSynapse.to] :
+                    selectedParticle.brain.w2[selectedSynapse.from * selectedParticle.brain.numOutputs + selectedSynapse.to];
+                setSelectedSynapseWeight(-currentVal);
+            });
+            document.getElementById('btnWeightExcite').addEventListener('click', () => setSelectedSynapseWeight(3.0));
+            document.getElementById('btnWeightInhibit').addEventListener('click', () => setSelectedSynapseWeight(-3.0));
+
+            document.getElementById('btnLockPlasticity').addEventListener('click', () => {
+                if (selectedParticle) {
+                    selectedParticle.isBrainLocked = !selectedParticle.isBrainLocked;
+                    updateNeuralEditorUI();
+                    logEvent(selectedParticle.isBrainLocked ? `🔒 個体 #${selectedParticle.id} の学習（脳可塑性）を固定しました` : `🔓 個体 #${selectedParticle.id} の学習（脳可塑性）を解禁しました`);
+                }
+            });
+
+            document.getElementById('btnRandomizeBrain').addEventListener('click', () => {
+                if (selectedParticle) {
+                    for (let i = 0; i < selectedParticle.brain.w1.length; i++) selectedParticle.brain.w1[i] = (Math.random() * 2 - 1) * 2;
+                    for (let i = 0; i < selectedParticle.brain.w2.length; i++) selectedParticle.brain.w2[i] = (Math.random() * 2 - 1) * 2;
+                    updateNeuralEditorUI();
+                    logEvent(`🎲 個体 #${selectedParticle.id} の全シナプス重みをランダム化しました`);
+                }
+            });
+
+            document.getElementById('btnZeroBrain').addEventListener('click', () => {
+                if (selectedParticle) {
+                    selectedParticle.brain.w1.fill(0);
+                    selectedParticle.brain.w2.fill(0);
+                    updateNeuralEditorUI();
+                    logEvent(`🧹 個体 #${selectedParticle.id} の全シナプス重みを0クリアしました`);
+                }
+            });
+
+            document.getElementById('btnFreezeParticle').addEventListener('click', () => {
+                if (selectedParticle) {
+                    selectedParticle.isFrozen = !selectedParticle.isFrozen;
+                    document.getElementById('lblFreeze').innerText = selectedParticle.isFrozen ? "▶️ 固定を解除" : "❄️ 個体を一時固定";
+                }
+            });
+
+            document.getElementById('btnReseed').addEventListener('click', reseedAdamAndEve);
+        }
+
+        function reseedAdamAndEve() {
+            const p1 = new Particle(width * 0.4, height * 0.5, true);
+            const p2 = new Particle(width * 0.6, height * 0.5, false);
+            particles.push(p1, p2);
+            selectedParticle = p1;
+            logEvent("🌱 アダムとイブ（新個体ペア）を創生放流しました");
+        }
+
+        function updateSimulationStep() {
+            stepCounter++;
+
+            // Spatial Hash Reset
+            spatialHash.clear();
+            for (let i = 0; i < particles.length; i++) {
+                spatialHash.insert(particles[i]);
+            }
+
+            // Update All Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+
+                // Extinction Check
+                if (p.energy <= 0 || p.age > p.maxAge) {
+                    if (selectedParticle === p) selectedParticle = null;
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Auto Reseed if Extinct
+            if (particles.length === 0 && stepCounter % 60 === 0) {
+                reseedAdamAndEve();
+            }
+
+            // Environmental Fields Decay & Diffusion
+            for (let i = 0; i < GRID_COUNT; i++) {
+                electricPotential[i] *= 0.92;
+                pheroFood[i] *= 0.98;
             }
         }
 
         function simLoop() {
             if (isRunning) {
-                stepCounter++;
-                updateClimateAndSeasons();
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    particles[i].update();
-                    if (!particles[i].alive) particles.splice(i, 1);
-                }
-
-                for (let i = parasites.length - 1; i >= 0; i--) {
-                    parasites[i].update();
-                    if (!parasites[i].alive) parasites.splice(i, 1);
+                const steps = Math.round(simSpeed);
+                for (let s = 0; s < steps; s++) {
+                    updateSimulationStep();
                 }
             }
 
-            renderSimulationCanvas(currentOverlayMode);
-            updateUI();
+            // Render World Simulation Canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Particles
+            for (let p of particles) {
+                p.draw(ctx);
+
+                // Highlight Selected Particle
+                if (p === selectedParticle) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+
+            // Draw Food Nutrients
+            for (let f of foods) {
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#10b981';
+                ctx.fill();
+            }
+
+            // Update UI Inspectors
+            updateHUDAndInspector();
 
             requestAnimationFrame(simLoop);
         }
 
-        function handleCanvasBrush(mx, my) {
-            if (currentBrushMode === 'select') {
-                let clicked = null;
-                for (let p of particles) {
-                    if (Math.hypot(p.x - mx, p.y - my) < p.radius + 10) {
-                        clicked = p;
-                        break;
-                    }
+        function updateHUDAndInspector() {
+            // HUD
+            document.getElementById('hudPopulation').innerText = particles.length;
+            
+            // Selected Particle Info
+            if (selectedParticle) {
+                document.getElementById('pName').innerText = `個体 #${selectedParticle.id}`;
+                document.getElementById('pSpecies').innerText = `種: ${selectedParticle.speciesId}`;
+                document.getElementById('pSexIcon').innerText = selectedParticle.isMale ? '♂' : '♀';
+                document.getElementById('valEnergy').innerText = `${Math.round(selectedParticle.energy)} / ${selectedParticle.maxEnergy}`;
+                document.getElementById('barEnergy').style.width = `${Math.min(100, (selectedParticle.energy / selectedParticle.maxEnergy) * 100)}%`;
+                document.getElementById('valCharge').innerText = `${selectedParticle.electricCharge.toFixed(1)}V`;
+                document.getElementById('barCharge').style.width = `${Math.min(100, (selectedParticle.electricCharge / 50) * 100)}%`;
+                document.getElementById('valReward').innerText = selectedParticle.cumulativeReward.toFixed(1);
+                document.getElementById('valInfection').innerText = `${Math.round(selectedParticle.parasiteInfection * 100)}%`;
+                document.getElementById('dnaSequenceBox').innerText = selectedParticle.dnaSequence;
+
+                // Update Brain Lock Button UI State
+                const btnLock = document.getElementById('btnLockPlasticity');
+                const iconLock = document.getElementById('iconLockPlasticity');
+                const lblLock = document.getElementById('lblLockPlasticity');
+                if (selectedParticle.isBrainLocked) {
+                    btnLock.className = 'py-1 px-2 bg-amber-950/80 hover:bg-amber-900 border border-amber-700 text-amber-300 rounded transition-all text-[9px] flex items-center gap-1';
+                    iconLock.className = 'fa-solid fa-lock text-amber-400';
+                    lblLock.innerText = '学習固定中';
+                } else {
+                    btnLock.className = 'py-1 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded transition-all text-[9px] flex items-center gap-1';
+                    iconLock.className = 'fa-solid fa-lock-open text-slate-400';
+                    lblLock.innerText = '学習継続中';
                 }
-                selectedParticle = clicked;
-            } else if (currentBrushMode === 'food') {
-                const gx = Math.min(GRID_RES - 1, Math.max(0, Math.floor((mx / width) * GRID_RES)));
-                const gy = Math.min(GRID_RES - 1, Math.max(0, Math.floor((my / height) * GRID_RES)));
-                foodGrid[gy * GRID_RES + gx] = Math.min(25, foodGrid[gy * GRID_RES + gx] + 6.0);
-            } else if (currentBrushMode === 'parasite') {
-                parasites.push(new Parasite(mx, my));
-                playBioSound('parasite');
-            } else if (currentBrushMode === 'male') {
-                particles.push(new Particle(mx, my, true));
-                playBioSound('spawn');
-            } else if (currentBrushMode === 'female') {
-                particles.push(new Particle(mx, my, false));
-                playBioSound('spawn');
-            } else if (currentBrushMode === 'radiation') {
-                for (let p of particles) {
-                    if (Math.hypot(p.x - mx, p.y - my) < 55) {
-                        p.dna = mutateDNA(p.dna);
-                        p.traits = translateDNA(p.dna);
-                        p.brain = new NeuralBrain(9, 8, 5, p.traits.brainWeights);
-                    }
-                }
-                playBioSound('radiation');
+
+                // Render Live Neural Brain Diagram
+                renderNeuralBrainDiagram(selectedParticle);
+            } else {
+                document.getElementById('pName').innerText = "個体 未選択";
+                document.getElementById('pSpecies').innerText = "クリックして選択";
+                document.getElementById('dnaSequenceBox').innerText = "---";
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            simCanvas = document.getElementById('simCanvas');
-            ctx = simCanvas.getContext('2d');
-            brainCanvas = document.getElementById('brainCanvas');
-            brainCtx = brainCanvas.getContext('2d');
-            treeCanvas = document.getElementById('treeCanvas');
-            treeCtx = treeCanvas.getContext('2d');
+        function logEvent(msg) {
+            const consoleBox = document.getElementById('logContent');
+            if (!consoleBox) return;
+            const div = document.createElement('div');
+            div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            consoleBox.appendChild(div);
+            if (consoleBox.children.length > 8) consoleBox.removeChild(consoleBox.firstChild);
+        }
 
-            function resize() {
-                const parent = simCanvas.parentElement;
-                width = simCanvas.width = Math.max(1, parent.clientWidth);
-                height = simCanvas.height = Math.max(1, parent.clientHeight);
+        // Web Audio Synthesizer Effect
+        function playSynthSound(freq, type = 'sine', duration = 0.1) {
+            if (!isAudioEnabled) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const actx = new AudioCtx();
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, actx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(actx.destination);
+                osc.start();
+                osc.stop(actx.currentTime + duration);
+            } catch(e){}
+        }
 
-                const bParent = brainCanvas.parentElement;
-                brainCanvas.width = Math.max(1, bParent.clientWidth);
-                brainCanvas.height = Math.max(1, bParent.clientHeight);
-
-                const tParent = treeCanvas.parentElement;
-                treeCanvas.width = Math.max(1, tParent.clientWidth);
-                treeCanvas.height = Math.max(1, tParent.clientHeight);
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            generateProceduralTerrain();
-
-            for (let i = 0; i < 10; i++) {
-                particles.push(new Particle(Math.random() * width, Math.random() * height, true));
-                particles.push(new Particle(Math.random() * width, Math.random() * height, false));
-            }
-
-            simCanvas.addEventListener('pointerdown', (e) => {
-                isMouseDown = true;
-                const rect = simCanvas.getBoundingClientRect();
-                handleCanvasBrush(e.clientX - rect.left, e.clientY - rect.top);
-            });
-
-            simCanvas.addEventListener('pointermove', (e) => {
-                if (!isMouseDown) return;
-                if (currentBrushMode !== 'select') {
-                    const rect = simCanvas.getBoundingClientRect();
-                    handleCanvasBrush(e.clientX - rect.left, e.clientY - rect.top);
-                }
-            });
-
-            window.addEventListener('pointerup', () => { isMouseDown = false; });
-
-            document.querySelectorAll('.brush-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.brush-btn').forEach(b => {
-                        b.classList.remove('active', 'bg-slate-800', 'text-cyan-300', 'border', 'border-cyan-500/40');
-                        b.classList.add('text-slate-400');
-                    });
-                    this.classList.add('active', 'bg-slate-800', 'text-cyan-300', 'border', 'border-cyan-500/40');
-                    currentBrushMode = this.dataset.brush;
-
-                    const labels = {
-                        select: '🔍 選択',
-                        food: '🍏 栄養',
-                        parasite: '👾 寄生体',
-                        male: '♂ オス',
-                        female: '♀ メス',
-                        radiation: '☢️ 変異線'
-                    };
-                    document.getElementById('lblBrushMode').innerText = labels[currentBrushMode] || currentBrushMode;
-                });
-            });
-
-            const tabInspect = document.getElementById('tabInspect');
-            const tabTree = document.getElementById('tabTree');
-            const panelInspect = document.getElementById('panelInspect');
-            const panelTree = document.getElementById('panelTree');
-
-            tabInspect.addEventListener('click', () => {
-                tabInspect.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                tabInspect.classList.remove('border-transparent', 'text-slate-400');
-                tabTree.classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                tabTree.classList.add('border-transparent', 'text-slate-400');
-                panelInspect.classList.remove('hidden');
-                panelTree.classList.add('hidden');
-            });
-
-            tabTree.addEventListener('click', () => {
-                tabTree.classList.add('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                tabTree.classList.remove('border-transparent', 'text-slate-400');
-                tabInspect.classList.remove('border-cyan-400', 'text-cyan-300', 'font-semibold');
-                tabInspect.classList.add('border-transparent', 'text-slate-400');
-                panelTree.classList.remove('hidden');
-                panelInspect.classList.add('hidden');
-                renderPhylogeneticTree();
-            });
-
-            document.getElementById('btnAudio').addEventListener('click', () => {
-                soundEnabled = !soundEnabled;
-                const icon = document.getElementById('iconAudio');
-                if (soundEnabled) {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                    icon.className = 'fa-solid fa-volume-high text-xs text-cyan-400';
-                    logEvent('🔊 バイオサウンドを有効化しました');
-                } else {
-                    icon.className = 'fa-solid fa-volume-xmark text-xs';
-                    logEvent('🔇 バイオサウンドを消音しました');
-                }
-            });
-
-            document.getElementById('btnFreeze').addEventListener('click', () => {
-                if (selectedParticle) {
-                    selectedParticle.isFrozen = !selectedParticle.isFrozen;
-                    document.getElementById('lblFreezeText').innerText = selectedParticle.isFrozen ? '解除' : '固定';
-                    logEvent(selectedParticle.isFrozen ? `❄️ 個体 #${selectedParticle.id} を固定しました` : `▶️ 個体 #${selectedParticle.id} の固定を解除しました`);
-                }
-            });
-
-            document.getElementById('btnMutateNow').addEventListener('click', () => {
-                if (selectedParticle) {
-                    selectedParticle.dna = mutateDNA(selectedParticle.dna);
-                    selectedParticle.traits = translateDNA(selectedParticle.dna);
-                    selectedParticle.brain = new NeuralBrain(9, 8, 5, selectedParticle.traits.brainWeights);
-                    logEvent(`⚡ 個体 #${selectedParticle.id} のDNAを強制的変異させました`);
-                    playBioSound('radiation');
-                }
-            });
-
-            document.getElementById('chkStrictSex').addEventListener('change', (e) => {
-                strictSex = e.target.checked;
-                logEvent(strictSex ? '⚤ 厳格有性生殖 (XX/XY) 有効化' : '♾️ 自由交配 モード');
-            });
-
-            document.getElementById('btnPlay').addEventListener('click', () => {
-                isRunning = !isRunning;
-                document.getElementById('iconPlay').className = isRunning ? 'fa-solid fa-pause text-xs' : 'fa-solid fa-play text-xs';
-            });
-            document.getElementById('btnStep').addEventListener('click', () => {
-                isRunning = false;
-                stepCounter++;
-                for (let p of particles) p.update();
-            });
-            document.getElementById('btnReset').addEventListener('click', () => {
-                particles = [];
-                parasites = [];
-                stepCounter = 0;
-                generateProceduralTerrain();
-                for (let i = 0; i < 10; i++) {
-                    particles.push(new Particle(Math.random() * width, Math.random() * height, true));
-                    particles.push(new Particle(Math.random() * width, Math.random() * height, false));
-                }
-            });
-
-            document.getElementById('sliderPointMut').addEventListener('input', (e) => {
-                pointMutationRate = parseFloat(e.target.value) / 100;
-                document.getElementById('lblPointMut').innerText = `${e.target.value}%`;
-            });
-            document.getElementById('sliderStructMut').addEventListener('input', (e) => {
-                structMutationRate = parseFloat(e.target.value) / 100;
-                document.getElementById('lblStructMut').innerText = `${e.target.value}%`;
-            });
-            document.getElementById('sliderSeasonSpeed').addEventListener('input', (e) => {
-                seasonSpeed = parseFloat(e.target.value);
-                document.getElementById('lblSeasonSpeed').innerText = `${seasonSpeed.toFixed(1)}x`;
-            });
-
-            document.getElementById('btnSpawnAdamuEva').addEventListener('click', () => {
-                for (let i = 0; i < 10; i++) {
-                    particles.push(new Particle(Math.random() * width, Math.random() * height, true));
-                    particles.push(new Particle(Math.random() * width, Math.random() * height, false));
-                }
-                playBioSound('spawn');
-            });
-            document.getElementById('btnSpawnParasite').addEventListener('click', () => {
-                for (let i = 0; i < 5; i++) parasites.push(new Parasite(Math.random() * width, Math.random() * height));
-                playBioSound('parasite');
-            });
-
-            const disasterMenuBtn = document.getElementById('btnDisasterMenu');
-            const disasterDropdown = document.getElementById('disasterDropdown');
-            disasterMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                disasterDropdown.classList.toggle('hidden');
-            });
-            document.addEventListener('click', () => disasterDropdown.classList.add('hidden'));
-
-            document.querySelectorAll('.overlay-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.overlay-btn').forEach(b => {
-                        b.classList.remove('active', 'bg-slate-800', 'text-cyan-400', 'border', 'border-cyan-500/30');
-                        b.classList.add('text-slate-400');
-                    });
-                    this.classList.add('active', 'bg-slate-800', 'text-cyan-400', 'border', 'border-cyan-500/30');
-                    currentOverlayMode = this.dataset.overlay;
-                });
-            });
-
-            simLoop();
+        // Initialize on Window Load
+        window.addEventListener('load', () => {
+            initSimulation();
         });
     </script>
 </body>
